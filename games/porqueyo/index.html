@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Por qué siempre yo?</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ TOPBAR ============ -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-l1">¿POR QUÉ</span>
+    <span class="brand-l2">SIEMPRE YO?</span>
+  </div>
+
+  <div class="meta">
+    <div class="meta-block">
+      <span class="meta-label">MESA #1247</span>
+      <span class="meta-value">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+        4/4
+      </span>
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">RONDA</span>
+      <span class="meta-value">6</span>
+    </div>
+  </div>
+
+  <div class="turn-pill">
+    <span class="turn-label">TURNO DE</span>
+    <span class="turn-player">
+      <span class="avatar avatar-sm avatar-maria">M</span>
+      <strong>MARÍA</strong>
+    </span>
+  </div>
+
+  <div class="topbar-actions">
+    <button class="icon-btn" type="button" aria-label="Sonido">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+    </button>
+    <button class="icon-btn" type="button" aria-label="Ayuda">
+      <span class="icon-glyph">?</span>
+    </button>
+    <button class="icon-btn" type="button" aria-label="Ajustes">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M19.14 12.94a7.07 7.07 0 000-1.88l2.03-1.58a.5.5 0 00.12-.64l-1.92-3.32a.5.5 0 00-.6-.22l-2.39.96a7.03 7.03 0 00-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.58.24-1.12.55-1.62.94l-2.39-.96a.5.5 0 00-.6.22L2.67 8.84a.5.5 0 00.12.64l2.03 1.58a7.07 7.07 0 000 1.88l-2.03 1.58a.5.5 0 00-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.58-.24 1.12-.55 1.62-.94l2.39.96c.22.08.47 0 .6-.22l1.92-3.32a.5.5 0 00-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1112 8.5a3.5 3.5 0 010 7z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============ MAIN ============ -->
+<main class="stage">
+
+  <!-- ---------- COLUMNA IZQUIERDA ---------- -->
+  <aside class="col col-left">
+    <h2 class="col-title">JUGADORES</h2>
+
+    <ul class="players">
+      <li class="player is-active">
+        <span class="turn-arrow" aria-hidden="true"></span>
+        <span class="avatar avatar-maria" data-color="yellow">M</span>
+        <div class="player-info">
+          <span class="player-name c-yellow">MARÍA</span>
+          <div class="pips" data-count="10">
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip half"></i>
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip off"></i>
+          </div>
+        </div>
+        <div class="player-count">
+          <span class="count c-yellow">10</span>
+          <span class="count-label">CANICAS</span>
+        </div>
+      </li>
+
+      <li class="player">
+        <span class="avatar avatar-andres" data-color="blue">A</span>
+        <div class="player-info">
+          <span class="player-name c-blue">ANDRÉS</span>
+          <div class="pips" data-count="10">
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip half"></i>
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip off"></i>
+          </div>
+        </div>
+        <div class="player-count">
+          <span class="count c-blue">10</span>
+          <span class="count-label">CANICAS</span>
+        </div>
+      </li>
+
+      <li class="player">
+        <span class="avatar avatar-sofia" data-color="green">S</span>
+        <div class="player-info">
+          <span class="player-name c-green">SOFÍA</span>
+          <div class="pips" data-count="10">
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip half"></i>
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip off"></i>
+          </div>
+        </div>
+        <div class="player-count">
+          <span class="count c-green">10</span>
+          <span class="count-label">CANICAS</span>
+        </div>
+      </li>
+
+      <li class="player">
+        <span class="avatar avatar-juan" data-color="red">J</span>
+        <div class="player-info">
+          <span class="player-name c-red">JUAN</span>
+          <div class="pips" data-count="10">
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip half"></i>
+            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip off"></i>
+          </div>
+        </div>
+        <div class="player-count">
+          <span class="count c-red">10</span>
+          <span class="count-label">CANICAS</span>
+        </div>
+      </li>
+    </ul>
+
+    <section class="panel howto">
+      <h3 class="panel-title">CÓMO JUGAR</h3>
+      <ul class="rules">
+        <li><span class="bullet b-yellow"></span> Lanza el dado y sigue la regla del color obtenido.</li>
+        <li><span class="bullet b-blue"></span> Si la zona está llena, recoges todas las canicas.</li>
+        <li><span class="bullet b-black"></span> Si sale NEGRO, pierdes 1 canica (se elimina).</li>
+      </ul>
+    </section>
+  </aside>
+
+  <!-- ---------- CENTRO: TABLERO ---------- -->
+  <section class="col col-center">
+
+    <div class="board" role="img" aria-label="Tablero con zonas de colores">
+      <svg id="board-svg" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <section class="panel your-marbles">
+      <h3 class="panel-title">TUS CANICAS</h3>
+      <div class="your-marbles-body">
+        <div class="marble-tray">
+          <i class="marble m-white sm"></i><i class="marble m-white sm"></i><i class="marble m-white sm"></i>
+          <i class="marble m-white sm"></i><i class="marble m-white sm"></i><i class="marble m-white sm"></i>
+          <i class="marble m-white sm"></i><i class="marble m-white sm"></i><i class="marble m-white sm"></i>
+          <i class="marble m-white sm"></i><i class="marble m-white sm"></i><i class="marble m-white sm"></i>
+        </div>
+        <div class="tray-count">
+          <span class="count">10</span>
+          <span class="count-label">CANICAS</span>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ---------- COLUMNA DERECHA ---------- -->
+  <aside class="col col-right">
+
+    <section class="panel dice-panel">
+      <h3 class="panel-title">DADO</h3>
+      <svg class="die-svg" viewBox="0 0 200 205" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="die-red" x1="100" y1="20" x2="100" y2="98" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ea6a5c"/>
+            <stop offset="45%" stop-color="#c0392b"/>
+            <stop offset="100%" stop-color="#821f16"/>
+          </linearGradient>
+          <linearGradient id="die-green" x1="32.5" y1="59" x2="100" y2="172" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#78b043"/>
+            <stop offset="55%" stop-color="#4a7d27"/>
+            <stop offset="100%" stop-color="#26400f"/>
+          </linearGradient>
+          <linearGradient id="die-white" x1="100" y1="59" x2="167.5" y2="172" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#fffaf0"/>
+            <stop offset="55%" stop-color="#eadfc4"/>
+            <stop offset="100%" stop-color="#b7a983"/>
+          </linearGradient>
+          <radialGradient id="die-sheen" cx="30%" cy="14%" r="85%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+            <stop offset="45%" stop-color="#ffffff" stop-opacity="0.08"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="die-umbra" cx="78%" cy="86%" r="80%">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+            <stop offset="60%" stop-color="#000000" stop-opacity="0.10"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0.40"/>
+          </radialGradient>
+          <filter id="die-grain" x="-30%" y="-30%" width="160%" height="160%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="4" result="n"/>
+            <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.33 0.33 0.34 0 -0.25" result="a"/>
+            <feComponentTransfer in="a"><feFuncA type="linear" slope="1.1" intercept="-0.15"/></feComponentTransfer>
+          </filter>
+          <filter id="die-shadow-blur" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="4"/>
+          </filter>
+          <filter id="die-vertex-blur" x="-200%" y="-200%" width="500%" height="500%">
+            <feGaussianBlur stdDeviation="2.2"/>
+          </filter>
+          <clipPath id="die-round-clip">
+            <path d="M92.21 24.50 Q100 20 107.79 24.50 L159.71 54.50 Q167.5 59 167.5 68
+                     L167.5 124 Q167.5 133 159.71 137.50 L107.79 167.50 Q100 172 92.21 167.50
+                     L40.29 137.50 Q32.5 133 32.5 124 L32.5 68 Q32.5 59 40.29 54.50 Z"/>
+          </clipPath>
+        </defs>
+
+        <ellipse cx="100" cy="187" rx="64" ry="12" fill="#000000" opacity="0.45" filter="url(#die-shadow-blur)"/>
+
+        <g clip-path="url(#die-round-clip)">
+          <g stroke="#2e1c10" stroke-width="2" stroke-linejoin="round">
+            <path d="M32.5 59 L100 98 L100 172 L32.5 133 Z" fill="url(#die-green)"/>
+            <path d="M167.5 59 L100 98 L100 172 L167.5 133 Z" fill="url(#die-white)"/>
+            <path d="M100 20 L167.5 59 L100 98 L32.5 59 Z" fill="url(#die-red)"/>
+          </g>
+
+          <g opacity="0.22">
+            <path d="M32.5 59 L100 98 L100 172 L32.5 133 Z" fill="#000000" filter="url(#die-grain)"/>
+            <path d="M167.5 59 L100 98 L100 172 L167.5 133 Z" fill="#000000" filter="url(#die-grain)"/>
+            <path d="M100 20 L167.5 59 L100 98 L32.5 59 Z" fill="#000000" filter="url(#die-grain)"/>
+          </g>
+
+          <!-- filo iluminado en las aristas superiores -->
+          <path d="M32.5 59 L100 20 L167.5 59" fill="none" stroke="#ffe9c4" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M100 98 L100 172" fill="none" stroke="#000000" stroke-opacity="0.30" stroke-width="2"/>
+
+          <rect x="20" y="10" width="160" height="172" fill="url(#die-sheen)" style="mix-blend-mode:overlay" pointer-events="none"/>
+          <rect x="20" y="10" width="160" height="172" fill="url(#die-umbra)" style="mix-blend-mode:multiply" pointer-events="none"/>
+
+          <!-- brillo nitido en el vertice superior, redondeado de verdad ahora -->
+          <circle cx="100" cy="22.5" r="3.5" fill="#ffffff" opacity="0.5" filter="url(#die-vertex-blur)"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="panel result-panel">
+      <h3 class="panel-title">ÚLTIMO RESULTADO</h3>
+      <div class="result-row">
+        <span class="result-dot d-yellow"></span>
+        <span class="result-name c-yellow">AMARILLO</span>
+      </div>
+      <p class="result-sub">ZONA AMARILLA</p>
+    </section>
+
+    <div class="throw-area">
+      <button class="throw-btn" type="button">
+        <span class="throw-disc">
+          <span class="die-6" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+        </span>
+        <span class="throw-label">LANZAR DADO</span>
+      </button>
+    </div>
+
+    <button class="history-btn" type="button">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M13 3a9 9 0 00-9 9H1l3.9 3.9.07.14L9 12H6a7 7 0 117 7 6.96 6.96 0 01-4.95-2.05l-1.42 1.42A8.96 8.96 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      HISTORIAL
+    </button>
+  </aside>
+
+</main>
+
+<script>
+(function () {
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("board-svg");
+
+  const CX = 300, CY = 300;
+  const R_OUTER        = 296; // borde exterior del aro de madera
+  const R_RIM_INNER     = 244; // borde exterior de las zonas de color
+  const R_SECTOR_INNER  = 150; // borde interior de las zonas de color
+  const R_RING_INNER    = 112; // borde interior del aro de madera central
+  const R_BLACK         = 112; // disco negro central
+
+  const GAP_DEG = 3;      // separacion angular entre zonas (madera visible)
+  const CORNER  = 15;     // radio de redondeo de cada zona
+
+  const BEZEL_R  = 31;    // borde tallado del hoyo
+  const PIT_R    = 25;    // hueco hundido del hoyo
+  const MARBLE_R = 21.5;  // canica
+
+  const ZONES = [
+    { name: "white",  count: 1, base: "#e7dcc2", light: "#f7efd9", dark: "#c9b98f", marble: "marble-white" },
+    { name: "yellow", count: 2, base: "#b9861c", light: "#e0b23f", dark: "#7c5710", marble: "marble-yellow" },
+    { name: "blue",   count: 3, base: "#1f4d78", light: "#3f79ae", dark: "#122c46", marble: "marble-blue" },
+    { name: "green",  count: 4, base: "#33591f", light: "#5c8a37", dark: "#1c3210", marble: "marble-green" },
+    { name: "red",    count: 5, base: "#7a231c", light: "#a8392c", dark: "#4a130e", marble: "marble-red" },
+  ];
+
+  const toRad = (deg) => (deg * Math.PI) / 180;
+
+  function polar(angleDeg, r) {
+    const a = toRad(angleDeg);
+    return [CX + r * Math.sin(a), CY - r * Math.cos(a)];
+  }
+
+  /* arco abierto en coordenadas absolutas (mismo eje de luz para todo el tablero) */
+  function arcPathAbs(cx, cy, r, a0, a1) {
+    const p0 = [cx + r * Math.sin(toRad(a0)), cy - r * Math.cos(toRad(a0))];
+    const p1 = [cx + r * Math.sin(toRad(a1)), cy - r * Math.cos(toRad(a1))];
+    const large = a1 - a0 > 180 ? 1 : 0;
+    return `M ${p0[0]} ${p0[1]} A ${r} ${r} 0 ${large} 1 ${p1[0]} ${p1[1]}`;
+  }
+
+  const LIGHT_A0 = -115, LIGHT_A1 = 25;   // arco arriba-izquierda (luz)
+  const SHADE_A0 = 65, SHADE_A1 = 205;    // arco abajo-derecha (sombra)
+
+  function el(tag, attrs) {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) node.setAttribute(k, attrs[k]);
+    return node;
+  }
+
+  /* zona en forma de trapecio circular con las 4 esquinas redondeadas */
+  function roundedWedgePath(a0, a1, rOuter, rInner, corner) {
+    const dOuter = (corner / rOuter) * (180 / Math.PI);
+    const dInner = (corner / rInner) * (180 / Math.PI);
+
+    const oStartArc = polar(a0 + dOuter, rOuter);
+    const oStartEdge = polar(a0, rOuter - corner);
+    const oEndArc = polar(a1 - dOuter, rOuter);
+    const oEndEdge = polar(a1, rOuter - corner);
+    const iEndArc = polar(a1 - dInner, rInner);
+    const iEndEdge = polar(a1, rInner + corner);
+    const iStartArc = polar(a0 + dInner, rInner);
+    const iStartEdge = polar(a0, rInner + corner);
+
+    return [
+      `M ${oStartArc[0]} ${oStartArc[1]}`,
+      `A ${rOuter} ${rOuter} 0 0 1 ${oEndArc[0]} ${oEndArc[1]}`,
+      `A ${corner} ${corner} 0 0 1 ${oEndEdge[0]} ${oEndEdge[1]}`,
+      `L ${iEndEdge[0]} ${iEndEdge[1]}`,
+      `A ${corner} ${corner} 0 0 1 ${iEndArc[0]} ${iEndArc[1]}`,
+      `A ${rInner} ${rInner} 0 0 0 ${iStartArc[0]} ${iStartArc[1]}`,
+      `A ${corner} ${corner} 0 0 1 ${iStartEdge[0]} ${iStartEdge[1]}`,
+      `L ${oStartEdge[0]} ${oStartEdge[1]}`,
+      `A ${corner} ${corner} 0 0 1 ${oStartArc[0]} ${oStartArc[1]}`,
+      "Z",
+    ].join(" ");
+  }
+
+  /* ---------- <defs> ---------- */
+  const defs = el("defs", {});
+  svg.appendChild(defs);
+
+  function radial(id, stops, cx, cy, r) {
+    const g = el("radialGradient", { id, cx: cx ?? "38%", cy: cy ?? "28%", r: r ?? "75%" });
+    stops.forEach(([off, color, op]) => {
+      g.appendChild(el("stop", { offset: off, "stop-color": color, "stop-opacity": op ?? 1 }));
+    });
+    defs.appendChild(g);
+    return `url(#${id})`;
+  }
+
+  const woodRim = radial("wood-rim", [
+    [ "0%", "#a9754a" ], [ "35%", "#8a5a34" ], [ "70%", "#5c3a20" ], [ "100%", "#331e0f" ],
+  ], "35%", "22%", "85%");
+
+  const woodGap = radial("wood-gap", [
+    [ "0%", "#7c5330" ], [ "100%", "#4a3018" ],
+  ], "40%", "30%", "90%");
+
+  const blackDisc = radial("black-disc", [
+    [ "0%", "#3c352c" ], [ "45%", "#221d17" ], [ "100%", "#0d0a07" ],
+  ], "42%", "34%", "80%");
+
+  const bezelGrad = radial("hole-bezel", [
+    [ "0%", "#6b492b" ], [ "55%", "#432c18" ], [ "100%", "#1c1109" ],
+  ], "35%", "25%", "80%");
+
+  const pitGrad = radial("hole-pit", [
+    [ "0%", "#150f0a" ], [ "70%", "#000000" ], [ "100%", "#000000" ],
+  ], "45%", "38%", "75%");
+
+  ZONES.forEach((z) => {
+    z.fillId = radial(`fill-${z.name}`, [
+      [ "0%", z.light ], [ "55%", z.base ], [ "100%", z.dark ],
+    ], "36%", "24%", "78%");
+  });
+
+  const marbleColors = {
+    "marble-white":  ["#ffffff", "#efe4cd", "#b6a88f", "#7b7060"],
+    "marble-yellow": ["#ffe9a4", "#f2b91f", "#b57c0b", "#7a5205"],
+    "marble-blue":   ["#8fc4f5", "#2a72c4", "#1a4a86", "#0f2f57"],
+    "marble-green":  ["#b0dd7c", "#4f8f27", "#34641a", "#1f3f0e"],
+    "marble-red":    ["#f19a8c", "#c0392b", "#86251a", "#521309"],
+    "marble-black":  ["#5c5650", "#231f1a", "#100d0a", "#000000"],
+  };
+  const marbleFill = {};
+  Object.keys(marbleColors).forEach((key) => {
+    const [c0, c1, c2, c3] = marbleColors[key];
+    marbleFill[key] = radial(key, [
+      [ "0%", c0 ], [ "42%", c1 ], [ "78%", c2 ], [ "100%", c3 ],
+    ], "34%", "26%", "72%");
+  });
+
+  const lightSheen = radial("light-sheen", [
+    [ "0%", "#fff6e2", 0.75 ], [ "40%", "#fff6e2", 0.18 ], [ "100%", "#fff6e2", 0 ],
+  ], "26%", "16%", "78%");
+
+  const shadowSheen = radial("shadow-sheen", [
+    [ "0%", "#000000", 0 ], [ "55%", "#000000", 0.12 ], [ "100%", "#000000", 0.42 ],
+  ], "80%", "82%", "78%");
+
+  /* veta de madera direccional: ruido estirado (baja frecuencia en x, alta en y) */
+  const grainFilter = el("filter", { id: "grain", x: "-20%", y: "-20%", width: "140%", height: "140%" });
+  grainFilter.appendChild(el("feTurbulence", { type: "fractalNoise", baseFrequency: "0.022 0.1", numOctaves: "4", seed: "11", result: "n" }));
+  grainFilter.appendChild(el("feColorMatrix", { in: "n", type: "matrix", values: "0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.33 0.33 0.34 0 -0.12", result: "a" }));
+  const grainBoost = el("feComponentTransfer", { in: "a" });
+  grainBoost.appendChild(el("feFuncA", { type: "linear", slope: "1.5", intercept: "-0.22" }));
+  grainFilter.appendChild(grainBoost);
+  defs.appendChild(grainFilter);
+
+  const blurFilter = el("filter", { id: "soft-blur", x: "-60%", y: "-60%", width: "220%", height: "220%" });
+  blurFilter.appendChild(el("feGaussianBlur", { stdDeviation: "1.1" }));
+  defs.appendChild(blurFilter);
+
+  const rimBevel = el("linearGradient", { id: "rim-bevel", x1: "10%", y1: "6%", x2: "90%", y2: "94%" });
+  [
+    [ "0%", "#fff2d0", 0.65 ], [ "30%", "#fff2d0", 0.15 ], [ "58%", "#000000", 0 ], [ "100%", "#000000", 0.45 ],
+  ].forEach(([off, color, op]) => rimBevel.appendChild(el("stop", { offset: off, "stop-color": color, "stop-opacity": op })));
+  defs.appendChild(rimBevel);
+
+  /* ---------- construccion del tablero ---------- */
+
+  // aro exterior de madera
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_OUTER, fill: woodRim }));
+  // bisel direccional: filo claro arriba-izquierda, sombra abajo-derecha
+  svg.appendChild(el("circle", {
+    cx: CX, cy: CY, r: R_OUTER - 4, fill: "none",
+    stroke: "url(#rim-bevel)", "stroke-width": 8,
+  }));
+  svg.appendChild(el("circle", {
+    cx: CX, cy: CY, r: R_OUTER - 1.5, fill: "none",
+    stroke: "#f3d9ab", "stroke-opacity": 0.25, "stroke-width": 1.5,
+  }));
+
+  // disco base bajo las zonas (rellena las juntas / separaciones)
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_RIM_INNER, fill: woodGap }));
+
+  // tablero dividido en 15 sectores iguales (24 grados cada uno): 1 para blanca,
+  // 2 para amarilla, 3 para azul, 4 para verde, 5 para roja - blanca centrada arriba
+  const SLICE_DEG = 360 / 15;
+  const RAW_START = -(ZONES[0].count * SLICE_DEG) / 2;
+  let cumDeg = 0;
+  const zoneBounds = ZONES.map((z) => {
+    const start = RAW_START + cumDeg;
+    const end = start + z.count * SLICE_DEG;
+    cumDeg += z.count * SLICE_DEG;
+    return [start, end];
+  });
+  function zoneSpan(i) {
+    const [s, e] = zoneBounds[i];
+    return [s + GAP_DEG / 2, e - GAP_DEG / 2];
+  }
+
+  ZONES.forEach((z, i) => {
+    const [start, end] = zoneSpan(i);
+    const path = roundedWedgePath(start, end, R_RIM_INNER, R_SECTOR_INNER, CORNER);
+    svg.appendChild(el("path", { d: path, fill: z.fillId }));
+    svg.appendChild(el("path", {
+      d: path, fill: "none", stroke: "#000000", "stroke-opacity": 0.16, "stroke-width": 1.4,
+    }));
+  });
+
+  // aro de madera interior (separa zonas de la zona negra)
+  const innerRing = el("path", {
+    d: `M ${CX - R_SECTOR_INNER} ${CY} A ${R_SECTOR_INNER} ${R_SECTOR_INNER} 0 1 1 ${CX + R_SECTOR_INNER} ${CY} A ${R_SECTOR_INNER} ${R_SECTOR_INNER} 0 1 1 ${CX - R_SECTOR_INNER} ${CY} Z ` +
+       `M ${CX - R_RING_INNER} ${CY} A ${R_RING_INNER} ${R_RING_INNER} 0 1 0 ${CX + R_RING_INNER} ${CY} A ${R_RING_INNER} ${R_RING_INNER} 0 1 0 ${CX - R_RING_INNER} ${CY} Z`,
+    fill: woodRim, "fill-rule": "evenodd",
+  });
+  svg.appendChild(innerRing);
+  svg.appendChild(el("circle", {
+    cx: CX, cy: CY, r: R_RING_INNER + 1, fill: "none",
+    stroke: "#000000", "stroke-opacity": 0.4, "stroke-width": 2,
+  }));
+
+  // zona negra central (plana, las canicas desaparecen aqui)
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_BLACK, fill: blackDisc }));
+
+  // textura de grano sobre toda la madera y las zonas de color
+  svg.appendChild(el("circle", {
+    cx: CX, cy: CY, r: R_OUTER, fill: "#000000",
+    filter: "url(#grain)", "clip-path": `circle(${R_OUTER}px at ${CX}px ${CY}px)`,
+  }));
+
+  /* dibuja la canica con brillo especular resuelto (óvalo suave + punto nítido + contraluz) */
+  function drawMarble(g, x, y, r, marbleKey) {
+    g.appendChild(el("circle", { cx: x, cy: y, r, fill: marbleFill[marbleKey] }));
+    // contraluz sutil en el borde opuesto a la luz
+    g.appendChild(el("path", {
+      d: arcPathAbs(x, y, r - 0.6, SHADE_A0, SHADE_A1),
+      fill: "none", stroke: "#000000", "stroke-opacity": 0.30, "stroke-width": r * 0.14, "stroke-linecap": "round",
+    }));
+    // brillo suave difuso
+    g.appendChild(el("ellipse", {
+      cx: x - r * 0.30, cy: y - r * 0.34, rx: r * 0.46, ry: r * 0.32,
+      fill: "#ffffff", opacity: 0.40, filter: "url(#soft-blur)",
+    }));
+    // punto de brillo nítido (catch-light)
+    g.appendChild(el("ellipse", {
+      cx: x - r * 0.34, cy: y - r * 0.38, rx: r * 0.14, ry: r * 0.10,
+      fill: "#ffffff", opacity: 0.9,
+    }));
+  }
+
+  function drawHole(angleDeg, radius, marbleKey) {
+    const [x, y] = polar(angleDeg, radius);
+    const g = el("g", {});
+    g.appendChild(el("circle", { cx: x, cy: y, r: BEZEL_R, fill: bezelGrad }));
+    g.appendChild(el("circle", {
+      cx: x, cy: y, r: BEZEL_R - 1, fill: "none",
+      stroke: "#000000", "stroke-opacity": 0.35, "stroke-width": 1.5,
+    }));
+    g.appendChild(el("circle", { cx: x, cy: y, r: PIT_R, fill: pitGrad }));
+    // sombra y luz direccionales sobre el bisel tallado del hoyo
+    g.appendChild(el("path", {
+      d: arcPathAbs(x, y, BEZEL_R - 2, SHADE_A0, SHADE_A1),
+      fill: "none", stroke: "#000000", "stroke-opacity": 0.40, "stroke-width": 3, "stroke-linecap": "round",
+    }));
+    g.appendChild(el("path", {
+      d: arcPathAbs(x, y, BEZEL_R - 2, LIGHT_A0, LIGHT_A1),
+      fill: "none", stroke: "#ffedc4", "stroke-opacity": 0.30, "stroke-width": 3, "stroke-linecap": "round",
+    }));
+    drawMarble(g, x, y, MARBLE_R, marbleKey);
+    g.appendChild(el("circle", {
+      cx: x, cy: y, r: BEZEL_R, fill: "none",
+      stroke: "#fff2d6", "stroke-opacity": 0.12, "stroke-width": 1,
+    }));
+    svg.appendChild(g);
+    return { x, y };
+  }
+
+  // cada zona ya ocupa exactamente (count * 24deg): un hueco por cada sector de 24
+  // grados, todos al mismo radio (sin zigzag, no hace falta: cada hueco tiene su
+  // propio sector con espacio de sobra)
+  ZONES.forEach((z, i) => {
+    const [start, end] = zoneSpan(i);
+    const span = end - start;
+    const n = z.count;
+    for (let k = 0; k < n; k++) {
+      const angle = start + ((k + 0.5) * span) / n;
+      const rMin = R_SECTOR_INNER + BEZEL_R + 6;
+      const rMax = R_RIM_INNER - BEZEL_R - 6;
+      const radius = (rMin + rMax) / 2;
+      drawHole(angle, radius, z.marble);
+    }
+  });
+
+  // canica negra en el centro exacto
+  (function drawCenterMarble() {
+    const r = MARBLE_R * 1.05;
+    const g = el("g", {});
+    g.appendChild(el("circle", { cx: CX, cy: CY, r: r + 6, fill: pitGrad }));
+    drawMarble(g, CX, CY, r, "marble-black");
+    svg.appendChild(g);
+  })();
+
+  // iluminacion direccional general (arriba-izquierda = luz, abajo-derecha = sombra), por encima de todo
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_OUTER, fill: shadowSheen, style: "mix-blend-mode:multiply", "pointer-events": "none" }));
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_OUTER, fill: lightSheen, style: "mix-blend-mode:overlay", "pointer-events": "none" }));
+})();
+</script>
+
+</body>
+</html>

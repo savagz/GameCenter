@@ -1,0 +1,521 @@
+/* =========================================================
+   ¿POR QUÉ SIEMPRE YO? — estilos del juego multijugador
+   Complementa styles.css (variables, topbar, tablero, paneles).
+   ========================================================= */
+
+.is-hidden { display: none !important; }
+
+/* =========================================================
+   PANTALLAS (home / lobby)
+   ========================================================= */
+
+.screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 18px;
+}
+
+.screen-box {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.brand-center {
+  align-self: center;
+  text-align: center;
+  align-items: center;
+}
+
+.screen-foot {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.screen-foot b { color: var(--gold); }
+
+/* =========================================================
+   PESTAÑAS Y FORMULARIOS
+   ========================================================= */
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tab {
+  flex: 1;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  background: rgba(0, 0, 0, .3);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.tab.is-on {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+  background: rgba(242, 193, 78, .10);
+}
+
+.form { display: flex; flex-direction: column; gap: 14px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+.field input,
+.field select {
+  padding: 11px 13px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color .18s;
+}
+.field input:focus,
+.field select:focus { border-color: var(--gold-dim); }
+.field select { appearance: none; cursor: pointer; }
+
+.code-input {
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.form-note {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.form-error {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: rgba(192, 57, 43, .15);
+  border: 1px solid rgba(192, 57, 43, .5);
+  color: #f0a89e;
+  font-size: 13px;
+  animation: shake .3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.btn-main {
+  padding: 13px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #1a0f08;
+  background: linear-gradient(180deg, #ffe9a8, #f2c14e 45%, #dfa321);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .5);
+  transition: filter .15s, transform .12s;
+}
+.btn-main:hover { filter: brightness(1.08); }
+.btn-main:active { transform: translateY(1px); }
+.btn-main:disabled { filter: grayscale(.7) brightness(.7); cursor: not-allowed; }
+
+.btn-ghost {
+  padding: 11px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.btn-ghost:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+.btn-copy {
+  padding: 7px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(242, 193, 78, .12);
+  border: 1px solid var(--gold-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .18s;
+}
+.btn-copy:hover { background: rgba(242, 193, 78, .22); }
+
+/* =========================================================
+   SALA DE ESPERA
+   ========================================================= */
+
+.code-box {
+  text-align: center;
+  padding: 14px;
+  margin-bottom: 14px;
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, .3);
+  border: 1px solid var(--panel-border);
+}
+.code-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.code-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.code-value {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--gold);
+}
+.code-hint { display: block; margin-top: 8px; font-size: 12px; color: var(--text-dim); }
+
+.stat-list { display: flex; flex-direction: column; gap: 8px; }
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.stat-row dt { color: var(--text-dim); }
+.stat-row dd { font-weight: 700; color: var(--text); }
+.stat-row dd.val-gold { color: var(--gold); }
+
+.count-badge {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(242, 193, 78, .12);
+  border-radius: 999px;
+}
+
+.waiting {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.waiting::after {
+  content: '…';
+  display: inline-block;
+  width: 1.2em;
+  animation: dots 1.4s steps(4) infinite;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+@keyframes dots { to { width: 0; } }
+
+.player-list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.player-list .player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+}
+.player-id { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.player-id strong { font-size: 14px; color: var(--text); }
+.player-tags { display: flex; gap: 6px; }
+.tag-host, .tag-you {
+  display: inline-block;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  border-radius: 999px;
+}
+.tag-host { color: #1a0f08; background: var(--gold); }
+.tag-you { color: var(--gold); background: rgba(242, 193, 78, .15); border: 1px solid var(--gold-dim); }
+
+.dot-online {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #4ade5a;
+  box-shadow: 0 0 6px rgba(74, 222, 90, .8);
+  margin-left: 6px;
+}
+.dot-online.is-off { background: #6a6055; box-shadow: none; }
+
+/* =========================================================
+   JUGADORES (pantalla de juego) — usa .players/.player de styles.css
+   ========================================================= */
+
+.player-marbles-mini {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* =========================================================
+   PANEL "COMO JUGAR" — reutiliza .howto/.rules de styles.css
+   ========================================================= */
+
+.rules li b { color: var(--gold); }
+
+/* =========================================================
+   RESULTADO / DADO — estados dinamicos
+   ========================================================= */
+
+.throw-btn:disabled,
+.throw-btn.is-disabled {
+  cursor: not-allowed;
+  filter: grayscale(.55) brightness(.75);
+}
+.throw-btn:disabled .throw-disc,
+.throw-btn.is-disabled .throw-disc { animation: none; }
+
+.throw-disc.is-rolling { animation: spin-die .9s cubic-bezier(.3, .1, .3, 1); transform-origin: 50% 50%; }
+@keyframes spin-die {
+  0%   { transform: rotate(0deg) scale(1); }
+  40%  { transform: rotate(360deg) scale(1.06); }
+  70%  { transform: rotate(620deg) scale(.98); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+
+/* el dado del panel "DADO" ya no gira en el espacio: sus 3 caras cambian de
+   color al azar mientras dura el lanzamiento, con un resplandor sutil */
+.die-svg.is-rolling { animation: die-flicker .9s ease-in-out; }
+@keyframes die-flicker {
+  0%, 100% { filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .55)); }
+  50% { filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .55)) drop-shadow(0 0 16px rgba(242, 193, 78, .6)); }
+}
+
+.result-panel.is-fresh .result-dot,
+.result-panel.is-fresh .result-name { animation: pop-in .4s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes pop-in {
+  0% { transform: scale(.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* =========================================================
+   TABLERO EN VIVO — huecos y canica central
+   ========================================================= */
+
+#board-svg .slot-marble { transition: opacity .4s ease; }
+#board-svg .slot-marble.is-empty { opacity: 0; }
+
+#board-svg .center-marble { transform-box: fill-box; transform-origin: center; }
+#board-svg .center-marble.is-move { animation: marble-hop .6s ease; }
+@keyframes marble-hop {
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-10px, -16px) scale(.92); }
+  50% { transform: translate(0, -24px) scale(1.06); }
+  75% { transform: translate(10px, -10px) scale(.94); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* =========================================================
+   MODALES
+   ========================================================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(10, 6, 3, .78);
+  backdrop-filter: blur(3px);
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 380px;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 26px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(40, 24, 12, .97), rgba(16, 9, 4, .98));
+  border: 1px solid var(--panel-border-strong);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .7);
+}
+.modal-wide { max-width: 480px; text-align: left; }
+
+.crown { font-size: 3rem; line-height: 1; animation: crown-pop .7s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes crown-pop {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.modal-title {
+  margin: 8px 0 10px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gold);
+  text-align: center;
+}
+.modal-wide .modal-title { text-align: left; }
+.modal-text { font-size: 14px; color: var(--text); line-height: 1.5; text-align: center; }
+
+.score-list { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.score-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, .3);
+  border: 1px solid var(--panel-border);
+}
+.score-list li.is-winner {
+  border-color: var(--gold);
+  background: rgba(242, 193, 78, .12);
+}
+.sc-name { flex: 1; text-align: left; font-weight: 600; color: var(--text); }
+.sc-val { font-weight: 700; color: var(--gold); }
+
+.modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.modal-wait { margin-top: 10px; font-size: 13px; color: var(--text-dim); text-align: center; }
+
+.rules-list, .roll-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.rules-list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.rules-list li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 7px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.rules-list b { color: var(--gold); }
+
+.roll-log { max-height: 50vh; overflow-y: auto; margin: 14px 0; }
+.roll-log li {
+  padding: 9px 11px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .25);
+  border: 1px solid rgba(255, 255, 255, .06);
+}
+.log-empty { color: var(--text-dim); text-align: center; }
+
+/* =========================================================
+   TOASTS
+   ========================================================= */
+
+.toasts {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(90vw, 380px);
+  pointer-events: none;
+}
+
+.toast {
+  padding: 11px 16px;
+  font-size: 13.5px;
+  color: var(--text);
+  text-align: center;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(40, 24, 12, .97), rgba(16, 9, 4, .98));
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .6);
+  animation: toast-in .25s ease;
+}
+.toast.is-out { animation: toast-out .3s ease forwards; }
+@keyframes toast-in { from { transform: translateY(-14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toast-out { to { transform: translateY(-14px); opacity: 0; } }
+
+.toast.t-win { border-color: var(--gold); box-shadow: 0 12px 30px rgba(0, 0, 0, .6), 0 0 26px rgba(242, 193, 78, .4); }
+.toast.t-penalty { border-color: rgba(192, 57, 43, .6); box-shadow: 0 12px 30px rgba(0, 0, 0, .6), 0 0 22px rgba(192, 57, 43, .25); }
+.toast.t-reward { border-color: rgba(74, 222, 90, .6); box-shadow: 0 12px 30px rgba(0, 0, 0, .6), 0 0 22px rgba(74, 222, 90, .25); }
+
+/* =========================================================
+   AVISO DE CAMBIO DE TURNO
+   ========================================================= */
+
+.turn-flash {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  pointer-events: none;
+}
+.turn-flash span {
+  display: inline-block;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--gold);
+  background: linear-gradient(180deg, rgba(40, 24, 12, .97), rgba(16, 9, 4, .98));
+  border: 1px solid var(--gold-dim);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .6), 0 0 26px rgba(242, 193, 78, .35);
+  animation: flash-pop 1.7s ease forwards;
+}
+@keyframes flash-pop {
+  0% { transform: translateY(-10px) scale(.9); opacity: 0; }
+  12% { transform: translateY(0) scale(1); opacity: 1; }
+  82% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-10px) scale(.95); opacity: 0; }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 620px) {
+  .field-grid { grid-template-columns: 1fr; }
+  .code-value { font-size: 24px; letter-spacing: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .throw-disc.is-rolling, .die-svg.is-rolling, .crown, .toast, .turn-flash span { animation: none !important; }
+}

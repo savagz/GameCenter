@@ -1,0 +1,618 @@
+/* ============================================================
+   BENDITO SIETE — capa de juego
+   Solo estilos nuevos: pantallas, formularios, modales, avisos y
+   estados dinamicos. styles.css queda intacto.
+   ============================================================ */
+
+.is-hidden{display:none!important}
+
+/* ============================================================
+   Pantallas (inicio / sala de espera)
+   ============================================================ */
+
+.screen{
+  position:fixed;
+  inset:0;
+  z-index:60;
+  display:grid;
+  place-items:center;
+  padding:24px 16px;
+  overflow-y:auto;
+  background:
+    radial-gradient(130% 90% at 50% 0%, rgba(140,80,25,.35), transparent 62%),
+    linear-gradient(160deg,#241505,#140b04 55%,#0d0703);
+}
+
+.screen-box{
+  width:100%;
+  max-width:440px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  animation:screen-in .45s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes screen-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+.screen-foot{
+  text-align:center;
+  font-size:.82rem;
+  color:var(--text-dim);
+}
+.screen-foot b{color:var(--gold)}
+
+/* ---------- pestañas ---------- */
+
+.tabs{
+  display:flex;
+  gap:6px;
+  padding:4px;
+  margin-bottom:16px;
+  border-radius:11px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(240,182,74,.14);
+}
+.tab{
+  flex:1;
+  padding:9px 6px;
+  border:0;
+  border-radius:8px;
+  background:none;
+  color:var(--text-dim);
+  font:600 .88rem/1 inherit;
+  letter-spacing:.04em;
+  cursor:pointer;
+  transition:background .2s ease,color .2s ease;
+}
+.tab.is-on{
+  color:#2a1a06;
+  background:linear-gradient(180deg,#ffd97a,#d19a34);
+  box-shadow:0 2px 7px rgba(0,0,0,.45);
+}
+
+/* ---------- formularios ---------- */
+
+.form{display:flex;flex-direction:column;gap:13px}
+
+.field{display:flex;flex-direction:column;gap:6px}
+.field > span{
+  font-size:.74rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--gold);
+  font-weight:700;
+}
+
+.field input,
+.field select{
+  width:100%;
+  padding:11px 13px;
+  border-radius:10px;
+  background:linear-gradient(180deg,#1a1006,#100903);
+  border:1px solid rgba(240,182,74,.28);
+  color:var(--cream);
+  font:600 1rem/1.2 inherit;
+  outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.field input:focus,
+.field select:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(240,182,74,.16);
+}
+.field select{appearance:none;cursor:pointer}
+
+.code-input{
+  text-transform:uppercase;
+  letter-spacing:.42em;
+  text-align:center;
+  font-size:1.5rem!important;
+  font-weight:700!important;
+  color:var(--gold)!important;
+}
+
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.form-note{
+  font-size:.8rem;
+  color:var(--text-dim);
+  line-height:1.45;
+  padding:9px 11px;
+  border-radius:9px;
+  background:rgba(240,182,74,.06);
+  border:1px solid rgba(240,182,74,.14);
+}
+
+.form-error{
+  margin-top:12px;
+  padding:9px 12px;
+  border-radius:9px;
+  font-size:.86rem;
+  color:#ffd9d3;
+  background:rgba(239,91,76,.14);
+  border:1px solid rgba(239,91,76,.45);
+  animation:shake .35s;
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+
+/* ---------- botones ---------- */
+
+.btn-main{
+  margin-top:4px;
+  padding:14px 16px;
+  border-radius:12px;
+  cursor:pointer;
+  color:#eafbe6;
+  font:700 1.05rem/1 inherit;
+  letter-spacing:.05em;
+  background:linear-gradient(180deg,#3f9a3a,#1f6a22 55%,#134a17);
+  border:1px solid #6fd063;
+  box-shadow:
+    inset 0 2px 0 rgba(190,255,180,.45),
+    inset 0 -4px 8px rgba(0,0,0,.35),
+    0 6px 16px rgba(0,0,0,.5);
+  text-shadow:0 2px 3px rgba(0,0,0,.5);
+  transition:transform .12s ease, filter .12s ease;
+}
+.btn-main:hover{filter:brightness(1.1)}
+.btn-main:active{transform:translateY(2px)}
+.btn-main:disabled{filter:grayscale(.7) brightness(.7);cursor:not-allowed}
+
+.btn-ghost{
+  margin-top:10px;
+  padding:10px 14px;
+  width:100%;
+  border-radius:10px;
+  cursor:pointer;
+  background:none;
+  border:1px solid rgba(240,182,74,.28);
+  color:var(--text-dim);
+  font:600 .88rem/1 inherit;
+  transition:color .2s ease, border-color .2s ease;
+}
+.btn-ghost:hover{color:var(--gold);border-color:var(--gold)}
+
+/* ============================================================
+   Sala de espera
+   ============================================================ */
+
+.code-box{
+  text-align:center;
+  padding:6px 0 14px;
+  border-bottom:1px dashed rgba(240,182,74,.16);
+  margin-bottom:12px;
+}
+.code-label{
+  display:block;
+  font-size:.72rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  margin-bottom:8px;
+}
+.code-row{display:flex;align-items:center;justify-content:center;gap:12px}
+.code-value{
+  font-family:Georgia,serif;
+  font-size:2.6rem;
+  letter-spacing:.28em;
+  padding-left:.28em;
+  background:linear-gradient(180deg,#ffe9a8 10%,#f0b64a 50%,#a86c14 90%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.btn-copy{
+  padding:7px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  background:rgba(240,182,74,.10);
+  border:1px solid rgba(240,182,74,.35);
+  color:var(--gold);
+  font:600 .8rem/1 inherit;
+}
+.btn-copy:hover{background:rgba(240,182,74,.2)}
+.code-hint{display:block;margin-top:10px;font-size:.78rem;color:var(--text-dim)}
+
+.count-badge{
+  padding:3px 9px;
+  border-radius:20px;
+  font-size:.74rem;
+  font-weight:700;
+  color:var(--gold);
+  background:rgba(240,182,74,.12);
+  border:1px solid rgba(240,182,74,.3);
+}
+
+.waiting{
+  margin-top:12px;
+  text-align:center;
+  font-size:.86rem;
+  color:var(--text-dim);
+}
+.waiting::after{
+  content:'';
+  display:inline-block;
+  width:1.2em;
+  text-align:left;
+  animation:dots 1.4s steps(4,end) infinite;
+}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+
+.tag-host{
+  margin-left:6px;
+  padding:2px 7px;
+  border-radius:20px;
+  font-size:.64rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#2a1a06;
+  background:linear-gradient(180deg,#ffd97a,#d19a34);
+}
+.tag-you{
+  margin-left:6px;
+  padding:2px 7px;
+  border-radius:20px;
+  font-size:.64rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#d7ffd0;
+  background:rgba(74,222,90,.18);
+  border:1px solid rgba(74,222,90,.5);
+}
+
+/* ============================================================
+   Cabecera del tablero
+   ============================================================ */
+
+.board-owner{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border-radius:11px;
+  background:linear-gradient(165deg,rgba(36,22,8,.9),rgba(21,12,4,.9));
+  border:1px solid rgba(240,182,74,.18);
+}
+.owner-nav{
+  width:30px;height:30px;
+  flex:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:rgba(240,182,74,.08);
+  border:1px solid rgba(240,182,74,.22);
+  color:var(--gold);
+  font:400 1.25rem/1 inherit;
+}
+.owner-nav:hover{background:rgba(240,182,74,.2)}
+.owner-name{
+  flex:1;
+  text-align:center;
+  font-size:.95rem;
+  font-weight:600;
+  color:var(--cream);
+}
+.owner-name.is-mine{color:var(--gold)}
+.owner-progress{
+  font-size:.82rem;
+  font-weight:700;
+  color:var(--text-dim);
+  font-variant-numeric:tabular-nums;
+}
+
+/* el tablero se ilumina cuando es tu turno */
+.board-frame.is-my-turn{
+  animation:board-glow 2.6s ease-in-out infinite;
+}
+@keyframes board-glow{
+  0%,100%{box-shadow:0 24px 46px rgba(0,0,0,.65), inset 0 2px 0 rgba(255,205,140,.22), 0 0 0 rgba(240,182,74,0)}
+  50%    {box-shadow:0 24px 46px rgba(0,0,0,.65), inset 0 2px 0 rgba(255,205,140,.22), 0 0 26px rgba(240,182,74,.45)}
+}
+
+/* ============================================================
+   Dados: estados y animacion
+   ============================================================ */
+
+.die{transition:transform .18s ease, box-shadow .2s ease, opacity .2s ease}
+
+.die.is-rolling{animation:tumble .28s linear infinite}
+@keyframes tumble{
+  0%  {transform:translateY(0) rotate(0)}
+  25% {transform:translateY(-9px) rotate(-11deg)}
+  50% {transform:translateY(0) rotate(0)}
+  75% {transform:translateY(-6px) rotate(9deg)}
+  100%{transform:translateY(0) rotate(0)}
+}
+
+.die.is-landing{animation:land .3s cubic-bezier(.2,1.6,.4,1)}
+@keyframes land{0%{transform:scale(1.22)}100%{transform:scale(1)}}
+
+/* dado que forma parte del 7 */
+.die.is-seven{
+  --pip:#7a1a12;
+  background:linear-gradient(155deg,#ffe4de,#f0aca0 70%,#d97e6f);
+  box-shadow:
+    inset 0 2px 0 #fff,
+    inset 0 -3px 5px rgba(150,60,45,.5),
+    0 0 12px rgba(239,91,76,.55),
+    0 4px 9px rgba(0,0,0,.5);
+}
+
+.dice-tray{min-height:64px}
+
+/* ============================================================
+   Panel de lanzamiento
+   ============================================================ */
+
+.btn-roll:disabled{
+  filter:grayscale(.75) brightness(.6);
+  cursor:not-allowed;
+  animation:none;
+}
+.btn-roll.is-hot{animation:roll-pulse 1.5s ease-in-out infinite}
+.btn-roll.is-final{
+  background:linear-gradient(180deg,#ffd97a,#d19a34);
+  border-color:#ffe6a6;
+  color:#2a1a06;
+  text-shadow:none;
+  animation:roll-pulse-gold 1.2s ease-in-out infinite;
+}
+@keyframes roll-pulse{
+  0%,100%{box-shadow:inset 0 2px 0 rgba(190,255,180,.45), inset 0 -4px 8px rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.5)}
+  50%    {box-shadow:inset 0 2px 0 rgba(190,255,180,.45), inset 0 -4px 8px rgba(0,0,0,.35), 0 6px 26px rgba(74,222,90,.6)}
+}
+@keyframes roll-pulse-gold{
+  0%,100%{box-shadow:0 6px 16px rgba(0,0,0,.5)}
+  50%    {box-shadow:0 6px 30px rgba(240,182,74,.75)}
+}
+
+.final-box{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:11px;
+  background:rgba(255,201,60,.10);
+  border:1px solid rgba(255,201,60,.45);
+  animation:pending-in .3s ease;
+}
+@keyframes pending-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.final-icon{font-size:1.4rem}
+.final-text{font-size:.82rem;line-height:1.35;color:var(--cream)}
+
+.warn{
+  margin-top:10px;
+  padding:8px 11px;
+  border-radius:9px;
+  font-size:.82rem;
+  color:#ffe9c9;
+  background:rgba(224,139,30,.16);
+  border:1px solid rgba(224,139,30,.5);
+}
+
+.log-empty{
+  justify-content:center;
+  color:var(--text-dim);
+  font-size:.86rem;
+}
+.roll-log li{animation:log-in .3s ease}
+@keyframes log-in{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+/* ============================================================
+   Estados de jugador
+   ============================================================ */
+
+.dot-online.is-off{
+  background:#6b6255;
+  box-shadow:none;
+}
+.player.is-view{border-color:rgba(240,182,74,.28)}
+.player{cursor:pointer;transition:background .2s ease}
+.player:hover{background:rgba(240,182,74,.07)}
+
+.player-bar{
+  position:relative;
+  display:block;
+  height:4px;
+  margin-top:5px;
+  border-radius:3px;
+  background:rgba(255,255,255,.10);
+  overflow:hidden;
+}
+.player-bar i{
+  position:absolute;
+  inset:0 auto 0 0;
+  display:block;
+  border-radius:3px;
+  background:linear-gradient(90deg,#49c93f,#8ef07f);
+  transition:width .5s cubic-bezier(.2,.9,.3,1);
+}
+
+/* ============================================================
+   Avisos flotantes
+   ============================================================ */
+
+.toasts{
+  position:fixed;
+  left:50%;
+  bottom:26px;
+  transform:translateX(-50%);
+  z-index:70;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  align-items:center;
+  pointer-events:none;
+  width:min(94vw,520px);
+}
+
+.toast{
+  width:100%;
+  padding:12px 16px;
+  border-radius:12px;
+  font-size:.92rem;
+  line-height:1.4;
+  color:var(--cream);
+  background:linear-gradient(165deg,#2b1a09,#150c04);
+  border:1px solid rgba(240,182,74,.35);
+  box-shadow:0 12px 30px rgba(0,0,0,.6);
+  animation:toast-in .35s cubic-bezier(.2,1.2,.35,1);
+}
+.toast.is-out{animation:toast-out .3s ease forwards}
+@keyframes toast-in{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes toast-out{to{opacity:0;transform:translateY(-10px)}}
+
+.toast.t-penalty{border-color:rgba(239,91,76,.6);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 22px rgba(239,91,76,.25)}
+.toast.t-jackpot,
+.toast.t-cover{border-color:rgba(74,222,90,.6);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 22px rgba(74,222,90,.25)}
+.toast.t-win{border-color:var(--gold);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 26px rgba(240,182,74,.4)}
+
+/* cartel de cambio de turno */
+.turn-flash{
+  position:fixed;
+  inset:0;
+  z-index:65;
+  display:grid;
+  place-items:center;
+  pointer-events:none;
+}
+.turn-flash span{
+  padding:16px 42px;
+  border-radius:16px;
+  font-family:Georgia,serif;
+  font-size:2rem;
+  letter-spacing:.05em;
+  color:#2a1a06;
+  background:linear-gradient(180deg,#ffe9a8,#d19a34);
+  box-shadow:0 18px 40px rgba(0,0,0,.65);
+  animation:flash 1.6s cubic-bezier(.2,.9,.3,1) forwards;
+}
+@keyframes flash{
+  0%  {opacity:0;transform:scale(.7)}
+  18% {opacity:1;transform:scale(1.04)}
+  70% {opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.12)}
+}
+
+/* ============================================================
+   Modales
+   ============================================================ */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:80;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  overflow-y:auto;
+  background:rgba(8,4,1,.82);
+  backdrop-filter:blur(3px);
+  animation:fade-in .3s ease;
+}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+
+.modal-box{
+  width:100%;
+  max-width:430px;
+  padding:26px 24px 22px;
+  border-radius:18px;
+  text-align:center;
+  background:linear-gradient(165deg,#2b1a09,#120a04);
+  border:1px solid rgba(240,182,74,.45);
+  box-shadow:0 26px 60px rgba(0,0,0,.75), inset 0 0 40px rgba(240,182,74,.06);
+  animation:modal-in .45s cubic-bezier(.2,1.1,.3,1);
+}
+.modal-wide{max-width:520px;text-align:left}
+@keyframes modal-in{from{opacity:0;transform:translateY(26px) scale(.95)}to{opacity:1;transform:none}}
+
+.crown{font-size:3.2rem;line-height:1;animation:crown-pop .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes crown-pop{0%{transform:scale(0) rotate(-25deg)}100%{transform:none}}
+
+.modal-title{
+  margin:8px 0 6px;
+  font-family:Georgia,serif;
+  font-size:1.8rem;
+  background:linear-gradient(180deg,#ffe9a8 10%,#f0b64a 55%,#a86c14 95%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.modal-text{font-size:.95rem;color:var(--text);line-height:1.5}
+
+.score-list{
+  list-style:none;
+  margin:16px 0 4px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  text-align:left;
+}
+.score-list li{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 12px;
+  border-radius:10px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(240,182,74,.12);
+  font-size:.9rem;
+}
+.score-list li.is-winner{
+  border-color:var(--gold);
+  background:rgba(240,182,74,.12);
+}
+.score-list .sc-name{flex:1;color:var(--cream);font-weight:600}
+.score-list .sc-val{font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+
+.modal-actions{display:flex;flex-direction:column;gap:2px;margin-top:16px}
+.modal-wait{margin-top:12px;font-size:.84rem;color:var(--text-dim)}
+
+.rules-list{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  margin:14px 0 18px;
+}
+.rules-list li{
+  position:relative;
+  padding-left:22px;
+  font-size:.9rem;
+  line-height:1.45;
+  color:var(--text);
+}
+.rules-list li::before{
+  content:'';
+  position:absolute;
+  left:4px;top:.55em;
+  width:7px;height:7px;
+  border-radius:50%;
+  background:var(--gold);
+}
+.rules-list b{color:var(--gold)}
+
+/* celebracion al completar el tablero */
+.board-grid.is-winner .cell{animation:cell-cheer .8s ease-in-out 3}
+.board-grid.is-winner .cell:nth-child(2n){animation-delay:.08s}
+@keyframes cell-cheer{
+  0%,100%{transform:translateY(0)}
+  25%{transform:translateY(-8px)}
+  75%{transform:translateY(-3px)}
+}
+
+@media (max-width:820px){
+  .field-grid{grid-template-columns:1fr}
+  .code-value{font-size:2rem}
+  .turn-flash span{font-size:1.4rem;padding:12px 24px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .die.is-rolling,.die.is-landing,
+  .board-frame.is-my-turn,.btn-roll.is-hot,.btn-roll.is-final,.board-grid.is-winner .cell{animation:none}
+}

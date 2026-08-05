@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameCenter — Configurar partida</title>
+<link rel="stylesheet" href="css/gamecenter.css">
+<style>
+  .config-stage {
+    min-height: 680px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px 90px;
+  }
+  .config-card {
+    width: min(420px, 92vw);
+    background: linear-gradient(160deg, #14161a 0%, #0a0b0d 60%, #060607 100%);
+    border: 1px solid var(--gold);
+    border-radius: 18px;
+    padding: 30px 28px 26px;
+    box-shadow: 0 0 34px rgba(217,178,95,0.18);
+  }
+  .config-card h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--gold-bright);
+    text-align: center;
+    margin: 0 0 4px;
+    font-size: 1.3rem;
+  }
+  .config-sub {
+    text-align: center;
+    color: #cfc7ab;
+    margin: 0 0 26px;
+    font-size: 1rem;
+  }
+  .config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-top: 1px solid rgba(217,178,95,0.18);
+  }
+  .config-row:first-of-type { border-top: none; }
+  .config-row label {
+    font-size: 1.1rem;
+    color: #e9e2cf;
+  }
+  .switch {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    display: inline-block;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(217,178,95,0.4);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .switch-track::before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    top: 3px;
+    background: var(--gold);
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+  }
+  .switch input:checked + .switch-track { background: rgba(76,175,110,0.35); border-color: var(--green); }
+  .switch input:checked + .switch-track::before { transform: translateX(22px); background: var(--gold-bright); }
+
+  .amount-fields { display: none; flex-direction: column; gap: 14px; margin-top: 4px; }
+  .amount-fields.is-visible { display: flex; }
+  .amount-field label {
+    display: block;
+    font-size: 0.95rem;
+    color: #cfc7ab;
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+  .amount-field .input-money {
+    position: relative;
+  }
+  .amount-field .input-money span {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+  }
+  .amount-field input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(217,178,95,0.4);
+    border-radius: 8px;
+    color: #e9e2cf;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    padding: 10px 12px 10px 26px;
+    outline: none;
+  }
+  .amount-field input:focus { border-color: var(--gold); }
+
+  .config-actions { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; }
+  .config-actions .gc-btn { width: 100%; padding: 13px 0; }
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    color: #a99a6c;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .back-link:hover { color: var(--gold-bright); }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="index.html" class="player-btn" style="text-decoration:none;">
+      <span class="icon-circle">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </span>
+      <span>Volver</span>
+    </a>
+    <div class="brand">
+      <div class="brand-logo">G</div>
+      <h1>GAMECENTER</h1>
+      <p class="brand-sub">CONFIGURA TU PARTIDA</p>
+    </div>
+    <span style="width:34px;"></span>
+  </header>
+
+  <main class="config-stage">
+    <div class="config-card">
+      <h2 id="gameTitle">JUEGO</h2>
+      <p class="config-sub" id="playerSub">Jugador</p>
+
+      <div class="config-row">
+        <label for="bettingToggle">Activar apuestas</label>
+        <span class="switch">
+          <input type="checkbox" id="bettingToggle">
+          <span class="switch-track"></span>
+        </span>
+      </div>
+
+      <div class="amount-fields" id="amountFields">
+        <div class="amount-field">
+          <label for="betAmount">Monto de apuesta / CASE</label>
+          <div class="input-money">
+            <span>$</span>
+            <input type="number" id="betAmount" min="0" step="1" value="500">
+          </div>
+        </div>
+        <div class="amount-field" id="penaltyField">
+          <label for="penaltyAmount">Jugada de castigo</label>
+          <div class="input-money">
+            <span>$</span>
+            <input type="number" id="penaltyAmount" min="0" step="1" value="100">
+          </div>
+        </div>
+      </div>
+
+      <div class="config-actions">
+        <button class="gc-btn gc-btn-gold" id="continueBtn">CONTINUAR</button>
+      </div>
+      <a href="index.html" class="back-link">Elegir otro juego</a>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+</body>
+</html>

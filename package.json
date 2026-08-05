@@ -1,0 +1,15 @@
+{
+  "name": "gamecenter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GameCenter — lobby, apuestas y salas para Cucaracha II, Rummy, ¿Por qué siempre yo? y Bendito 7",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:rummy": "npm --prefix games/rummy run build",
+    "install:rummy": "npm --prefix games/rummy install"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

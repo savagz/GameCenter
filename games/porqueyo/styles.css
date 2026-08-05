@@ -1,0 +1,611 @@
+/* =========================================================
+   ¿POR QUÉ SIEMPRE YO? — interfaz de partida
+   ========================================================= */
+
+:root {
+  /* madera */
+  --wood-950: #1a0f08;
+  --wood-900: #24150c;
+  --wood-800: #2f1c10;
+  --wood-700: #3d2415;
+  --wood-600: #55341d;
+  --wood-500: #6f4526;
+  --wood-400: #8a5730;
+  --wood-300: #a86e3f;
+
+  /* panel */
+  --panel-bg: rgba(20, 11, 6, .72);
+  --panel-border: rgba(168, 110, 63, .35);
+  --panel-border-strong: rgba(214, 160, 82, .55);
+
+  /* colores de juego */
+  --c-white: #f0e6d2;
+  --c-yellow: #f0b323;
+  --c-blue: #2f7fd1;
+  --c-green: #5f9b32;
+  --c-red: #c0392b;
+  --c-black: #14100d;
+
+  /* tipografía / acento */
+  --gold: #f2c14e;
+  --gold-dim: #c9a24a;
+  --text: #efe3cf;
+  --text-dim: #b9a486;
+
+  --radius: 14px;
+  --radius-lg: 20px;
+
+  --font: "Trebuchet MS", "Segoe UI", Avenir, "Helvetica Neue", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background-color: var(--wood-900);
+  background-image:
+    /* viñeta */
+    radial-gradient(ellipse 90% 70% at 50% 45%, rgba(120, 74, 40, .30), transparent 70%),
+    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 45%, rgba(0, 0, 0, .72) 100%),
+    /* veta de madera */
+    repeating-linear-gradient(94deg,
+      rgba(255, 255, 255, .022) 0px,
+      rgba(255, 255, 255, .022) 2px,
+      rgba(0, 0, 0, .035) 3px,
+      rgba(0, 0, 0, .035) 7px,
+      rgba(255, 255, 255, .012) 8px,
+      rgba(255, 255, 255, .012) 14px),
+    linear-gradient(180deg, var(--wood-800), var(--wood-950));
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+.topbar {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(190px, 240px) auto 1fr auto;
+  align-items: center;
+  gap: 26px;
+  padding: 12px 26px;
+  background: linear-gradient(180deg, rgba(58, 34, 18, .92), rgba(24, 13, 7, .95));
+  border-bottom: 1px solid rgba(0, 0, 0, .7);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(214, 160, 82, .18);
+}
+
+/* --- logo --- */
+.brand {
+  display: flex;
+  flex-direction: column;
+  line-height: .92;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: .5px;
+  transform: rotate(-2deg);
+}
+.brand-l1 { font-size: 20px; }
+.brand-l2 { font-size: 30px; }
+.brand-l1, .brand-l2 {
+  background: linear-gradient(180deg, #fff6cf 0%, #f6cf72 32%, #edad20 58%, #b9760f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(60, 30, 6, .85);
+  filter: drop-shadow(0 2px 0 rgba(60, 28, 6, .9)) drop-shadow(0 4px 8px rgba(0, 0, 0, .6));
+}
+
+/* --- mesa / ronda --- */
+.meta { display: flex; gap: 30px; }
+.meta-block { display: flex; flex-direction: column; gap: 3px; }
+.meta-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
+}
+.meta-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.meta-value .ico { width: 15px; height: 15px; fill: var(--text-dim); }
+
+/* --- píldora de turno --- */
+.turn-pill {
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 340px;
+  padding: 8px 34px;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(12, 7, 4, .9), rgba(30, 18, 9, .9));
+  border: 1px solid var(--panel-border-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 150, .12), 0 4px 14px rgba(0, 0, 0, .5);
+}
+.turn-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+.turn-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--gold);
+}
+
+/* --- botones de icono --- */
+.topbar-actions { display: flex; gap: 12px; }
+.icon-btn {
+  width: 46px; height: 46px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-dim);
+  background: radial-gradient(circle at 35% 25%, rgba(255, 220, 160, .10), rgba(0, 0, 0, .45));
+  border: 1.5px solid rgba(180, 130, 70, .45);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 150, .12), 0 3px 8px rgba(0, 0, 0, .5);
+  transition: border-color .18s, color .18s, transform .12s;
+}
+.icon-btn:hover { color: var(--gold); border-color: var(--gold-dim); transform: translateY(-1px); }
+.icon-btn:active { transform: translateY(0); }
+.icon-btn .ico { width: 22px; height: 22px; fill: currentColor; }
+.icon-glyph { font-size: 22px; font-weight: 800; line-height: 1; }
+
+/* =========================================================
+   LAYOUT PRINCIPAL
+   ========================================================= */
+
+.stage {
+  display: grid;
+  grid-template-columns: 300px minmax(480px, 1fr) 270px;
+  gap: 30px;
+  align-items: start;
+  padding: 26px 26px 34px;
+  max-width: 1560px;
+  margin: 0 auto;
+}
+
+.col { display: flex; flex-direction: column; gap: 14px; }
+.col-center { align-items: center; gap: 24px; }
+.col-right { align-items: stretch; }
+
+.col-title {
+  margin: 4px 0 2px 6px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+}
+
+/* =========================================================
+   PANELES
+   ========================================================= */
+
+.panel {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 150, .07), 0 6px 18px rgba(0, 0, 0, .45);
+  backdrop-filter: blur(2px);
+}
+
+.panel-title {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+  text-align: center;
+}
+
+/* =========================================================
+   JUGADORES
+   ========================================================= */
+
+.players { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+
+.player {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 150, .06), 0 5px 14px rgba(0, 0, 0, .4);
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.player.is-active {
+  border-color: var(--gold);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 235, 180, .18),
+    0 0 0 1px rgba(242, 193, 78, .35),
+    0 0 22px rgba(242, 193, 78, .30),
+    0 6px 18px rgba(0, 0, 0, .5);
+  background: linear-gradient(180deg, rgba(56, 34, 12, .85), rgba(24, 14, 6, .85));
+}
+
+.turn-arrow {
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0; height: 0;
+  border-left: 12px solid var(--gold);
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  filter: drop-shadow(0 0 6px rgba(242, 193, 78, .7));
+}
+
+/* avatar */
+.avatar {
+  width: 56px; height: 56px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  font-size: 22px; font-weight: 800;
+  color: rgba(255, 255, 255, .92);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .6);
+  background: linear-gradient(160deg, #6a5142, #38251a);
+  border: 2.5px solid var(--gold-dim);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .5);
+}
+.avatar-sm { width: 30px; height: 30px; font-size: 13px; border-width: 2px; }
+
+.avatar[data-color="yellow"] { border-color: var(--c-yellow); background: linear-gradient(160deg, #7d6236, #3a2a14); }
+.avatar[data-color="blue"]   { border-color: var(--c-blue);   background: linear-gradient(160deg, #3f5c7d, #16283a); }
+.avatar[data-color="green"]  { border-color: var(--c-green);  background: linear-gradient(160deg, #4d6a35, #1d2c12); }
+.avatar[data-color="red"]    { border-color: var(--c-red);    background: linear-gradient(160deg, #7d4038, #331210); }
+
+.player-info { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+
+.player-name {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.c-yellow { color: var(--c-yellow); }
+.c-blue   { color: #5a9fe0; }
+.c-green  { color: #79b845; }
+.c-red    { color: #e05a4c; }
+
+/* pips = canicas en miniatura */
+.pips {
+  display: grid;
+  grid-template-columns: repeat(6, 12px);
+  gap: 4px 5px;
+}
+.pip {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, #ffffff 0%, #eae0cb 40%, #a1937c 72%, #6d6250 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .55), inset 0 -1px 1px rgba(0, 0, 0, .3);
+}
+.pip.half { opacity: .55; }
+.pip.off {
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.10), rgba(0,0,0,.35));
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .7);
+}
+
+.player-count { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.count {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--gold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, .6);
+}
+.count-label {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: var(--text-dim);
+}
+
+/* =========================================================
+   CÓMO JUGAR
+   ========================================================= */
+
+.howto { margin-top: 8px; }
+.howto .panel-title { text-align: left; margin-left: 2px; }
+
+.rules {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.rules li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 10px;
+  align-items: start;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--text-dim);
+}
+.bullet {
+  width: 13px; height: 13px;
+  margin-top: 3px;
+  border-radius: 50%;
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .5);
+}
+.b-yellow { background: radial-gradient(circle at 33% 28%, #ffe08a, var(--c-yellow) 70%); }
+.b-blue   { background: radial-gradient(circle at 33% 28%, #9cc8f5, var(--c-blue) 70%); }
+.b-black  { background: radial-gradient(circle at 33% 28%, #4a4038, #0b0906 70%); border: 1px solid rgba(180,150,110,.35); }
+
+/* =========================================================
+   TABLERO
+   ========================================================= */
+
+.board {
+  --board: 520px;
+  width: var(--board);
+  height: var(--board);
+  position: relative;
+  filter: drop-shadow(0 26px 40px rgba(0, 0, 0, .65));
+}
+
+#board-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* --- canicas (bandeja "tus canicas") --- */
+.marble {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: block;
+  box-shadow:
+    0 5px 9px rgba(0, 0, 0, .55),
+    inset 0 -6px 10px rgba(0, 0, 0, .45),
+    inset 0 3px 6px rgba(255, 255, 255, .22);
+}
+.marble::after {
+  content: "";
+  display: block;
+  width: 30%; height: 22%;
+  margin: 16% 0 0 20%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .55);
+  filter: blur(2.5px);
+}
+.marble.sm { width: 30px; height: 30px; }
+
+.m-white  { background: radial-gradient(circle at 34% 28%, #ffffff, #efe4cd 45%, #b6a88f 78%, #7b7060 100%); }
+.m-yellow { background: radial-gradient(circle at 34% 28%, #ffe9a4, #f2b91f 48%, #b57c0b 80%, #7a5205 100%); }
+.m-blue   { background: radial-gradient(circle at 34% 28%, #8fc4f5, #2a72c4 48%, #1a4a86 80%, #0f2f57 100%); }
+.m-green  { background: radial-gradient(circle at 34% 28%, #b0dd7c, #4f8f27 48%, #34641a 80%, #1f3f0e 100%); }
+.m-red    { background: radial-gradient(circle at 34% 28%, #f19a8c, #c0392b 46%, #86251a 80%, #521309 100%); }
+
+/* =========================================================
+   TUS CANICAS
+   ========================================================= */
+
+.your-marbles {
+  width: min(560px, 100%);
+  padding: 14px 26px 18px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(30, 18, 9, .92), rgba(14, 8, 4, .94));
+  border: 1px solid var(--panel-border-strong);
+}
+.your-marbles .panel-title { text-align: left; }
+
+.your-marbles-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.marble-tray {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px 14px;
+}
+
+.tray-count { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.tray-count .count { font-size: 44px; }
+
+/* =========================================================
+   DADO (panel informativo)
+   ========================================================= */
+
+.dice-panel { display: flex; flex-direction: column; align-items: center; }
+
+/* dado isométrico (SVG) */
+.die-svg {
+  width: 128px;
+  height: auto;
+  margin: 4px 0 6px;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .55));
+}
+
+/* =========================================================
+   ÚLTIMO RESULTADO
+   ========================================================= */
+
+.result-panel { text-align: center; }
+
+.result-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.result-dot {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, .4), inset 0 3px 6px rgba(255, 255, 255, .3), 0 3px 8px rgba(0, 0, 0, .5);
+}
+.d-yellow { background: radial-gradient(circle at 34% 28%, #ffe9a4, #f0b323 55%, #b57c0b 100%); }
+.d-white  { background: radial-gradient(circle at 34% 28%, #fff, #dfd3ba 60%, #9d9179 100%); }
+.d-blue   { background: radial-gradient(circle at 34% 28%, #8fc4f5, #2f7fd1 55%, #17406f 100%); }
+.d-green  { background: radial-gradient(circle at 34% 28%, #b0dd7c, #5f9b32 55%, #2f5417 100%); }
+.d-red    { background: radial-gradient(circle at 34% 28%, #f19a8c, #c0392b 55%, #6b1c13 100%); }
+.d-black  { background: radial-gradient(circle at 34% 28%, #514740, #14100d 60%, #000 100%); }
+
+.result-name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.result-sub {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  color: var(--text-dim);
+}
+
+/* =========================================================
+   BOTÓN LANZAR DADO
+   ========================================================= */
+
+.throw-area { display: flex; justify-content: center; margin: 14px 0 4px; }
+
+.throw-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.throw-disc {
+  position: relative;
+  width: 178px; height: 178px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 26%, #ffe9a8 0%, #f2c14e 32%, #dfa321 58%, #a86f0e 100%);
+  box-shadow:
+    0 0 0 10px rgba(70, 43, 22, .95),
+    0 0 34px rgba(242, 193, 78, .55),
+    inset 0 4px 10px rgba(255, 255, 255, .45),
+    inset 0 -12px 22px rgba(120, 70, 10, .55),
+    0 12px 26px rgba(0, 0, 0, .6);
+  transition: transform .14s ease, box-shadow .2s ease;
+}
+.throw-btn:hover .throw-disc {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 0 0 10px rgba(70, 43, 22, .95),
+    0 0 46px rgba(242, 193, 78, .8),
+    inset 0 4px 10px rgba(255, 255, 255, .5),
+    inset 0 -12px 22px rgba(120, 70, 10, .55),
+    0 14px 30px rgba(0, 0, 0, .6);
+}
+.throw-btn:active .throw-disc { transform: translateY(1px) scale(.99); }
+
+/* dado blanco con 6 puntos dentro del disco */
+.die-6 {
+  width: 96px; height: 96px;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(150deg, #fffaf0 0%, #efe6d2 45%, #cec3a8 100%);
+  transform: rotate(-8deg);
+  box-shadow:
+    inset 0 3px 8px rgba(255, 255, 255, .8),
+    inset 0 -8px 14px rgba(0, 0, 0, .22),
+    0 8px 16px rgba(0, 0, 0, .45);
+}
+.die-6 i {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4a4038, #0d0b09 70%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .8);
+}
+
+.throw-label {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  color: var(--gold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, .8);
+}
+
+/* =========================================================
+   HISTORIAL
+   ========================================================= */
+
+.history-btn {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+  padding: 12px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 150, .07), 0 5px 14px rgba(0, 0, 0, .45);
+  transition: color .18s, border-color .18s, transform .12s;
+}
+.history-btn:hover { color: var(--gold); border-color: var(--gold-dim); transform: translateY(-1px); }
+.history-btn .ico { width: 19px; height: 19px; fill: currentColor; }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1400px) {
+  .stage { grid-template-columns: 280px 1fr 250px; gap: 20px; }
+  .board { --board: 460px; }
+}
+
+@media (max-width: 1100px) {
+  .topbar { grid-template-columns: 1fr auto; grid-template-areas: "brand actions" "meta meta" "turn turn"; row-gap: 12px; }
+  .brand { grid-area: brand; }
+  .meta { grid-area: meta; }
+  .turn-pill { grid-area: turn; width: 100%; min-width: 0; }
+  .topbar-actions { grid-area: actions; }
+
+  .stage { grid-template-columns: 1fr; }
+  .col-left, .col-right { order: 2; }
+  .col-center { order: 1; }
+  .history-btn { align-self: center; }
+}
+
+@media (max-width: 620px) {
+  .board { --board: min(340px, calc(100vw - 40px)); }
+  .marble-tray { grid-template-columns: repeat(5, 1fr); }
+}

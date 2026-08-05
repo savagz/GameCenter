@@ -1,0 +1,45 @@
+/* ============================================================
+   shared/ui/turn-banner.css — cartel "TURNO DE ..." (DESIGN.md §7)
+   Extraído 1:1 de games/cucaracha/game.css (.turn-flash), que es el
+   diseño de referencia. Autocontenido para juegos sin este markup
+   (ej. Rummy) — los 3 juegos nativos ya traen este CSS en su propio
+   game.css y no necesitan cargar este archivo.
+   ============================================================ */
+
+#turnFlash.is-hidden { display: none !important; }
+
+#turnFlash {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+#turnFlash span {
+  padding: 16px 42px;
+  border-radius: 16px;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  letter-spacing: 0.05em;
+  color: #2a1a06;
+  background: linear-gradient(180deg, #ffe9a8, #d19a34);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+  animation: gc-turn-flash 1.6s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+@keyframes gc-turn-flash {
+  0%   { opacity: 0; transform: scale(0.7); }
+  18%  { opacity: 1; transform: scale(1.04); }
+  70%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+
+@media (max-width: 480px) {
+  #turnFlash span { font-size: 1.4rem; padding: 12px 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #turnFlash span { animation: none; }
+}

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Por qué siempre yo? — Multijugador</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+
+<!-- ============================================================
+     PANTALLA: INICIO (crear / unirse)
+     ============================================================ -->
+<div class="screen" id="screenHome">
+  <div class="screen-box">
+
+    <div class="brand brand-center">
+      <span class="brand-l1">¿POR QUÉ</span>
+      <span class="brand-l2">SIEMPRE YO?</span>
+    </div>
+
+    <div class="panel">
+      <div class="tabs">
+        <button class="tab is-on" type="button" data-tab="create">Crear sala</button>
+        <button class="tab" type="button" data-tab="join">Unirse</button>
+      </div>
+
+      <!-- crear -->
+      <form class="form" id="formCreate">
+        <label class="field">
+          <span>Tu nombre</span>
+          <input type="text" id="createName" maxlength="16" placeholder="Anfitrión" required>
+        </label>
+
+        <p class="form-note">Configuración inicial de la partida — la define quien crea la sala.</p>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>Jugadores máx.</span>
+            <select id="cfgMax">
+              <option>2</option><option>3</option><option>4</option>
+              <option selected>5</option><option>6</option><option>7</option><option>8</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Canicas iniciales</span>
+            <input type="number" id="cfgMarbles" value="10" min="3" max="30" step="1">
+          </label>
+          <label class="field is-hidden" id="cfgApuestaWrap">
+            <span>Apuesta / CASE</span>
+            <input type="number" id="cfgApuesta" value="0" min="0" step="10" readonly>
+          </label>
+        </div>
+
+        <button class="btn-main" type="submit">Crear sala</button>
+      </form>
+
+      <!-- unirse -->
+      <form class="form is-hidden" id="formJoin">
+        <label class="field">
+          <span>Tu nombre</span>
+          <input type="text" id="joinName" maxlength="16" placeholder="Jugador" required>
+        </label>
+        <label class="field">
+          <span>Código de sala</span>
+          <input type="text" id="joinCode" maxlength="4" placeholder="ABCD"
+                 class="code-input" autocomplete="off" required>
+        </label>
+        <button class="btn-main" type="submit">Entrar a la sala</button>
+      </form>
+
+      <p class="form-error is-hidden" id="homeError"></p>
+    </div>
+
+    <p class="screen-foot">2 a 8 jugadores · el objetivo es <b>quedarse sin canicas</b></p>
+  </div>
+</div>
+
+<!-- ============================================================
+     PANTALLA: SALA DE ESPERA
+     ============================================================ -->
+<div class="screen is-hidden" id="screenLobby">
+  <div class="screen-box">
+    <div class="panel">
+      <header class="panel-head center"><h2>Sala de espera</h2></header>
+
+      <div class="code-box">
+        <span class="code-label">Código de sala</span>
+        <div class="code-row">
+          <strong class="code-value" id="lobbyCode">----</strong>
+          <button class="btn-copy" type="button" id="btnCopy">Copiar</button>
+        </div>
+        <span class="code-hint">Compártelo para que entren los demás jugadores.</span>
+      </div>
+
+      <dl class="stat-list" id="lobbyConfig"></dl>
+    </div>
+
+    <div class="panel">
+      <header class="panel-head">
+        <h2>Jugadores</h2>
+        <span class="count-badge" id="lobbyCount">0/6</span>
+      </header>
+      <ul class="player-list" id="lobbyPlayers"></ul>
+      <button class="btn-main" type="button" id="btnStart">Iniciar partida</button>
+      <p class="waiting" id="lobbyWait">Esperando a que el anfitrión inicie la partida…</p>
+      <button class="btn-ghost" type="button" id="btnLeaveLobby">Salir de la sala</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     JUEGO
+     ============================================================ -->
+<div class="is-hidden" id="screenGame">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-l1">¿POR QUÉ</span>
+      <span class="brand-l2">SIEMPRE YO?</span>
+    </div>
+
+    <div class="meta">
+      <div class="meta-block">
+        <span class="meta-label" id="metaRoomLabel">MESA ----</span>
+        <span class="meta-value">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+          <span id="metaPlayers">0/0</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="turn-pill">
+      <span class="turn-label" id="turnLabelTop">TURNO DE</span>
+      <span class="turn-player">
+        <span class="avatar avatar-sm" id="turnAvatarTop">?</span>
+        <strong id="turnNameTop">—</strong>
+      </span>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="icon-btn" type="button" id="btnSound" aria-label="Sonido">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+      </button>
+      <button class="icon-btn" type="button" id="btnRules" aria-label="Ayuda">
+        <span class="icon-glyph">?</span>
+      </button>
+      <button class="icon-btn" type="button" id="btnHistory" aria-label="Historial">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M13 3a9 9 0 00-9 9H1l3.9 3.9.07.14L9 12H6a7 7 0 117 7 6.96 6.96 0 01-4.95-2.05l-1.42 1.42A8.96 8.96 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      </button>
+      <button class="icon-btn" type="button" id="btnExit" aria-label="Regresar a página inicial" title="Regresar a página inicial">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9.5v-6h5v6H17.5a1 1 0 0 0 1-1v-9"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="stage">
+
+    <aside class="col col-left">
+      <h2 class="col-title">JUGADORES</h2>
+      <ul class="players" id="playerList"></ul>
+
+      <section class="panel howto">
+        <h3 class="panel-title">CÓMO JUGAR</h3>
+        <ul class="rules">
+          <li><span class="bullet b-yellow"></span> Lanza el dado y sigue la regla del color obtenido.</li>
+          <li><span class="bullet b-blue"></span> Si la zona está llena, te llevas todas las canicas.</li>
+          <li><span class="bullet b-black"></span> Si sale NEGRO, pierdes 1 canica (se elimina).</li>
+        </ul>
+      </section>
+    </aside>
+
+    <section class="col col-center">
+      <div class="board" role="img" aria-label="Tablero con zonas de colores">
+        <svg id="board-svg" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <section class="panel your-marbles">
+        <h3 class="panel-title">TUS CANICAS</h3>
+        <div class="your-marbles-body">
+          <div class="marble-tray" id="marbleTray"></div>
+          <div class="tray-count">
+            <span class="count" id="myMarbleCount">0</span>
+            <span class="count-label">CANICAS</span>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="col col-right">
+      <section class="panel dice-panel">
+        <h3 class="panel-title">DADO</h3>
+        <svg class="die-svg" id="die-svg" viewBox="0 0 200 205" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="die-face-top" x1="100" y1="20" x2="100" y2="98" gradientUnits="userSpaceOnUse">
+              <stop id="die-face-top-s0" offset="0%" stop-color="#ea6a5c"/>
+              <stop id="die-face-top-s1" offset="45%" stop-color="#c0392b"/>
+              <stop id="die-face-top-s2" offset="100%" stop-color="#821f16"/>
+            </linearGradient>
+            <linearGradient id="die-face-left" x1="32.5" y1="59" x2="100" y2="172" gradientUnits="userSpaceOnUse">
+              <stop id="die-face-left-s0" offset="0%" stop-color="#78b043"/>
+              <stop id="die-face-left-s1" offset="45%" stop-color="#4a7d27"/>
+              <stop id="die-face-left-s2" offset="100%" stop-color="#26400f"/>
+            </linearGradient>
+            <linearGradient id="die-face-right" x1="100" y1="59" x2="167.5" y2="172" gradientUnits="userSpaceOnUse">
+              <stop id="die-face-right-s0" offset="0%" stop-color="#fffaf0"/>
+              <stop id="die-face-right-s1" offset="45%" stop-color="#eadfc4"/>
+              <stop id="die-face-right-s2" offset="100%" stop-color="#b7a983"/>
+            </linearGradient>
+            <radialGradient id="die-sheen" cx="30%" cy="14%" r="85%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+              <stop offset="45%" stop-color="#ffffff" stop-opacity="0.08"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="die-umbra" cx="78%" cy="86%" r="80%">
+              <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+              <stop offset="60%" stop-color="#000000" stop-opacity="0.10"/>
+              <stop offset="100%" stop-color="#000000" stop-opacity="0.40"/>
+            </radialGradient>
+            <filter id="die-grain" x="-30%" y="-30%" width="160%" height="160%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="4" result="n"/>
+              <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.33 0.33 0.34 0 -0.25" result="a"/>
+              <feComponentTransfer in="a"><feFuncA type="linear" slope="1.1" intercept="-0.15"/></feComponentTransfer>
+            </filter>
+            <filter id="die-shadow-blur" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="4"/>
+            </filter>
+            <filter id="die-vertex-blur" x="-200%" y="-200%" width="500%" height="500%">
+              <feGaussianBlur stdDeviation="2.2"/>
+            </filter>
+            <clipPath id="die-round-clip">
+              <path d="M92.21 24.50 Q100 20 107.79 24.50 L159.71 54.50 Q167.5 59 167.5 68
+                       L167.5 124 Q167.5 133 159.71 137.50 L107.79 167.50 Q100 172 92.21 167.50
+                       L40.29 137.50 Q32.5 133 32.5 124 L32.5 68 Q32.5 59 40.29 54.50 Z"/>
+            </clipPath>
+          </defs>
+
+          <ellipse cx="100" cy="187" rx="64" ry="12" fill="#000000" opacity="0.45" filter="url(#die-shadow-blur)"/>
+
+          <g clip-path="url(#die-round-clip)">
+            <g stroke="#2e1c10" stroke-width="2" stroke-linejoin="round">
+              <path d="M32.5 59 L100 98 L100 172 L32.5 133 Z" fill="url(#die-face-left)"/>
+              <path d="M167.5 59 L100 98 L100 172 L167.5 133 Z" fill="url(#die-face-right)"/>
+              <path d="M100 20 L167.5 59 L100 98 L32.5 59 Z" fill="url(#die-face-top)"/>
+            </g>
+
+            <g opacity="0.22">
+              <path d="M32.5 59 L100 98 L100 172 L32.5 133 Z" fill="#000000" filter="url(#die-grain)"/>
+              <path d="M167.5 59 L100 98 L100 172 L167.5 133 Z" fill="#000000" filter="url(#die-grain)"/>
+              <path d="M100 20 L167.5 59 L100 98 L32.5 59 Z" fill="#000000" filter="url(#die-grain)"/>
+            </g>
+
+            <path d="M32.5 59 L100 20 L167.5 59" fill="none" stroke="#ffe9c4" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M100 98 L100 172" fill="none" stroke="#000000" stroke-opacity="0.30" stroke-width="2"/>
+
+            <rect x="20" y="10" width="160" height="172" fill="url(#die-sheen)" style="mix-blend-mode:overlay" pointer-events="none"/>
+            <rect x="20" y="10" width="160" height="172" fill="url(#die-umbra)" style="mix-blend-mode:multiply" pointer-events="none"/>
+
+            <circle cx="100" cy="22.5" r="3.5" fill="#ffffff" opacity="0.5" filter="url(#die-vertex-blur)"/>
+          </g>
+        </svg>
+      </section>
+
+      <section class="panel result-panel">
+        <h3 class="panel-title">ÚLTIMO RESULTADO</h3>
+        <div class="result-row" id="resultRow">
+          <span class="result-dot" id="resultDot"></span>
+          <span class="result-name" id="resultName">—</span>
+        </div>
+        <p class="result-sub" id="resultSub">Aún no se ha lanzado el dado</p>
+      </section>
+
+      <div class="throw-area">
+        <button class="throw-btn" type="button" id="btnRoll">
+          <span class="throw-disc">
+            <span class="die-6" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i>
+            </span>
+          </span>
+          <span class="throw-label" id="throwLabel">LANZAR DADO</span>
+        </button>
+      </div>
+    </aside>
+
+  </main>
+</div>
+
+<!-- ============================================================
+     MODALES Y AVISOS
+     ============================================================ -->
+<div class="modal is-hidden" id="modalWin">
+  <div class="modal-box">
+    <div class="crown">&#127942;</div>
+    <h2 class="modal-title" id="winTitle">¡Victoria!</h2>
+    <p class="modal-text" id="winText"></p>
+    <ul class="score-list" id="winScores"></ul>
+    <div class="modal-actions">
+      <button class="btn-main" type="button" id="btnRestart">Nueva partida</button>
+      <button class="btn-ghost" type="button" id="btnLeaveEnd">Salir</button>
+    </div>
+    <p class="modal-wait is-hidden" id="winWait">Esperando al anfitrión…</p>
+  </div>
+</div>
+
+<div class="modal is-hidden" id="modalExit">
+  <div class="modal-box">
+    <h2 class="modal-title">¿Salir a inicio?</h2>
+    <p class="modal-text">Volverás a la página principal de GameCenter y dejarás la sala.</p>
+    <div class="modal-actions">
+      <button class="btn-main" type="button" id="btnExitConfirm">Sí, salir</button>
+      <button class="btn-ghost" type="button" id="btnExitCancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal is-hidden" id="modalRules">
+  <div class="modal-box modal-wide">
+    <h2 class="modal-title">Cómo se juega</h2>
+    <ul class="rules-list">
+      <li>Cada jugador empieza con sus canicas iniciales. Lanzas el dado y sigues la regla del color.</li>
+      <li><b>Blanco</b> (1 hueco), <b>amarillo</b> (2), <b>azul</b> (3), <b>verde</b> (4), <b>rojo</b> (5): si hay hueco, colocas 1 canica. Si la zona está llena, te llevas todas las que había.</li>
+      <li><b>Negro</b>: pierdes 1 canica para siempre, no vuelve a la partida.</li>
+      <li>El tablero es compartido: cualquier jugador puede vaciar una zona llena, sin importar quién la llenó.</li>
+      <li>Gana el primer jugador que se quede con <b>0 canicas</b>.</li>
+    </ul>
+    <button class="btn-main" type="button" id="btnCloseRules">Entendido</button>
+  </div>
+</div>
+
+<div class="modal is-hidden" id="modalHistory">
+  <div class="modal-box modal-wide">
+    <h2 class="modal-title">Historial</h2>
+    <ul class="roll-log" id="historyLog">
+      <li class="log-empty">Aún no hay jugadas.</li>
+    </ul>
+    <button class="btn-main" type="button" id="btnCloseHistory">Cerrar</button>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="turn-flash is-hidden" id="turnFlash"><span id="turnFlashText"></span></div>
+
+<script>window.GC_BASE = new URL('.', location.href).pathname;</script>
+<script src="/shared/ui/bet-modal.js"></script>
+<script src="/shared/ui/turn-banner.js"></script>
+<script src="/shared/ui/victory-banner.js"></script>
+<script src="zones.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

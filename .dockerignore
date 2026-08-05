@@ -1,0 +1,9 @@
+node_modules
+games/rummy/node_modules
+games/rummy/dist
+npm-debug.log
+.git
+.DS_Store
+.claude
+mockup
+*.png

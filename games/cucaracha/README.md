@@ -70,7 +70,7 @@ anfitrión, por ejemplo `http://192.168.1.20:3000`.
 | `game.html` | Interfaz del juego (pantallas, tablero SVG, paneles). |
 | `game.css` | Estilos nuevos: pantallas, formularios, modales, avisos, animaciones. |
 | `game.js` | Cliente: render, animaciones y sonido sintetizado con WebAudio. |
-| `index.html`, `styles.css` | Mock de diseño original, **sin modificar**. Visible en `/index.html`. |
+| `styles.css` | Variables de tema y estilos base del diseño de madera original. |
 
 ## Notas técnicas
 

@@ -1,10 +1,12 @@
-// Rummikub game engine — server authoritative.
-// Rules implemented from RULES.md: groups, runs, first meld >= 30 pts,
-// jokers, board rearrangement with full-validity constraint, scoring.
+/* ============================================================
+   RUMMY — motor de reglas puras (autoritativo, servidor)
+   Implementa RULES.md: grupos, escaleras, bajada inicial >= 30 pts,
+   comodines, reordenamiento del tablero con validez total.
+   ============================================================ */
 
-export const COLORS = ['red', 'blue', 'yellow', 'black'];
+const COLORS = ['red', 'blue', 'yellow', 'black'];
 
-export function createDeck() {
+function createDeck() {
   const tiles = [];
   let id = 0;
   for (let set = 0; set < 2; set++) {
@@ -19,7 +21,7 @@ export function createDeck() {
   return shuffle(tiles);
 }
 
-export function shuffle(arr) {
+function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -29,11 +31,11 @@ export function shuffle(arr) {
 }
 
 /**
- * Validate a single meld (array of tile objects).
- * Returns { valid: boolean, points: number }.
- * Jokers count as the tile they represent (max plausible placement).
+ * Valida una combinacion (array de fichas).
+ * Devuelve { valid: boolean, points: number }.
+ * Los comodines cuentan como la ficha que representan (colocacion mas favorable).
  */
-export function validateMeld(tiles) {
+function validateMeld(tiles) {
   if (!Array.isArray(tiles) || tiles.length < 3) return { valid: false, points: 0 };
   const jokers = tiles.filter((t) => t.joker).length;
   const rest = tiles.filter((t) => !t.joker);
@@ -41,7 +43,7 @@ export function validateMeld(tiles) {
 
   let best = null;
 
-  // GROUP: same number, distinct colors, 3-4 tiles.
+  /* GRUPO: mismo numero, colores distintos, 3-4 fichas */
   if (tiles.length <= 4) {
     const nums = new Set(rest.map((t) => t.num));
     const cols = new Set(rest.map((t) => t.color));
@@ -50,7 +52,7 @@ export function validateMeld(tiles) {
     }
   }
 
-  // RUN: same color, consecutive numbers, jokers fill gaps / extend ends.
+  /* ESCALERA: mismo color, numeros consecutivos, comodines rellenan huecos/extienden puntas */
   const cols = new Set(rest.map((t) => t.color));
   if (cols.size === 1) {
     const nums = [...new Set(rest.map((t) => t.num))].sort((a, b) => a - b);
@@ -73,35 +75,32 @@ export function validateMeld(tiles) {
   return best || { valid: false, points: 0 };
 }
 
-export function validateBoard(melds) {
+function validateBoard(melds) {
   return melds.every((m) => validateMeld(m).valid);
 }
 
 /**
- * Validate an end-of-turn move.
+ * Valida una jugada de fin de turno.
  * @param {Object} params
- *  - oldBoard: array of melds (arrays of tiles) before the turn
- *  - oldHand: player's hand before the turn
- *  - newBoard: proposed melds
- *  - newHand: proposed remaining hand
- *  - hasMelded: whether player already made the initial 30-pt meld
- * Returns { ok, error?, placedIds?, meldedNow? }
+ *  - oldBoard: melds (arrays de fichas) antes del turno
+ *  - oldHand: mano del jugador antes del turno
+ *  - newBoard: melds propuestos
+ *  - newHand: mano restante propuesta
+ *  - hasMelded: si el jugador ya hizo su bajada inicial de 30 pts
+ * Devuelve { ok, error?, placedIds?, meldedNow? }
  */
-export function validateTurn({ oldBoard, oldHand, newBoard, newHand, hasMelded }) {
+function validateTurn({ oldBoard, oldHand, newBoard, newHand, hasMelded }) {
   const oldBoardIds = oldBoard.flat().map((t) => t.id);
   const oldHandIds = oldHand.map((t) => t.id);
   const newBoardIds = newBoard.flat().map((t) => t.id);
   const newHandIds = newHand.map((t) => t.id);
 
-  // No duplicates.
   if (new Set(newBoardIds).size !== newBoardIds.length) return { ok: false, error: 'Fichas duplicadas en la mesa.' };
   if (new Set(newHandIds).size !== newHandIds.length) return { ok: false, error: 'Fichas duplicadas en la mano.' };
 
-  // Hand can only shrink, and only with tiles the player owned.
   const oldHandSet = new Set(oldHandIds);
   if (!newHandIds.every((id) => oldHandSet.has(id))) return { ok: false, error: 'Fichas desconocidas en la mano.' };
 
-  // Conservation: old board + old hand === new board + new hand (by ids).
   const before = [...oldBoardIds, ...oldHandIds].sort().join(',');
   const after = [...newBoardIds, ...newHandIds].sort().join(',');
   if (before !== after) return { ok: false, error: 'Las fichas no cuadran: no se pueden quitar fichas de la mesa.' };
@@ -110,7 +109,6 @@ export function validateTurn({ oldBoard, oldHand, newBoard, newHand, hasMelded }
   const placedIds = oldHandIds.filter((id) => !newHandSet.has(id));
   if (placedIds.length === 0) return { ok: false, error: 'No colocaste ninguna ficha. Roba una para pasar.' };
 
-  // Every meld must be valid.
   for (const meld of newBoard) {
     const v = validateMeld(meld);
     if (!v.valid) {
@@ -118,8 +116,7 @@ export function validateTurn({ oldBoard, oldHand, newBoard, newHand, hasMelded }
     }
   }
 
-  // First meld: only new melds made purely of own tiles, >= 30 pts,
-  // existing melds untouched.
+  /* primera bajada: solo melds nuevos hechos con fichas propias, >= 30 pts, melds existentes intactos */
   if (!hasMelded) {
     const placedSet = new Set(placedIds);
     const oldKeys = oldBoard.map((m) => m.map((t) => t.id).sort().join(','));
@@ -129,7 +126,7 @@ export function validateTurn({ oldBoard, oldHand, newBoard, newHand, hasMelded }
       const idx = oldKeys.indexOf(key);
       if (idx >= 0) {
         oldKeys.splice(idx, 1);
-        continue; // untouched pre-existing meld
+        continue;
       }
       if (!meld.every((t) => placedSet.has(t.id))) {
         return { ok: false, error: 'Primera bajada: solo puedes usar fichas de tu mano (mínimo 30 puntos).' };
@@ -144,7 +141,7 @@ export function validateTurn({ oldBoard, oldHand, newBoard, newHand, hasMelded }
   return { ok: true, placedIds, meldedNow: !hasMelded };
 }
 
-export function handPoints(hand) {
+function handPoints(hand) {
   return hand.reduce((s, t) => s + (t.joker ? 30 : t.num), 0);
 }
 
@@ -152,3 +149,13 @@ function meldLabel(meld) {
   const names = { red: 'R', blue: 'A', yellow: 'M', black: 'N', joker: '★' };
   return meld.map((t) => (t.joker ? '★' : t.num + names[t.color])).join('-');
 }
+
+module.exports = {
+  COLORS,
+  createDeck,
+  shuffle,
+  validateMeld,
+  validateBoard,
+  validateTurn,
+  handPoints
+};

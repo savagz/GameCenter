@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1b12">
+<title>Rummy — Multijugador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/ui/turn-banner.css">
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+
+<!-- ============================================================
+     PANTALLA: INICIO (crear / unirse)
+     ============================================================ -->
+<div class="lobby-screen" id="screenHome">
+  <div class="panel">
+    <h1 class="logo">RUMMY<span>II</span></h1>
+
+    <div class="lobby-tiles" aria-hidden="true">
+      <div class="tile t-red demo"><div class="tile-face"><span class="num">7</span><span class="pip"></span></div></div>
+      <div class="tile t-blue demo"><div class="tile-face"><span class="num">7</span><span class="pip"></span></div></div>
+      <div class="tile t-black demo"><div class="tile-face"><span class="num">7</span><span class="pip"></span></div></div>
+      <div class="tile t-joker demo"><div class="tile-face">
+        <svg class="joker-face" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <circle cx="11.5" cy="13" r="2" fill="currentColor"/>
+          <circle cx="20.5" cy="13" r="2" fill="currentColor"/>
+          <path d="M10 19.5c1.8 2.6 4 3.8 6 3.8s4.2-1.2 6-3.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+        <span class="pip"></span>
+      </div></div>
+    </div>
+
+    <label class="field">
+      <span>Tu nombre</span>
+      <input type="text" id="nameInput" maxlength="16" placeholder="Ej: Samuel">
+    </label>
+
+    <div class="field is-hidden" id="bettingInfo">
+      <span>Apuesta de GameCenter: <b id="bettingAmount">$0</b></span>
+    </div>
+
+    <div class="field">
+      <span>Nivel de juego</span>
+      <div class="level-picker" id="levelPicker" role="radiogroup" aria-label="Nivel de juego">
+        <button type="button" class="level-opt selected" data-seconds="120" role="radio" aria-checked="true">
+          <strong>Relajado</strong><small>120s / turno</small>
+        </button>
+        <button type="button" class="level-opt" data-seconds="90" role="radio" aria-checked="false">
+          <strong>Normal</strong><small>90s / turno</small>
+        </button>
+        <button type="button" class="level-opt" data-seconds="45" role="radio" aria-checked="false">
+          <strong>Experto</strong><small>45s / turno</small>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" type="button" id="btnCreate">Crear sala</button>
+
+    <div class="divider"><span>o únete a una</span></div>
+
+    <div class="join-row">
+      <input class="code-input" id="joinCode" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
+      <button class="btn" type="button" id="btnJoin">Unirse</button>
+    </div>
+
+    <p class="form-error is-hidden" id="homeError"></p>
+  </div>
+</div>
+
+<!-- ============================================================
+     PANTALLA: SALA DE ESPERA
+     ============================================================ -->
+<div class="lobby-screen is-hidden" id="screenLobby">
+  <div class="panel waiting">
+    <h1 class="logo">RUMMY<span>II</span></h1>
+    <p class="room-code-label">Código de sala</p>
+    <div class="room-code" id="lobbyCode">----</div>
+    <p class="hint" id="lobbyHint">Comparte este código. Máximo 4 jugadores.</p>
+    <ul class="waiting-players" id="lobbyPlayers"></ul>
+    <button class="btn btn-primary" type="button" id="btnStart">Comenzar partida</button>
+    <p class="hint pulse is-hidden" id="lobbyWait">Esperando a que el anfitrión inicie…</p>
+    <button class="btn" type="button" id="btnLeaveLobby">Salir de la sala</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     JUEGO
+     ============================================================ -->
+<div class="game is-hidden" id="screenGame" data-drag="0">
+  <header class="topbar">
+    <div class="brand">R<span>II</span></div>
+    <div class="players" id="playersRow"></div>
+    <div class="status">
+      <div class="pot" title="Fichas en el pozo">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="4" y="3" width="10" height="14" rx="2"/>
+          <rect x="9" y="7" width="10" height="14" rx="2"/>
+        </svg>
+        <span id="potCount">0</span>
+      </div>
+      <div class="timer is-hidden" id="timerBox">2:00</div>
+      <button class="btn-mute" type="button" id="btnExit" title="Salir" aria-label="Salir">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9.5v-6h5v6H17.5a1 1 0 0 0 1-1v-9"/>
+        </svg>
+      </button>
+      <button class="btn-mute" type="button" id="btnMute" title="Silenciar" aria-label="Silenciar">
+        <svg id="iconSoundOn" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/>
+        </svg>
+        <svg id="iconSoundOff" class="is-hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
+          <path d="m17 9 5 6M22 9l-5 6"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="board" id="boardArea" data-drop="newmeld">
+    <div class="board-inner" id="boardInner"></div>
+  </main>
+
+  <footer class="bottom">
+    <div class="bottom-row">
+      <div class="side">
+        <button class="btn btn-icon" type="button" id="btnSortGroups" title="Ordenar por número">777</button>
+        <button class="btn btn-icon" type="button" id="btnSortRuns" title="Ordenar por color">789</button>
+        <span class="hand-value" id="handValue">0 pts</span>
+      </div>
+
+      <div class="rack" id="rack"></div>
+
+      <div class="side">
+        <button class="btn btn-round" type="button" id="btnUndo" title="Deshacer" aria-label="Deshacer jugada">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
+          </svg>
+        </button>
+        <button class="btn btn-round btn-draw" type="button" id="btnDraw" title="Robar ficha y pasar" aria-label="Robar ficha y pasar">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M12 8v6M9 11h6"/>
+          </svg>
+        </button>
+        <button class="btn btn-round btn-go" type="button" id="btnEndTurn" title="Terminar turno" aria-label="Terminar turno">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     MODALES
+     ============================================================ -->
+<div class="overlay is-hidden" id="modalGameOver">
+  <div class="panel gameover">
+    <svg class="trophy" viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4Z"/>
+      <path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/>
+    </svg>
+    <h1 id="goTitle">Fin de la partida</h1>
+    <p class="hint" id="goBody"></p>
+    <p class="hint is-hidden" id="goPrizeReason"></p>
+    <table class="scores"><tbody id="goScores"></tbody></table>
+    <div class="row">
+      <button class="btn btn-primary is-hidden" type="button" id="btnRestart">Jugar de nuevo</button>
+      <button class="btn" type="button" id="btnCloseGameOver">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay is-hidden" id="modalExit">
+  <div class="panel gameover">
+    <h1>¿Salir a inicio?</h1>
+    <p class="hint">Volverás a la página principal de GameCenter y dejarás la sala.</p>
+    <div class="row">
+      <button class="btn btn-primary" type="button" id="btnExitConfirm">Sí, salir</button>
+      <button class="btn" type="button" id="btnExitCancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div id="turnFlash" class="is-hidden"><span id="turnFlashText"></span></div>
+
+<script>window.GC_BASE = new URL('.', location.href).pathname;</script>
+<script src="/shared/ui/turn-banner.js"></script>
+<script src="/shared/ui/victory-banner.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

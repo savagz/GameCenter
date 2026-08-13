@@ -8,6 +8,7 @@
 
 const { NUMBERS, TOTAL } = window.SieteBoard;
 const $ = (id) => document.getElementById(id);
+const money = (n) => '$' + Number(n || 0).toLocaleString('en-US');
 
 /* nombre y apuesta llegan de GameCenter por query string (?name=&betting=&bet=&penalty=) */
 const GC = (function () {
@@ -266,9 +267,9 @@ function flashCell(v) {
 
 function playerById(st, id) { return st.players.find((p) => p.id === id) || null; }
 function initial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
-function avatarClass(st, id) {
+function playerColor(st, id) {
   const i = st.players.findIndex((p) => p.id === id);
-  return 'av-' + ((i % 8) + 1);
+  return 'var(--p' + (((i < 0 ? 0 : i) % 6) + 1) + ')';
 }
 
 function setView(id) {
@@ -300,25 +301,23 @@ function renderPlayers(st) {
   const list = $('playerList');
   list.textContent = '';
 
-  st.players.forEach((p, i) => {
+  st.players.forEach((p) => {
     const li = document.createElement('li');
-    li.className = 'player';
-    if (p.id === st.currentId) li.classList.add('is-active');
+    li.className = 'player-row';
+    li.style.setProperty('--p', playerColor(st, p.id));
+    if (!p.online) li.classList.add('off');
+    if (p.id === st.currentId) li.setAttribute('data-turn', '');
+    if (p.id === S.me.playerId) li.setAttribute('data-me', '');
     if (p.id === S.viewId) li.classList.add('is-view');
     li.dataset.pid = p.id;
 
-    const pct = Math.round((p.filled / st.total) * 100);
     li.innerHTML = `
-      <span class="player-rank">${i + 1}</span>
-      <span class="avatar ${avatarClass(st, p.id)}">${initial(p.name)}</span>
-      <span class="player-id">
-        <strong>${escapeHtml(p.name)}</strong>
-        <em>${p.id === S.me.playerId ? '(tú)' : `(Jugador ${i + 1})`}</em>
-        <span class="player-progress">
-          ${p.filled}/${st.total} <i class="dot-online${p.online ? '' : ' is-off'}"></i>
-        </span>
-        <span class="player-bar"><i style="width:${pct}%"></i></span>
-      </span>`;
+      <span class="avatar">${initial(p.name)}</span>
+      <span class="player-info">
+        <span class="player-name">${escapeHtml(p.name)}</span>
+        <span class="player-meta">${p.filled} / ${st.total} tapados</span>
+      </span>
+      ${p.id === st.currentId ? '<span class="turn-tag">TURNO</span>' : ''}`;
 
     li.addEventListener('click', () => { setView(p.id); S.follow = false; });
     list.appendChild(li);
@@ -328,15 +327,15 @@ function renderPlayers(st) {
 function renderTurnBar(st) {
   const cur = playerById(st, st.currentId);
   $('turnAvatar').textContent = cur ? initial(cur.name) : '?';
-  $('turnAvatar').className = 'avatar avatar-lg ' + (cur ? avatarClass(st, cur.id) : 'av-1');
+  $('turnAvatar').className = 'avatar avatar-lg';
+  $('turnAvatar').style.setProperty('--p', cur ? playerColor(st, cur.id) : 'var(--gold)');
 
   if (!cur) {
     $('turnName').textContent = st.status === 'finished' ? 'Partida terminada' : '—';
     return;
   }
   const mine = cur.id === S.me.playerId;
-  $('turnName').innerHTML =
-    `${escapeHtml(cur.name)} <em>${mine ? '(tú)' : ''}</em> <i class="dot-online${cur.online ? '' : ' is-off'}"></i>`;
+  $('turnName').innerHTML = `${escapeHtml(cur.name)} <em>${mine ? '(tú)' : ''}</em>`;
 }
 
 function renderBoard(st) {
@@ -554,13 +553,6 @@ function applyState(st) {
   const first = !S.state;
   S.state = st;                      /* S.state es siempre el estado vigente */
 
-  if (window.GCBetModal) {
-    GCBetModal.render(st.betGate, S.me && S.me.playerId, {
-      onConfirm: () => api('betConfirm').catch((e) => showHomeError(e.message)),
-      onCancel: () => api('betCancel').catch(() => {})
-    });
-  }
-
   /* al entrar (o reconectar) los tableros ya existentes no deben "sonar" */
   if (first) for (const p of st.players) S.lastBoards[p.id] = Object.assign({}, p.board);
 
@@ -671,7 +663,7 @@ function checkFinish(st) {
     const li = document.createElement('li');
     if (p.id === st.winnerId) li.classList.add('is-winner');
     li.innerHTML = `
-      <span class="avatar ${avatarClass(st, p.id)}">${initial(p.name)}</span>
+      <span class="avatar" style="--p:${playerColor(st, p.id)}">${initial(p.name)}</span>
       <span class="sc-name">${escapeHtml(p.name)}${p.id === S.me.playerId ? ' (tú)' : ''}</span>
       <span class="sc-val">${p.filled}/${st.total}</span>`;
     scores.appendChild(li);
@@ -694,22 +686,23 @@ function renderLobby(st) {
 
   $('lobbyConfig').innerHTML = `
     <div class="stat-row"><dt>Lances por turno</dt><dd class="val-gold">${st.config.lances}</dd></div>
+    ${st.config.bettingEnabled ? `
+    <div class="stat-row"><dt>Apuesta inicial</dt><dd class="val-gold">${money(st.config.apuesta)}</dd></div>
+    <div class="stat-row"><dt>Multa</dt><dd>${money(st.config.castigo)}</dd></div>` : ''}
     <div class="stat-row"><dt>Jugadores máx.</dt><dd>${st.config.maxPlayers}</dd></div>`;
 
   const list = $('lobbyPlayers');
   list.textContent = '';
-  st.players.forEach((p, i) => {
+  st.players.forEach((p) => {
     const li = document.createElement('li');
-    li.className = 'player';
+    li.className = 'player-row';
+    li.style.setProperty('--p', playerColor(st, p.id));
+    if (!p.online) li.classList.add('off');
+    if (p.id === S.me.playerId) li.setAttribute('data-me', '');
     li.innerHTML = `
-      <span class="player-rank">${i + 1}</span>
-      <span class="avatar ${avatarClass(st, p.id)}">${initial(p.name)}</span>
-      <span class="player-id">
-        <strong>${escapeHtml(p.name)}</strong>
-        ${p.id === st.hostId ? '<span class="tag-host">anfitrión</span>' : ''}
-        ${p.id === S.me.playerId ? '<span class="tag-you">tú</span>' : ''}
-        <span class="player-progress"><i class="dot-online${p.online ? '' : ' is-off'}"></i></span>
-      </span>`;
+      <span class="avatar">${initial(p.name)}</span>
+      <span class="player-info"><span class="player-name">${escapeHtml(p.name)}</span></span>
+      ${p.id === st.hostId ? '<span class="turn-tag">ANFITRIÓN</span>' : ''}`;
     list.appendChild(li);
   });
 
@@ -811,7 +804,9 @@ function wire() {
   $('btnRestart').addEventListener('click', () => {
     api('restart').catch((e) => toast(e.message, 'penalty'));
   });
-  $('btnLeaveEnd').addEventListener('click', () => leaveToHome());
+  $('btnLeaveEnd').addEventListener('click', () => {
+    api('leave').catch(() => {}).finally(() => { window.location.href = '/'; });
+  });
 
   $('btnSound').addEventListener('click', () => {
     const on = Sound.toggle();
@@ -865,6 +860,7 @@ async function boot() {
   if (!saved) { showScreen('home'); return; }
 
   S.me = saved;
+  $('screenHome').classList.add('is-hidden');
   try {
     await api('state');
     connect();

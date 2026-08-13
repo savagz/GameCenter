@@ -23,6 +23,14 @@
   --panel-1:#241608;
   --panel-2:#150c04;
   --line:rgba(240,182,74,.22);
+
+  /* paleta de identidad por jugador — uniforme entre lobby y los 4 juegos */
+  --p1:#c65a5a;
+  --p2:#5f8fd6;
+  --p3:#4fae74;
+  --p4:#d6a23f;
+  --p5:#a06ee0;
+  --p6:#3fb6ae;
   --radius:14px;
   --shadow-panel:0 10px 26px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,220,150,.06);
 }
@@ -152,33 +160,23 @@ body{
 
 /* ---------------- jugadores ---------------- */
 
-.player-list{list-style:none;display:flex;flex-direction:column}
+.player-list{list-style:none;display:flex;flex-direction:column;gap:8px}
 
-.player{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  padding:10px 8px;
+.player-row{
+  position:relative;
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;
   border-radius:10px;
   border:1px solid transparent;
-  border-bottom:1px solid rgba(240,182,74,.10);
+  cursor:pointer;
+  transition:border-color .2s ease, background .2s ease;
 }
-.player:last-child{border-bottom-color:transparent}
+.player-row.is-view{ border-color:rgba(240,182,74,.5); }
 
-.player.is-active{
-  background:linear-gradient(180deg,rgba(224,139,30,.18),rgba(224,139,30,.05));
-  border-color:rgba(240,182,74,.5);
-  box-shadow:inset 0 0 18px rgba(240,182,74,.10);
-}
-
-.player-rank{
-  flex:none;
-  width:24px;height:24px;border-radius:50%;
-  display:grid;place-items:center;
-  font-size:.74rem;font-weight:700;
-  color:#2a1a06;
-  background:radial-gradient(circle at 35% 28%,#ffe6a6,#c9902f);
-  border:1px solid #8a5f18;
+.player-row[data-turn]{
+  border-color:color-mix(in srgb, var(--p, var(--gold)) 55%, var(--line));
+  background:color-mix(in srgb, var(--p, var(--gold)) 8%, transparent);
+  box-shadow:inset 0 0 18px color-mix(in srgb, var(--p, var(--gold)) 12%, transparent);
 }
 
 .avatar{
@@ -186,36 +184,33 @@ body{
   width:38px;height:38px;border-radius:50%;
   display:grid;place-items:center;
   font-weight:700;font-size:1rem;color:#fff;
-  border:2px solid rgba(240,182,74,.45);
+  background:radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--p, var(--gold)) 55%, #1a1a1a), #0c0b0d 78%);
+  border:2px solid color-mix(in srgb, var(--p, var(--gold)) 60%, transparent);
   box-shadow:0 3px 8px rgba(0,0,0,.5);
 }
 .avatar-lg{width:46px;height:46px;font-size:1.2rem}
-.av-1{background:linear-gradient(150deg,#a2506b,#5c2338)}
-.av-2{background:linear-gradient(150deg,#4c7fa8,#22405c)}
-.av-3{background:linear-gradient(150deg,#c98a3a,#7a4614)}
-.av-4{background:linear-gradient(150deg,#5c8a63,#2b4a30)}
-.av-5{background:linear-gradient(150deg,#8a5cc9,#3d2270)}
-.av-6{background:linear-gradient(150deg,#c9b23a,#7a6414)}
-.av-7{background:linear-gradient(150deg,#5cb6c9,#22505c)}
-.av-8{background:linear-gradient(150deg,#c95c8a,#701e42)}
+.player-row.off .avatar{ opacity:.45; filter:grayscale(.5); }
 
-.player-id{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
-.player-id strong{font-size:.96rem;color:var(--cream)}
-.player-id em{font-style:normal;font-size:.8rem;color:var(--text-dim)}
-.player-progress{font-size:.86rem;font-weight:600;color:var(--text)}
+.player-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.player-name{font-size:.96rem;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-meta{font-size:.78rem;color:var(--text-dim)}
 
-.dot-online{
-  display:inline-block;width:7px;height:7px;border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 7px rgba(74,222,90,.8);
-  vertical-align:1px;margin-left:3px;
+.turn-tag{
+  flex:none;
+  font-size:.62rem;font-weight:700;letter-spacing:.06em;
+  color:#2a1a06;
+  background:linear-gradient(180deg,#ffe6a6,#c9902f);
+  padding:3px 8px;border-radius:999px;
 }
 
-.kebab{
-  flex:none;background:none;border:0;color:var(--text-dim);
-  font-size:1.15rem;line-height:1;cursor:pointer;padding:4px 6px;border-radius:6px;
+.player-row[data-me]::before{
+  content:"TÚ";
+  position:absolute; top:-7px; left:8px;
+  font-size:.55rem; font-weight:700; letter-spacing:.05em;
+  color:var(--text-dim);
+  background:var(--panel-1);
+  padding:0 5px;
 }
-.kebab:hover{color:var(--gold);background:rgba(240,182,74,.10)}
 
 /* ---------------- barra de turno ---------------- */
 
@@ -545,7 +540,10 @@ body{
 @media (max-width:820px){
   body{padding:12px}
   .app{grid-template-columns:1fr;gap:14px}
-  .col-center{order:0}
+  .col-right{display:contents}
+  .col-center{order:-3}
+  .panel-dice{order:-2}
+  .panel-roll{order:-1}
   .logo-title{font-size:1.5rem}
   .turn-name{font-size:1.05rem}
   .die{width:50px;height:50px;padding:7px}

@@ -69,7 +69,7 @@ anfitrión, por ejemplo `http://192.168.1.20:3000`.
 | `game.html` | Interfaz del juego (pantallas home/lobby/juego, tablero SVG, paneles). |
 | `game.css` | Estilos nuevos: pantallas, formularios, modales, avisos, animaciones. |
 | `game.js` | Cliente: construcción del tablero SVG, render, animaciones y sonido sintetizado con WebAudio. |
-| `index.html`, `styles.css` | Mock de diseño original, **sin modificar**. Visible en `/index.html`. |
+| `styles.css` | Variables de tema y estilos base de la interfaz de partida. |
 
 ## Notas técnicas
 
@@ -80,7 +80,6 @@ anfitrión, por ejemplo `http://192.168.1.20:3000`.
 - Todos los sonidos se sintetizan en el navegador con WebAudio: no hay archivos
   de audio. El navegador exige un gesto del usuario antes de sonar.
 - Las salas viven en memoria: al reiniciar el servidor se pierden.
-- El tablero SVG del juego reutiliza exactamente la misma geometría que
-  `index.html` (zonas proporcionales a su capacidad, huecos con bisel, canicas
-  con brillo especular), pero cada hueco se llena o vacía según el estado real
-  de la sala en vez de mostrarse siempre completo.
+- El tablero SVG del juego (geometría definida en `game.js`): zonas proporcionales
+  a su capacidad, huecos con bisel, canicas con brillo especular, pero cada hueco se
+  llena o vacía según el estado real de la sala en vez de mostrarse siempre completo.

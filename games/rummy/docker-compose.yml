@@ -1,6 +1,0 @@
-services:
-  rummikub:
-    build: .
-    ports:
-      - "3001:3001"
-    restart: unless-stopped

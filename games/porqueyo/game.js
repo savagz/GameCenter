@@ -483,12 +483,10 @@ function renderBoardFill(board) {
    Render — jugadores, turno, resultado, historial
    ============================================================ */
 
-const AVATAR_PALETTE = ['#e08a4f', '#9b7fd1', '#4fb8b0', '#d16fa0', '#6b8fd1', '#b0885a', '#8fbf6a', '#c98a3f'];
-
 function initial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
-function avatarColor(st, id) {
+function playerColor(st, id) {
   const i = st.players.findIndex((p) => p.id === id);
-  return AVATAR_PALETTE[i % AVATAR_PALETTE.length];
+  return 'var(--p' + (((i < 0 ? 0 : i) % 6) + 1) + ')';
 }
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -507,21 +505,19 @@ function renderPlayers(st, marblesOverride) {
   st.players.forEach((p) => {
     const marbles = marblesOverride && marblesOverride[p.id] !== undefined ? marblesOverride[p.id] : p.marbles;
     const li = document.createElement('li');
-    li.className = 'player';
-    if (p.id === st.currentId) li.classList.add('is-active');
+    li.className = 'player-row';
+    li.style.setProperty('--p', playerColor(st, p.id));
+    if (!p.online) li.classList.add('off');
+    if (p.id === st.currentId) li.setAttribute('data-turn', '');
+    if (p.id === S.me.playerId) li.setAttribute('data-me', '');
 
-    const color = avatarColor(st, p.id);
     li.innerHTML = `
-      ${p.id === st.currentId ? '<span class="turn-arrow"></span>' : ''}
-      <span class="avatar" style="border-color:${color};background:linear-gradient(160deg, ${color}88, #1c130b)">${initial(p.name)}</span>
+      <span class="avatar">${initial(p.name)}</span>
       <div class="player-info">
-        <span class="player-name" style="color:${color}">${escapeHtml(p.name)}${p.id === S.me.playerId ? ' (tú)' : ''}</span>
-        <span class="player-marbles-mini">${p.online ? '' : 'desconectado'}<i class="dot-online${p.online ? '' : ' is-off'}"></i></span>
+        <span class="player-name">${escapeHtml(p.name)}</span>
+        <span class="player-meta">${marbles} canicas</span>
       </div>
-      <div class="player-count">
-        <span class="count" style="color:${color}">${marbles}</span>
-        <span class="count-label">CANICAS</span>
-      </div>`;
+      ${p.id === st.currentId ? '<span class="turn-tag">TURNO</span>' : ''}`;
     list.appendChild(li);
   });
 }
@@ -538,9 +534,7 @@ function renderTurnPill(st) {
   $('turnNameTop').textContent = cur.name + (mine ? ' (tú)' : '');
   const av = $('turnAvatarTop');
   av.textContent = initial(cur.name);
-  const color = avatarColor(st, cur.id);
-  av.style.borderColor = color;
-  av.style.background = `linear-gradient(160deg, ${color}88, #1c130b)`;
+  av.style.setProperty('--p', playerColor(st, cur.id));
 }
 
 const RESULT_LABEL = { white: 'BLANCO', yellow: 'AMARILLO', blue: 'AZUL', green: 'VERDE', red: 'ROJO', black: 'NEGRO' };
@@ -655,13 +649,6 @@ function snapshotMarbles(st) {
 
 function applyState(st) {
   S.state = st;
-
-  if (window.GCBetModal) {
-    GCBetModal.render(st.betGate, S.me && S.me.playerId, {
-      onConfirm: () => api('betConfirm').catch((e) => showHomeError(e.message)),
-      onCancel: () => api('betCancel').catch(() => {})
-    });
-  }
 
   if (st.status === 'lobby') { renderLobby(st); showScreen('lobby'); return; }
 
@@ -858,9 +845,8 @@ function checkFinish(st) {
   [...st.players].sort((a, b) => a.marbles - b.marbles).forEach((p) => {
     const li = document.createElement('li');
     if (p.id === st.winnerId) li.classList.add('is-winner');
-    const color = avatarColor(st, p.id);
     li.innerHTML = `
-      <span class="avatar avatar-sm" style="border-color:${color};background:linear-gradient(160deg, ${color}88, #1c130b)">${initial(p.name)}</span>
+      <span class="avatar avatar-sm" style="--p:${playerColor(st, p.id)}">${initial(p.name)}</span>
       <span class="sc-name">${escapeHtml(p.name)}${p.id === S.me.playerId ? ' (tú)' : ''}</span>
       <span class="sc-val">${p.marbles} ${p.marbles === 1 ? 'canica' : 'canicas'}</span>`;
     scores.appendChild(li);
@@ -887,18 +873,14 @@ function renderLobby(st) {
   list.textContent = '';
   st.players.forEach((p) => {
     const li = document.createElement('li');
-    li.className = 'player';
-    const color = avatarColor(st, p.id);
+    li.className = 'player-row';
+    li.style.setProperty('--p', playerColor(st, p.id));
+    if (!p.online) li.classList.add('off');
+    if (p.id === S.me.playerId) li.setAttribute('data-me', '');
     li.innerHTML = `
-      <span class="avatar" style="border-color:${color};background:linear-gradient(160deg, ${color}88, #1c130b)">${initial(p.name)}</span>
-      <span class="player-id">
-        <strong>${escapeHtml(p.name)}</strong>
-        <span class="player-tags">
-          ${p.id === st.hostId ? '<span class="tag-host">anfitrión</span>' : ''}
-          ${p.id === S.me.playerId ? '<span class="tag-you">tú</span>' : ''}
-        </span>
-      </span>
-      <i class="dot-online${p.online ? '' : ' is-off'}"></i>`;
+      <span class="avatar">${initial(p.name)}</span>
+      <span class="player-info"><span class="player-name">${escapeHtml(p.name)}</span></span>
+      ${p.id === st.hostId ? '<span class="turn-tag">ANFITRIÓN</span>' : ''}`;
     list.appendChild(li);
   });
 
@@ -989,7 +971,9 @@ function wire() {
   $('btnRestart').addEventListener('click', () => {
     api('restart').catch((e) => toast(e.message, 'penalty'));
   });
-  $('btnLeaveEnd').addEventListener('click', () => leaveToHome());
+  $('btnLeaveEnd').addEventListener('click', () => {
+    api('leave').catch(() => {}).finally(() => { window.location.href = '/'; });
+  });
 
   $('btnSound').addEventListener('click', () => {
     const on = Sound.toggle();
@@ -1036,6 +1020,7 @@ async function boot() {
   if (!saved) { showScreen('home'); return; }
 
   S.me = saved;
+  $('screenHome').classList.add('is-hidden');
   try {
     await api('state');
     connect();

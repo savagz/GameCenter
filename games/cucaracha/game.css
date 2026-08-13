@@ -258,30 +258,6 @@
 }
 @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
 
-.tag-host{
-  margin-left:6px;
-  padding:2px 7px;
-  border-radius:20px;
-  font-size:.64rem;
-  font-weight:700;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:#2a1a06;
-  background:linear-gradient(180deg,#ffd97a,#d19a34);
-}
-.tag-you{
-  margin-left:6px;
-  padding:2px 7px;
-  border-radius:20px;
-  font-size:.64rem;
-  font-weight:700;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:#d7ffd0;
-  background:rgba(74,222,90,.18);
-  border:1px solid rgba(74,222,90,.5);
-}
-
 /* ============================================================
    Cabecera del tablero
    ============================================================ */
@@ -419,36 +395,6 @@
 }
 .roll-log li{animation:log-in .3s ease}
 @keyframes log-in{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
-
-/* ============================================================
-   Estados de jugador
-   ============================================================ */
-
-.dot-online.is-off{
-  background:#6b6255;
-  box-shadow:none;
-}
-.player.is-view{border-color:rgba(240,182,74,.28)}
-.player{cursor:pointer;transition:background .2s ease}
-.player:hover{background:rgba(240,182,74,.07)}
-
-.player-bar{
-  position:relative;
-  display:block;
-  height:4px;
-  margin-top:5px;
-  border-radius:3px;
-  background:rgba(255,255,255,.10);
-  overflow:hidden;
-}
-.player-bar i{
-  position:absolute;
-  inset:0 auto 0 0;
-  display:block;
-  border-radius:3px;
-  background:linear-gradient(90deg,#49c93f,#8ef07f);
-  transition:width .5s cubic-bezier(.2,.9,.3,1);
-}
 
 /* ============================================================
    Avisos flotantes
@@ -646,6 +592,14 @@
   .field-grid{grid-template-columns:1fr}
   .code-value{font-size:2rem}
   .turn-flash span{font-size:1.4rem;padding:12px 24px}
+}
+
+@media (hover:none){
+  .btn-main:active{filter:brightness(1.1)}
+  .btn-ghost:active{color:var(--gold);border-color:var(--gold)}
+  .btn-copy:active{background:rgba(240,182,74,.2)}
+  .owner-nav:active{background:rgba(240,182,74,.2)}
+  .player-row:active{background:rgba(240,182,74,.07)}
 }
 
 @media (prefers-reduced-motion:reduce){

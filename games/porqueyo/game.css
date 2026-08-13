@@ -240,51 +240,9 @@
 }
 @keyframes dots { to { width: 0; } }
 
-.player-list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.player-list .player {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-}
-.player-id { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.player-id strong { font-size: 14px; color: var(--text); }
-.player-tags { display: flex; gap: 6px; }
-.tag-host, .tag-you {
-  display: inline-block;
-  padding: 1px 7px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  border-radius: 999px;
-}
-.tag-host { color: #1a0f08; background: var(--gold); }
-.tag-you { color: var(--gold); background: rgba(242, 193, 78, .15); border: 1px solid var(--gold-dim); }
-
-.dot-online {
-  display: inline-block;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #4ade5a;
-  box-shadow: 0 0 6px rgba(74, 222, 90, .8);
-  margin-left: 6px;
-}
-.dot-online.is-off { background: #6a6055; box-shadow: none; }
-
 /* =========================================================
-   JUGADORES (pantalla de juego) — usa .players/.player de styles.css
+   JUGADORES — usa .players/.player-list/.player-row de styles.css
    ========================================================= */
-
-.player-marbles-mini {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--text-dim);
-}
 
 /* =========================================================
    PANEL "COMO JUGAR" — reutiliza .howto/.rules de styles.css
@@ -514,6 +472,12 @@
 @media (max-width: 620px) {
   .field-grid { grid-template-columns: 1fr; }
   .code-value { font-size: 24px; letter-spacing: 4px; }
+}
+
+@media (hover: none) {
+  .btn-main:active { filter: brightness(1.08); }
+  .btn-ghost:active { color: var(--gold); border-color: var(--gold-dim); }
+  .btn-copy:active { background: rgba(242, 193, 78, .22); }
 }
 
 @media (prefers-reduced-motion: reduce) {

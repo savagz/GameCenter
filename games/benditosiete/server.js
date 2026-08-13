@@ -1,7 +1,7 @@
 /* ============================================================
    BENDITO SIETE — router de juego (montado por GameCenter)
 
-   Expone createRouter({ Ledger, BetGate }) -> express.Router
+   Expone createRouter({ Ledger }) -> express.Router
      - GET  /                  -> game.html
      - GET  /events?...        -> stream SSE con el estado de la sala
      - POST /api/<accion>      -> acciones del jugador
@@ -9,14 +9,13 @@
    Standalone (fuera de GameCenter): node server.js  (ver bottom de archivo)
    ============================================================ */
 
-const path = require('path');
-const crypto = require('crypto');
 const express = require('express');
 const E = require('./engine.js');
+const RK = require('../../core/room-kit.js');
 
 const ROOT = __dirname;
 
-function createRouter({ Ledger, BetGate } = {}) {
+function createRouter({ Ledger } = {}) {
   const router = express.Router();
 
   /* ============================================================
@@ -25,29 +24,8 @@ function createRouter({ Ledger, BetGate } = {}) {
 
   const rooms = new Map();
 
-  const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; /* sin I,O,0,1 */
-
-  function roomCode() {
-    let code;
-    do {
-      code = Array.from({ length: 4 },
-        () => CODE_ALPHABET[crypto.randomInt(0, CODE_ALPHABET.length)]).join('');
-    } while (rooms.has(code));
-    return code;
-  }
-
-  const uid = () => crypto.randomBytes(9).toString('base64url');
-
-  function cleanName(raw, fallback) {
-    const name = String(raw || '').replace(/[<>]/g, '').trim().slice(0, 16);
-    return name || fallback;
-  }
-
-  function clampInt(v, min, max, def) {
-    const n = Math.floor(Number(v));
-    if (!Number.isFinite(n)) return def;
-    return Math.min(max, Math.max(min, n));
-  }
+  const roomCode = RK.makeRoomCode(rooms);
+  const { uid, cleanName, clampInt, findPlayer, currentPlayer, pushEvent, sseSend } = RK;
 
   /* ============================================================
      Sala
@@ -101,19 +79,6 @@ function createRouter({ Ledger, BetGate } = {}) {
     return player;
   }
 
-  function findPlayer(room, pid, token) {
-    const p = room.players.find((x) => x.id === pid);
-    if (!p || (token && p.token !== token)) return null;
-    return p;
-  }
-
-  const currentPlayer = (room) => room.players[room.turnIndex] || null;
-
-  function pushEvent(room, type, text) {
-    room.events.push({ id: ++room.eventSeq, type, text, ts: Date.now() });
-    if (room.events.length > 30) room.events.shift();
-  }
-
   /* siguiente indice de turno: prioriza jugadores conectados */
   function computeNextIndex(room) {
     const n = room.players.length;
@@ -132,11 +97,15 @@ function createRouter({ Ledger, BetGate } = {}) {
   function startGame(room) {
     room.status = 'playing';
     room.winnerId = null;
+    room.pot = 0;
 
     for (const p of room.players) {
       p.board = E.newBoard();
-      if (Ledger && room.config.bettingEnabled && room.config.apuesta) {
-        Ledger.recordEntry({ gameSlug: 'benditosiete', roomCode: room.id, playerId: p.id, playerName: p.name, amount: room.config.apuesta });
+      if (room.config.bettingEnabled && room.config.apuesta) {
+        room.pot += room.config.apuesta;
+        if (Ledger) {
+          Ledger.recordEntry({ gameSlug: 'benditosiete', roomCode: room.id, playerId: p.id, playerName: p.name, amount: room.config.apuesta });
+        }
       }
     }
 
@@ -195,8 +164,9 @@ function createRouter({ Ledger, BetGate } = {}) {
     room.status = 'finished';
     room.winnerId = winner.id;
     room.turn = null;
-    const prize = room.config.bettingEnabled ? room.config.apuesta * room.players.length : 0;
+    const prize = room.config.bettingEnabled ? room.pot : 0;
     room.lastPrize = prize;
+    room.pot = 0;
     if (Ledger && prize) {
       Ledger.recordWin({ gameSlug: 'benditosiete', roomCode: room.id, playerId: winner.id, playerName: winner.name, amount: prize, reason });
     }
@@ -230,11 +200,14 @@ function createRouter({ Ledger, BetGate } = {}) {
       t.log.push({ n: t.rollNo, dice, sum, result: 'final-fail' });
       t.phase = 'ending';
       t.finalPending = false;
-      if (Ledger && room.config.bettingEnabled && room.config.castigo) {
-        Ledger.recordPenalty({
-          gameSlug: 'benditosiete', roomCode: room.id,
-          playerId: player.id, playerName: player.name, amount: room.config.castigo, reason: 'sin-siete-final'
-        });
+      if (room.config.bettingEnabled && room.config.castigo) {
+        room.pot += room.config.castigo;
+        if (Ledger) {
+          Ledger.recordPenalty({
+            gameSlug: 'benditosiete', roomCode: room.id,
+            playerId: player.id, playerName: player.name, amount: room.config.castigo, reason: 'sin-siete-final'
+          });
+        }
       }
       pushEvent(room, 'penalty',
         `${player.name} lanzó ${sum} y no consiguió el 7. Pierde su oportunidad final.`);
@@ -246,11 +219,14 @@ function createRouter({ Ledger, BetGate } = {}) {
     if (sum === E.SEVEN) {
       t.log.push({ n: t.rollNo, dice, sum, result: 'seven' });
       t.phase = 'ending';
-      if (Ledger && room.config.bettingEnabled && room.config.castigo) {
-        Ledger.recordPenalty({
-          gameSlug: 'benditosiete', roomCode: room.id,
-          playerId: player.id, playerName: player.name, amount: room.config.castigo, reason: 'siete-antes-de-tiempo'
-        });
+      if (room.config.bettingEnabled && room.config.castigo) {
+        room.pot += room.config.castigo;
+        if (Ledger) {
+          Ledger.recordPenalty({
+            gameSlug: 'benditosiete', roomCode: room.id,
+            playerId: player.id, playerName: player.name, amount: room.config.castigo, reason: 'siete-antes-de-tiempo'
+          });
+        }
       }
       pushEvent(room, 'penalty', `${player.name} sacó 7. Su turno termina.`);
       scheduleEnd(room, 2200);
@@ -337,18 +313,13 @@ function createRouter({ Ledger, BetGate } = {}) {
         : null,
       events: room.events.slice(-10),
       total: E.TOTAL,
-      prize: room.status === 'finished' ? (room.lastPrize || 0) : 0,
-      betGate: BetGate ? BetGate.status('benditosiete', room.id) : null
+      prize: room.status === 'finished' ? (room.lastPrize || 0) : 0
     };
   }
 
   /* ============================================================
      SSE
      ============================================================ */
-
-  function sseSend(res, event, data) {
-    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
-  }
 
   function broadcast(room) {
     const state = publicState(room);
@@ -379,12 +350,18 @@ function createRouter({ Ledger, BetGate } = {}) {
     const close = () => {
       clearInterval(ping);
       player.streams.delete(res);
-      if (player.streams.size === 0) {
-        player.online = false;
-        player.offlineAt = Date.now();
-        pushEvent(room, 'info', `${player.name} se desconectó.`);
-        broadcast(room);
+      if (player.streams.size > 0) return;
+      player.online = false;
+      player.offlineAt = Date.now();
+
+      if (room.status === 'lobby') {
+        const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'benditosiete' });
+        if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        return;
       }
+
+      pushEvent(room, 'info', `${player.name} se desconectó.`);
+      broadcast(room);
     };
     res.on('close', close);
     res.on('error', close);
@@ -393,30 +370,8 @@ function createRouter({ Ledger, BetGate } = {}) {
     broadcast(room);
   }
 
-  /* si el jugador en turno lleva 25 s desconectado, se salta su turno */
-  setInterval(() => {
-    for (const room of rooms.values()) {
-      if (room.status !== 'playing') continue;
-      const cur = currentPlayer(room);
-      if (cur && cur.hasConnected && !cur.online && Date.now() - cur.offlineAt > 25000) {
-        pushEvent(room, 'info', `Se saltó el turno de ${cur.name} (desconectado).`);
-        nextTurn(room);
-        broadcast(room);
-      }
-    }
-  }, 5000);
-
-  /* limpieza de salas abandonadas (2 h sin nadie conectado) */
-  setInterval(() => {
-    const now = Date.now();
-    for (const [id, room] of rooms) {
-      const anyone = room.players.some((p) => p.online);
-      if (!anyone && now - room.createdAt > 2 * 3600 * 1000) {
-        rooms.delete(id);
-        if (Ledger) Ledger.disposeRoom('benditosiete', id);
-      }
-    }
-  }, 600000);
+  RK.scheduleSkipDisconnected(rooms, { nextTurn, broadcast });
+  RK.scheduleRoomCleanup(rooms, { gameSlug: 'benditosiete', Ledger });
 
   /* ---------- acciones ---------- */
 
@@ -433,7 +388,9 @@ function createRouter({ Ledger, BetGate } = {}) {
       if (!room) return err('No existe esa sala.');
       if (room.status !== 'lobby') return err('La partida ya comenzó.');
       if (room.players.length >= room.config.maxPlayers) return err('La sala está llena.');
-      const player = addPlayer(room, body.name);
+      const nameResult = RK.requireUniqueName(room, body.name);
+      if (nameResult.error) return err(nameResult.error);
+      const player = addPlayer(room, nameResult.name);
       pushEvent(room, 'info', `${player.name} se unió a la sala.`);
       broadcast(room);
       return ok({ roomId: room.id, playerId: player.id, token: player.token, state: publicState(room) });
@@ -451,39 +408,7 @@ function createRouter({ Ledger, BetGate } = {}) {
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede iniciar.'); break; }
         if (room.status === 'playing') { result = err('La partida ya está en curso.'); break; }
         if (room.players.length < 2) { result = err('Se necesitan al menos 2 jugadores.'); break; }
-        if (BetGate && room.config.bettingEnabled) {
-          BetGate.open('benditosiete', room.id, room.players.map((p) => p.id),
-            { amount: room.config.apuesta, penalty: room.config.castigo });
-          pushEvent(room, 'info', 'Confirma tu apuesta para comenzar.');
-        } else {
-          startGame(room);
-        }
-        result = ok();
-        break;
-
-      case 'betConfirm': {
-        if (!BetGate) { result = err('No disponible.'); break; }
-        const gate = BetGate.confirm('benditosiete', room.id, player.id);
-        if (gate && gate.allConfirmed) {
-          BetGate.close('benditosiete', room.id);
-          startGame(room);
-        }
-        result = ok();
-        break;
-      }
-
-      case 'betCancel':
-        if (BetGate) BetGate.cancel('benditosiete', room.id, player.id);
-        if (room.status === 'lobby') {
-          room.players = room.players.filter((p) => p !== player);
-          if (room.players.length === 0) {
-            rooms.delete(room.id);
-            if (Ledger) Ledger.disposeRoom('benditosiete', room.id);
-            return ok();
-          }
-          if (room.hostId === player.id) room.hostId = room.players[0].id;
-          pushEvent(room, 'info', `${player.name} canceló su apuesta y salió de la sala.`);
-        }
+        startGame(room);
         result = ok();
         break;
 
@@ -499,13 +424,7 @@ function createRouter({ Ledger, BetGate } = {}) {
 
       case 'leave':
         if (room.status === 'lobby') {
-          room.players = room.players.filter((p) => p !== player);
-          if (room.players.length === 0) {
-            rooms.delete(room.id);
-            if (Ledger) Ledger.disposeRoom('benditosiete', room.id);
-            return ok();
-          }
-          if (room.hostId === player.id) room.hostId = room.players[0].id;
+          if (RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'benditosiete' })) return ok();
           pushEvent(room, 'info', `${player.name} salió de la sala.`);
         }
         result = ok();
@@ -527,25 +446,13 @@ function createRouter({ Ledger, BetGate } = {}) {
      HTTP (Express)
      ============================================================ */
 
-  router.use(express.static(ROOT, { index: false }));
-  router.get('/', (req, res) => res.sendFile(path.join(ROOT, 'game.html')));
-
-  router.get('/events', (req, res) => {
-    const room = rooms.get(String(req.query.room || '').toUpperCase());
-    if (!room) { res.writeHead(404).end(); return; }
-    const player = findPlayer(room, req.query.pid, req.query.token);
-    if (!player) { res.writeHead(403).end(); return; }
-    attachStream(room, player, res);
-  });
-
-  router.post('/api/:action', express.json(), (req, res) => {
-    try {
-      const out = handleAction(req.params.action, req.body || {});
-      res.status(out.ok ? 200 : 400).json(out);
-    } catch (e) {
-      console.error('[benditosiete]', e);
-      res.status(500).json(err('Error interno del servidor.'));
-    }
+  RK.mountRoomRoutes(router, {
+    root: ROOT,
+    getRoom: (code) => rooms.get(code),
+    findPlayer,
+    attachStream,
+    handleAction,
+    label: 'benditosiete'
   });
 
   return router;

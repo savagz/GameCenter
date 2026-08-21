@@ -4,7 +4,7 @@
    ============================================================ */
 
 const crypto = require('crypto');
-const { ZONES, BLACK, FACES, BY_ID, TOTAL_SLOTS, newBoard } = require('./zones.js');
+const { ZONES, BLACK, FACES, BY_ID, newBoard } = require('./zones.js');
 
 const rollFace = () => FACES[crypto.randomInt(0, FACES.length)];
 
@@ -35,4 +35,4 @@ function resolveRoll(board, face) {
   return { type: 'steal', color: face, board: next, stolen: filled, cap: zone.cap };
 }
 
-module.exports = { ZONES, BLACK, FACES, BY_ID, TOTAL_SLOTS, newBoard, rollFace, resolveRoll };
+module.exports = { ZONES, BLACK, FACES, BY_ID, newBoard, rollFace, resolveRoll };

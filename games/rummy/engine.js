@@ -75,10 +75,6 @@ function validateMeld(tiles) {
   return best || { valid: false, points: 0 };
 }
 
-function validateBoard(melds) {
-  return melds.every((m) => validateMeld(m).valid);
-}
-
 /**
  * Valida una jugada de fin de turno.
  * @param {Object} params
@@ -155,7 +151,6 @@ module.exports = {
   createDeck,
   shuffle,
   validateMeld,
-  validateBoard,
   validateTurn,
   handPoints
 };

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1b12">
+<title>Toma 6 — Multijugador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/ui/turn-banner.css">
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+
+<!-- ============================================================
+     PANTALLA: INICIO (crear / unirse)
+     ============================================================ -->
+<div class="lobby-screen" id="screenHome">
+  <div class="panel">
+    <h1 class="logo">TOMA<span>6</span></h1>
+
+    <div class="lobby-cards" aria-hidden="true">
+      <div class="card demo c-normal"><span class="num">23</span><span class="stars">★</span></div>
+      <div class="card demo c-mid"><span class="num">45</span><span class="stars">★★</span></div>
+      <div class="card demo c-hot"><span class="num">55</span><span class="stars">★★★★★★★</span></div>
+    </div>
+
+    <label class="field">
+      <span>Tu nombre</span>
+      <input type="text" id="nameInput" maxlength="16" placeholder="Ej: Samuel">
+    </label>
+
+    <div class="field is-hidden" id="bettingInfo">
+      <span>Apuesta de GameCenter: <b id="bettingAmount">$0</b></span>
+    </div>
+
+    <label class="field">
+      <span>Jugadores máx.</span>
+      <select id="cfgMax">
+        <option>2</option><option>3</option><option>4</option><option>5</option>
+        <option selected>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+      </select>
+    </label>
+
+    <button class="btn btn-primary" type="button" id="btnCreate">Crear sala</button>
+
+    <div class="divider"><span>o únete a una</span></div>
+
+    <div class="join-row">
+      <input class="code-input" id="joinCode" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
+      <button class="btn" type="button" id="btnJoin">Unirse</button>
+    </div>
+
+    <p class="form-error is-hidden" id="homeError"></p>
+  </div>
+</div>
+
+<!-- ============================================================
+     PANTALLA: SALA DE ESPERA
+     ============================================================ -->
+<div class="lobby-screen is-hidden" id="screenLobby">
+  <div class="panel waiting">
+    <h1 class="logo">TOMA<span>6</span></h1>
+    <p class="room-code-label">Código de sala</p>
+    <div class="room-code" id="lobbyCode">----</div>
+    <p class="hint" id="lobbyHint">Comparte este código.</p>
+    <ul class="waiting-players" id="lobbyPlayers"></ul>
+    <button class="btn btn-primary" type="button" id="btnStart">Comenzar partida</button>
+    <p class="hint pulse is-hidden" id="lobbyWait">Esperando a que el anfitrión inicie…</p>
+    <button class="btn" type="button" id="btnLeaveLobby">Salir de la sala</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     JUEGO
+     ============================================================ -->
+<div class="game is-hidden" id="screenGame">
+  <header class="topbar">
+    <div class="brand">T<span>6</span></div>
+    <div class="players" id="playersRow"></div>
+    <div class="status">
+      <div class="round-box" title="Ronda">
+        <span id="roundLabel">0/10</span>
+      </div>
+      <div class="choose-count is-hidden" id="chooseCount" title="Jugadores que ya eligieron"></div>
+      <button class="btn-mute" type="button" id="btnExit" title="Salir" aria-label="Salir">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9.5v-6h5v6H17.5a1 1 0 0 0 1-1v-9"/>
+        </svg>
+      </button>
+      <button class="btn-mute" type="button" id="btnMute" title="Silenciar" aria-label="Silenciar">
+        <svg id="iconSoundOn" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/>
+        </svg>
+        <svg id="iconSoundOff" class="is-hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H3v6h3l5 4V5Z"/>
+          <path d="m17 9 5 6M22 9l-5 6"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="board">
+    <div class="board-inner" id="boardInner"></div>
+    <p class="phase-hint" id="phaseHint"></p>
+  </main>
+
+  <footer class="bottom">
+    <div class="hand-row" id="handRow"></div>
+    <button class="btn btn-primary btn-confirm" type="button" id="btnConfirm" disabled>Jugar carta</button>
+  </footer>
+</div>
+
+<!-- ============================================================
+     MODALES
+     ============================================================ -->
+<div class="overlay is-hidden" id="modalChooseRow">
+  <div class="panel gameover">
+    <h1>Tu carta es menor que todas</h1>
+    <p class="hint" id="chooseRowHint">Elige qué fila te llevas.</p>
+    <div class="row-picker" id="rowPicker"></div>
+  </div>
+</div>
+
+<div class="overlay is-hidden" id="modalGameOver">
+  <div class="panel gameover">
+    <svg class="trophy" viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4Z"/>
+      <path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/>
+    </svg>
+    <h1 id="goTitle">Fin de la partida</h1>
+    <p class="hint" id="goBody"></p>
+    <p class="hint is-hidden" id="goPrizeReason"></p>
+    <table class="scores"><tbody id="goScores"></tbody></table>
+    <div class="row">
+      <button class="btn btn-primary is-hidden" type="button" id="btnRestart">Jugar de nuevo</button>
+      <button class="btn" type="button" id="btnCloseGameOver">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay is-hidden" id="modalExit">
+  <div class="panel gameover">
+    <h1>¿Salir a inicio?</h1>
+    <p class="hint">Volverás a la página principal de GameCenter y dejarás la sala.</p>
+    <div class="row">
+      <button class="btn btn-primary" type="button" id="btnExitConfirm">Sí, salir</button>
+      <button class="btn" type="button" id="btnExitCancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div id="turnFlash" class="is-hidden"><span id="turnFlashText"></span></div>
+
+<script>window.GC_BASE = new URL('.', location.href).pathname;</script>
+<script src="/shared/ui/turn-banner.js"></script>
+<script src="/shared/ui/victory-banner.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

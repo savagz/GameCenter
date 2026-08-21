@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tapados — Multijugador</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="game.css">
+</head>
+<body>
+
+<!-- ============================================================
+     PANTALLA: INICIO (crear / unirse)
+     ============================================================ -->
+<div class="screen" id="screenHome">
+  <div class="screen-box">
+
+    <div class="logo-plate">
+      <svg class="logo-dice" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="2" y="2" width="36" height="36" rx="8" fill="#e8bd7d"/>
+        <rect x="2" y="2" width="36" height="36" rx="8" fill="none" stroke="#8a5f18" stroke-width="2"/>
+        <circle cx="13" cy="13" r="3.4" fill="#2a1a06"/>
+        <circle cx="27" cy="13" r="3.4" fill="#2a1a06"/>
+        <circle cx="20" cy="20" r="3.4" fill="#2a1a06"/>
+        <circle cx="13" cy="27" r="3.4" fill="#2a1a06"/>
+        <circle cx="27" cy="27" r="3.4" fill="#2a1a06"/>
+      </svg>
+      <h1 class="logo-title">TAPADOS</h1>
+      <span class="logo-flourish">&#10022;</span>
+    </div>
+
+    <div class="panel">
+      <div class="tabs">
+        <button class="tab is-on" type="button" data-tab="create">Crear sala</button>
+        <button class="tab" type="button" data-tab="join">Unirse</button>
+      </div>
+
+      <!-- crear -->
+      <form class="form" id="formCreate">
+        <label class="field">
+          <span>Tu nombre</span>
+          <input type="text" id="createName" maxlength="16" placeholder="Anfitrión" required>
+        </label>
+
+        <p class="form-note">Configuración inicial de la partida — la define quien crea la sala.</p>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>Jugadores máx.</span>
+            <select id="cfgMax">
+              <option>2</option><option>3</option><option selected>4</option>
+              <option>5</option><option>6</option>
+            </select>
+          </label>
+          <label class="field is-hidden" id="cfgApuestaWrap">
+            <span>Apuesta / CASE</span>
+            <input type="number" id="cfgApuesta" value="0" min="0" step="10" readonly>
+          </label>
+        </div>
+
+        <button class="btn-main" type="submit">Crear sala</button>
+      </form>
+
+      <!-- unirse -->
+      <form class="form is-hidden" id="formJoin">
+        <label class="field">
+          <span>Tu nombre</span>
+          <input type="text" id="joinName" maxlength="16" placeholder="Jugador" required>
+        </label>
+        <label class="field">
+          <span>Código de sala</span>
+          <input type="text" id="joinCode" maxlength="4" placeholder="ABCD"
+                 class="code-input" autocomplete="off" required>
+        </label>
+        <button class="btn-main" type="submit">Entrar a la sala</button>
+      </form>
+
+      <p class="form-error is-hidden" id="homeError"></p>
+    </div>
+
+    <p class="screen-foot">2 a 6 jugadores · 1 dado · tapa las 6 posiciones: <b>1·2·3·4·5·6</b></p>
+  </div>
+</div>
+
+<!-- ============================================================
+     PANTALLA: SALA DE ESPERA
+     ============================================================ -->
+<div class="screen is-hidden" id="screenLobby">
+  <div class="screen-box">
+    <div class="panel">
+      <header class="panel-head center"><h2>Sala de espera</h2></header>
+
+      <div class="code-box">
+        <span class="code-label">Código de sala</span>
+        <div class="code-row">
+          <strong class="code-value" id="lobbyCode">----</strong>
+          <button class="btn-copy" type="button" id="btnCopy">Copiar</button>
+        </div>
+        <span class="code-hint">Compártelo para que entren los demás jugadores.</span>
+      </div>
+
+      <dl class="stat-list" id="lobbyConfig"></dl>
+    </div>
+
+    <div class="panel">
+      <header class="panel-head">
+        <span class="panel-icon">&#128101;</span>
+        <h2>Jugadores</h2>
+        <span class="count-badge" id="lobbyCount">0/4</span>
+      </header>
+      <ul class="player-list" id="lobbyPlayers"></ul>
+      <button class="btn-main" type="button" id="btnStart">Iniciar partida</button>
+      <p class="waiting" id="lobbyWait">Esperando a que el anfitrión inicie la partida…</p>
+      <button class="btn-ghost" type="button" id="btnLeaveLobby">Salir de la sala</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     JUEGO
+     ============================================================ -->
+<div class="app is-hidden" id="screenGame">
+
+  <!-- ---------- columna izquierda ---------- -->
+  <aside class="col col-left">
+
+    <div class="logo-plate">
+      <svg class="logo-dice" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="2" y="2" width="36" height="36" rx="8" fill="#e8bd7d"/>
+        <rect x="2" y="2" width="36" height="36" rx="8" fill="none" stroke="#8a5f18" stroke-width="2"/>
+        <circle cx="13" cy="13" r="3.4" fill="#2a1a06"/>
+        <circle cx="27" cy="13" r="3.4" fill="#2a1a06"/>
+        <circle cx="20" cy="20" r="3.4" fill="#2a1a06"/>
+        <circle cx="13" cy="27" r="3.4" fill="#2a1a06"/>
+        <circle cx="27" cy="27" r="3.4" fill="#2a1a06"/>
+      </svg>
+      <h1 class="logo-title">TAPADOS</h1>
+      <span class="logo-flourish">&#10022;</span>
+    </div>
+
+    <section class="panel">
+      <header class="panel-head">
+        <span class="panel-icon">&#9788;</span>
+        <h2>Información del juego</h2>
+        <button class="chip-info" type="button" id="btnRules" title="Reglas">i</button>
+      </header>
+      <dl class="stat-list">
+        <div class="stat-row"><dt>Sala</dt><dd id="infoRoom">----</dd></div>
+        <div class="stat-row"><dt>Jugadores</dt><dd id="infoPlayers">0 / 4</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <header class="panel-head">
+        <span class="panel-icon">&#128101;</span>
+        <h2>Jugadores</h2>
+      </header>
+      <ul class="player-list" id="playerList"></ul>
+    </section>
+  </aside>
+
+  <!-- ---------- columna central ---------- -->
+  <main class="col col-center">
+
+    <div class="turn-bar">
+      <span class="avatar avatar-lg" id="turnAvatar">?</span>
+      <div class="turn-text">
+        <span class="turn-label">Turno actual</span>
+        <span class="turn-name" id="turnName">—</span>
+      </div>
+      <span class="turn-die" aria-hidden="true">
+        <span class="die die-mini f1" id="turnDie"><i></i></span>
+      </span>
+    </div>
+
+    <div class="board-owner">
+      <button class="owner-nav" type="button" id="btnPrevBoard" aria-label="Tablero anterior">&#8249;</button>
+      <span class="owner-name" id="boardOwner">Tu tablero</span>
+      <span class="owner-progress" id="boardProgress">0 / 6</span>
+      <button class="owner-nav" type="button" id="btnNextBoard" aria-label="Tablero siguiente">&#8250;</button>
+    </div>
+
+    <div class="board-frame" id="boardFrame">
+      <div class="board-inner">
+        <div class="board-wood">
+          <div class="board-seam" aria-hidden="true"></div>
+          <div class="board-grid" id="boardGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><i class="lg"></i>Destapado</span>
+      <span class="legend-item"><i class="lg lg-fill"></i>Tapado</span>
+    </div>
+  </main>
+
+  <!-- ---------- columna derecha ---------- -->
+  <aside class="col col-right">
+
+    <div class="topbar">
+      <button class="icon-btn" type="button" id="btnSound" aria-label="Sonido" title="Sonido">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none"/>
+          <path class="wave" d="M16.5 8.5a5 5 0 0 1 0 7"/>
+          <path class="wave" d="M19.3 6a8.5 8.5 0 0 1 0 12"/>
+        </svg>
+      </button>
+      <button class="icon-btn" type="button" id="btnFull" aria-label="Pantalla completa" title="Pantalla completa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 4H4v5"/><path d="M15 4h5v5"/><path d="M9 20H4v-5"/><path d="M15 20h5v-5"/>
+        </svg>
+      </button>
+      <button class="icon-btn" type="button" id="btnExit" aria-label="Regresar a página inicial" title="Regresar a página inicial">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9.5v-6h5v6H17.5a1 1 0 0 0 1-1v-9"/>
+        </svg>
+      </button>
+    </div>
+
+    <section class="panel panel-dice">
+      <header class="panel-head">
+        <span class="panel-icon">&#127922;</span>
+        <h2>Tu dado</h2>
+      </header>
+
+      <div class="dice-tray" id="diceTray"></div>
+
+      <p class="dice-caption" id="diceCaption">Esperando el primer lanzamiento</p>
+      <p class="hint" id="hintText"><span class="chip-info sm">i</span> El número que salga se tapa si estaba libre, o se destapa si ya lo tenías tapado.</p>
+    </section>
+
+    <section class="panel panel-roll">
+      <header class="panel-head center"><h2>Lanzar dado</h2></header>
+
+      <div class="roll-box">
+        <button class="btn-roll" type="button" id="btnRoll">
+          <span class="die die-mini dark f1" id="btnDie"><i></i></span>
+          <span class="btn-roll-label" id="btnRollLabel">LANZAR</span>
+        </button>
+      </div>
+
+      <p class="roll-sub" id="rollSub">Esperando…</p>
+    </section>
+
+    <section class="panel">
+      <header class="panel-head center"><h2>Lanzamiento del turno</h2></header>
+      <ul class="roll-log" id="rollLog">
+        <li class="log-empty">Aún no hay lanzamientos.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <header class="panel-head">
+        <span class="panel-icon">&#9889;</span>
+        <h2>Último evento</h2>
+      </header>
+      <p class="event-text" id="eventText">La partida acaba de comenzar.</p>
+      <p class="event-time" id="eventTime">Ahora</p>
+    </section>
+
+  </aside>
+</div>
+
+<!-- ============================================================
+     MODALES Y AVISOS
+     ============================================================ -->
+<div class="modal is-hidden" id="modalWin">
+  <div class="modal-box">
+    <div class="crown">&#127942;</div>
+    <h2 class="modal-title" id="winTitle">¡Tapados!</h2>
+    <p class="modal-text" id="winText"></p>
+    <ul class="score-list" id="winScores"></ul>
+    <div class="modal-actions">
+      <button class="btn-main" type="button" id="btnRestart">Nueva partida</button>
+      <button class="btn-ghost" type="button" id="btnLeaveEnd">Salir</button>
+    </div>
+    <p class="modal-wait is-hidden" id="winWait">Esperando al anfitrión…</p>
+  </div>
+</div>
+
+<div class="modal is-hidden" id="modalExit">
+  <div class="modal-box">
+    <h2 class="modal-title">¿Salir a inicio?</h2>
+    <p class="modal-text">Volverás a la página principal de GameCenter y dejarás la sala.</p>
+    <div class="modal-actions">
+      <button class="btn-main" type="button" id="btnExitConfirm">Sí, salir</button>
+      <button class="btn-ghost" type="button" id="btnExitCancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal is-hidden" id="modalRules">
+  <div class="modal-box modal-wide">
+    <h2 class="modal-title">Cómo se juega</h2>
+    <ul class="rules-list">
+      <li>Tu tablero tiene 6 posiciones: <b>1·2·3·4·5·6</b>, una por cada cara del dado.</li>
+      <li>En tu turno lanzas <b>un solo dado</b>, una sola vez.</li>
+      <li>Si la posición obtenida está destapada, la <b>tapas</b>.</li>
+      <li>Si la posición ya estaba tapada, la <b>destapas</b>.</li>
+      <li>Tu turno termina de inmediato tras ese lanzamiento, sin importar el resultado.</li>
+      <li>Ganas al instante si consigues tener <b>las 6 posiciones tapadas a la vez</b> al terminar tu turno.</li>
+    </ul>
+    <button class="btn-main" type="button" id="btnCloseRules">Entendido</button>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="turn-flash is-hidden" id="turnFlash"><span id="turnFlashText"></span></div>
+
+<script>window.GC_BASE = new URL('.', location.href).pathname;</script>
+<script src="/shared/ui/turn-banner.js"></script>
+<script src="/shared/ui/victory-banner.js"></script>
+<script src="board.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

@@ -212,14 +212,6 @@ input:focus {
 }
 .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: currentColor; }
 
-.version-tag {
-  margin-top: 14px;
-  text-align: center;
-  font-size: 0.72rem;
-  opacity: 0.4;
-  letter-spacing: 0.04em;
-}
-
 .join-row { display: flex; gap: 10px; }
 .code-input {
   flex: 1;

@@ -457,17 +457,6 @@ body{
 
 .roll-box{display:flex;align-items:stretch;gap:8px}
 
-.nav-arrow{
-  width:34px;
-  border-radius:10px;
-  background:linear-gradient(180deg,#2b1a09,#150c04);
-  border:1px solid rgba(240,182,74,.22);
-  color:var(--gold);
-  font-size:1.4rem;line-height:1;
-  cursor:pointer;
-}
-.nav-arrow:hover{background:rgba(240,182,74,.14)}
-
 .btn-roll{
   flex:1;
   display:flex;align-items:center;justify-content:center;gap:12px;

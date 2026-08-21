@@ -35,20 +35,17 @@
 
   /* ---------- configuración general (apuestas + defaults por juego) ---------- */
 
-  const SLUGS = ['rummy', 'cucaracha', 'benditosiete', 'porqueyo'];
+  const SLUGS = ['rummy', 'cucaracha', 'benditosiete', 'porqueyo', 'tapados', 'tomaseis'];
   const SETTINGS_KEY = 'gc_settings';
 
   const DEFAULT_SETTINGS = {
-    betting: {
-      rummy:        { enabled: false, bet: 500 },
-      cucaracha:    { enabled: false, bet: 500, penalty: 100 },
-      benditosiete: { enabled: false, bet: 500, penalty: 100 },
-      porqueyo:     { enabled: false, bet: 500 }
-    },
+    betting: { enabled: false, bet: 500, penalty: 100 },
     rummy:        { turnSeconds: 120 },
     cucaracha:    { maxPlayers: 6 },
     benditosiete: { maxPlayers: 4, lances: 3 },
-    porqueyo:     { maxPlayers: 6, startMarbles: 10 }
+    porqueyo:     { maxPlayers: 6, startMarbles: 10 },
+    tapados:      { maxPlayers: 4 },
+    tomaseis:     { maxPlayers: 6 }
   };
 
   function clampInt(v, min, max, def) {
@@ -62,7 +59,9 @@
     try { saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); } catch (_) { saved = null; }
     const s = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     if (saved && saved.betting) {
-      SLUGS.forEach((slug) => Object.assign(s.betting[slug], saved.betting[slug] || {}));
+      if (typeof saved.betting.enabled === 'boolean') s.betting.enabled = saved.betting.enabled;
+      if (typeof saved.betting.bet === 'number') s.betting.bet = saved.betting.bet;
+      if (typeof saved.betting.penalty === 'number') s.betting.penalty = saved.betting.penalty;
     }
     SLUGS.forEach((slug) => { if (saved && saved[slug]) Object.assign(s[slug], saved[slug]); });
     return s;
@@ -72,18 +71,17 @@
 
   function populateSettingsForm() {
     const s = loadSettings();
-    SLUGS.forEach((slug) => {
-      const bet = s.betting[slug];
-      $('bet-' + slug + '-enabled').checked = bet.enabled;
-      $('bet-' + slug + '-fields').classList.toggle('is-visible', bet.enabled);
-      $('bet-' + slug + '-amount').value = bet.bet;
-      if (slug === 'cucaracha' || slug === 'benditosiete') $('bet-' + slug + '-penalty').value = bet.penalty;
-    });
+    $('bet-enabled').checked = s.betting.enabled;
+    $('bet-fields').classList.toggle('is-visible', s.betting.enabled);
+    $('bet-amount').value = s.betting.bet;
+    $('bet-penalty').value = s.betting.penalty;
     $('cuc-maxplayers').value = s.cucaracha.maxPlayers;
     $('bs-maxplayers').value = s.benditosiete.maxPlayers;
     $('bs-lances').value = s.benditosiete.lances;
     $('pq-maxplayers').value = s.porqueyo.maxPlayers;
     $('pq-marbles').value = s.porqueyo.startMarbles;
+    $('tp-maxplayers').value = s.tapados.maxPlayers;
+    $('t6-maxplayers').value = s.tomaseis.maxPlayers;
 
     $('rummyLevelPicker').querySelectorAll('.level-opt').forEach((btn) => {
       const on = Number(btn.dataset.seconds) === s.rummy.turnSeconds;
@@ -94,18 +92,16 @@
 
   function persistSettingsFromForm() {
     const s = loadSettings();
-    SLUGS.forEach((slug) => {
-      s.betting[slug].enabled = $('bet-' + slug + '-enabled').checked;
-      s.betting[slug].bet = clampInt($('bet-' + slug + '-amount').value, 0, 1e7, s.betting[slug].bet);
-      if (slug === 'cucaracha' || slug === 'benditosiete') {
-        s.betting[slug].penalty = clampInt($('bet-' + slug + '-penalty').value, 0, 1e7, s.betting[slug].penalty);
-      }
-    });
+    s.betting.enabled = $('bet-enabled').checked;
+    s.betting.bet = clampInt($('bet-amount').value, 0, 1e7, s.betting.bet);
+    s.betting.penalty = clampInt($('bet-penalty').value, 0, 1e7, s.betting.penalty);
     s.cucaracha.maxPlayers = clampInt($('cuc-maxplayers').value, 2, 6, s.cucaracha.maxPlayers);
     s.benditosiete.maxPlayers = clampInt($('bs-maxplayers').value, 2, 8, s.benditosiete.maxPlayers);
     s.benditosiete.lances = clampInt($('bs-lances').value, 1, 10, s.benditosiete.lances);
     s.porqueyo.maxPlayers = clampInt($('pq-maxplayers').value, 2, 8, s.porqueyo.maxPlayers);
     s.porqueyo.startMarbles = clampInt($('pq-marbles').value, 3, 30, s.porqueyo.startMarbles);
+    s.tapados.maxPlayers = clampInt($('tp-maxplayers').value, 2, 6, s.tapados.maxPlayers);
+    s.tomaseis.maxPlayers = clampInt($('t6-maxplayers').value, 2, 10, s.tomaseis.maxPlayers);
     const selectedLevel = $('rummyLevelPicker').querySelector('.level-opt.selected');
     s.rummy.turnSeconds = selectedLevel ? Number(selectedLevel.dataset.seconds) : s.rummy.turnSeconds;
     saveSettings(s);
@@ -113,7 +109,7 @@
 
   function buildConfig(slug) {
     const s = loadSettings();
-    const bet = s.betting[slug];
+    const bet = s.betting;
     if (slug === 'rummy') {
       return { turnSeconds: s.rummy.turnSeconds, bettingEnabled: bet.enabled, apuesta: bet.enabled ? bet.bet : 0 };
     }
@@ -134,9 +130,23 @@
         castigo: bet.enabled ? bet.penalty : 0
       };
     }
+    if (slug === 'porqueyo') {
+      return {
+        maxPlayers: s.porqueyo.maxPlayers,
+        startMarbles: s.porqueyo.startMarbles,
+        bettingEnabled: bet.enabled,
+        apuesta: bet.enabled ? bet.bet : 0
+      };
+    }
+    if (slug === 'tapados') {
+      return {
+        maxPlayers: s.tapados.maxPlayers,
+        bettingEnabled: bet.enabled,
+        apuesta: bet.enabled ? bet.bet : 0
+      };
+    }
     return {
-      maxPlayers: s.porqueyo.maxPlayers,
-      startMarbles: s.porqueyo.startMarbles,
+      maxPlayers: s.tomaseis.maxPlayers,
       bettingEnabled: bet.enabled,
       apuesta: bet.enabled ? bet.bet : 0
     };
@@ -148,11 +158,9 @@
   });
   $('settingsClose').addEventListener('click', () => $('settingsModal').classList.remove('is-open'));
 
-  SLUGS.forEach((slug) => {
-    $('bet-' + slug + '-enabled').addEventListener('change', () => {
-      $('bet-' + slug + '-fields').classList.toggle('is-visible', $('bet-' + slug + '-enabled').checked);
-      persistSettingsFromForm();
-    });
+  $('bet-enabled').addEventListener('change', () => {
+    $('bet-fields').classList.toggle('is-visible', $('bet-enabled').checked);
+    persistSettingsFromForm();
   });
 
   $('settingsModal').querySelectorAll('input[type="number"]').forEach((input) => {
@@ -175,14 +183,18 @@
     rummy: 'rummy:session',
     cucaracha: 'cucaracha:session',
     benditosiete: 'bendito7:session',
-    porqueyo: 'porqueyo:session'
+    porqueyo: 'porqueyo:session',
+    tapados: 'tapados:session',
+    tomaseis: 'tomaseis:session'
   };
 
   const GAME_NAMES = {
     rummy: 'RUMMY',
     cucaracha: 'CUCARACHA II',
     benditosiete: 'BENDITO 7',
-    porqueyo: '¿POR QUÉ SIEMPRE YO?'
+    porqueyo: '¿POR QUÉ SIEMPRE YO?',
+    tapados: 'TAPADOS',
+    tomaseis: 'TOMA 6'
   };
 
   function toast(msg) {

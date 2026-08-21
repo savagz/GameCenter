@@ -11,6 +11,8 @@ const cucaracha = require('./games/cucaracha/server.js');
 const porqueyo = require('./games/porqueyo/server.js');
 const benditosiete = require('./games/benditosiete/server.js');
 const rummy = require('./games/rummy/server.js');
+const tapados = require('./games/tapados/server.js');
+const tomaseis = require('./games/tomaseis/server.js');
 const Ledger = require('./core/ledger.js');
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -24,6 +26,8 @@ app.use('/games/cucaracha', cucaracha.createRouter(deps));
 app.use('/games/porqueyo', porqueyo.createRouter(deps));
 app.use('/games/benditosiete', benditosiete.createRouter(deps));
 app.use('/games/rummy', rummy.createRouter(deps));
+app.use('/games/tapados', tapados.createRouter(deps));
+app.use('/games/tomaseis', tomaseis.createRouter(deps));
 
 app.use('/shared', express.static(path.join(__dirname, 'shared')));
 app.use(express.static(path.join(__dirname, 'public')));

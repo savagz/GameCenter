@@ -6,7 +6,7 @@
 (function () {
 'use strict';
 
-const { ZONES, BLACK, BY_ID } = window.PorqueyoZones;
+const { ZONES, BLACK } = window.PorqueyoZones;
 const $ = (id) => document.getElementById(id);
 
 /* nombre y apuesta llegan de GameCenter por query string (?name=&betting=&bet=) */

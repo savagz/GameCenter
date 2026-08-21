@@ -531,7 +531,6 @@
   background:rgba(240,182,74,.12);
 }
 .score-list .sc-name{flex:1;color:var(--cream);font-weight:600}
-.score-list .sc-val{font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
 
 .modal-actions{display:flex;flex-direction:column;gap:2px;margin-top:16px}
 .modal-wait{margin-top:12px;font-size:.84rem;color:var(--text-dim)}

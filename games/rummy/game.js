@@ -767,7 +767,7 @@ function applyState(st) {
   if (!myTurn || isNewTurn) {
     S.board = st.board.map((tiles) => ({ id: uid(), tiles: tiles.slice() }));
     S.placed = new Set();
-    S.liveBoard = null;
+    if (isNewTurn) S.liveBoard = null;
     if (myTurn) S.snapshot = { board: st.board.map((tiles) => tiles.slice()), hand: st.hand.slice() };
   }
 
@@ -910,7 +910,10 @@ function wire() {
   $('btnDraw').addEventListener('click', draw);
   $('btnEndTurn').addEventListener('click', endTurn);
 
-  $('btnCloseGameOver').addEventListener('click', () => $('modalGameOver').classList.add('is-hidden'));
+  $('btnCloseGameOver').addEventListener('click', () => {
+    $('modalGameOver').classList.add('is-hidden');
+    api('leave').catch(() => {}).finally(() => { window.location.href = '/'; });
+  });
   $('btnRestart').addEventListener('click', () => {
     api('restart').catch((e) => toast(e.message, 'error'));
     $('modalGameOver').classList.add('is-hidden');

@@ -22,7 +22,6 @@
 
   const FACES = ZONES.map((z) => z.id).concat(BLACK.id); /* 6 caras del dado */
   const BY_ID = ZONES.reduce((m, z) => (m[z.id] = z, m), {});
-  const TOTAL_SLOTS = ZONES.reduce((n, z) => n + z.cap, 0); /* 15 */
 
   function newBoard() {
     const b = {};
@@ -30,5 +29,5 @@
     return b;
   }
 
-  return { ZONES, BLACK, FACES, BY_ID, TOTAL_SLOTS, newBoard };
+  return { ZONES, BLACK, FACES, BY_ID, newBoard };
 });

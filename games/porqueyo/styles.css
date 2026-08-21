@@ -27,12 +27,8 @@
   --p6: #3fb6ae;
 
   /* colores de juego */
-  --c-white: #f0e6d2;
   --c-yellow: #f0b323;
   --c-blue: #2f7fd1;
-  --c-green: #5f9b32;
-  --c-red: #c0392b;
-  --c-black: #14100d;
 
   /* tipografía / acento */
   --gold: #f2c14e;
@@ -546,32 +542,6 @@ body {
 }
 
 /* =========================================================
-   HISTORIAL
-   ========================================================= */
-
-.history-btn {
-  align-self: flex-end;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin-top: 10px;
-  padding: 12px 20px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  color: var(--text-dim);
-  cursor: pointer;
-  border-radius: var(--radius);
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  box-shadow: inset 0 1px 0 rgba(255, 220, 150, .07), 0 5px 14px rgba(0, 0, 0, .45);
-  transition: color .18s, border-color .18s, transform .12s;
-}
-.history-btn:hover { color: var(--gold); border-color: var(--gold-dim); transform: translateY(-1px); }
-.history-btn .ico { width: 19px; height: 19px; fill: currentColor; }
-
-/* =========================================================
    RESPONSIVE
    ========================================================= */
 
@@ -594,7 +564,6 @@ body {
   .dice-panel { order: 1; }
   .throw-area { order: 2; }
   .result-panel { order: 3; }
-  .history-btn { align-self: center; }
   .board { --board: clamp(260px, 60vw, 420px); }
 }
 

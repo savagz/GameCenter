@@ -97,6 +97,34 @@
         </div>
       </article>
 
+      <article class="game-card" data-game="tapados" style="--accent:#7a4fb0" tabindex="0">
+        <span class="selected-flag"><span class="dot"></span>Seleccionado</span>
+        <div class="badge">🔲</div>
+        <h2 class="game-title">TAPADOS</h2>
+        <p class="game-desc">Lanza el dado y tapa las 6 posiciones antes que nadie.</p>
+        <ul class="chips">
+          <li>2–6 jugadores</li><li>~10 min</li><li>Apuesta opcional</li>
+        </ul>
+        <div class="game-actions">
+          <button class="enter-btn" data-action="create" data-game="tapados">CREAR SALA</button>
+          <button class="enter-btn" data-action="join" data-game="tapados">UNIRSE</button>
+        </div>
+      </article>
+
+      <article class="game-card" data-game="tomaseis" style="--accent:#c6392f" tabindex="0">
+        <span class="selected-flag"><span class="dot"></span>Seleccionado</span>
+        <div class="badge">🐴</div>
+        <h2 class="game-title">TOMA 6</h2>
+        <p class="game-desc">Elige carta a la vez que todos y evita cargarte de estrellas.</p>
+        <ul class="chips">
+          <li>2–10 jugadores</li><li>~20 min</li><li>Apuesta opcional</li>
+        </ul>
+        <div class="game-actions">
+          <button class="enter-btn" data-action="create" data-game="tomaseis">CREAR SALA</button>
+          <button class="enter-btn" data-action="join" data-game="tomaseis">UNIRSE</button>
+        </div>
+      </article>
+
     </div>
 
     <div class="carousel-dots" id="carouselDots">
@@ -104,6 +132,8 @@
       <button aria-label="Ir a Cucaracha II"></button>
       <button aria-label="Ir a Bendito 7"></button>
       <button aria-label="Ir a ¿Por qué siempre yo?"></button>
+      <button aria-label="Ir a Tapados"></button>
+      <button aria-label="Ir a Toma 6"></button>
     </div>
     <p class="swipe-hint">← desliza para ver las mesas →</p>
   </main>
@@ -129,24 +159,39 @@
       <h3>Configuración</h3>
 
       <div class="settings-section">
-        <h4>Rummy</h4>
+        <h4>Apuesta</h4>
+        <p class="gc-sub">Se aplica igual en las cuatro mesas.</p>
         <div class="config-row">
-          <label for="bet-rummy-enabled">Activar apuesta</label>
+          <label for="bet-enabled">Activar apuesta</label>
           <span class="switch">
-            <input type="checkbox" id="bet-rummy-enabled" data-game="rummy">
+            <input type="checkbox" id="bet-enabled">
             <span class="switch-track"></span>
           </span>
         </div>
-        <div class="amount-fields" id="bet-rummy-fields">
-          <div class="amount-field">
-            <label for="bet-rummy-amount">Monto de apuesta</label>
-            <div class="input-money">
-              <span>$</span>
-              <input type="number" id="bet-rummy-amount" min="0" step="1">
+        <div class="amount-fields" id="bet-fields">
+          <div class="field-grid">
+            <div class="amount-field">
+              <label for="bet-amount">Monto de apuesta</label>
+              <div class="input-money">
+                <span>$</span>
+                <input type="number" id="bet-amount" min="0" step="1">
+              </div>
+            </div>
+            <div class="amount-field">
+              <label for="bet-penalty">Multa / castigo</label>
+              <div class="input-money">
+                <span>$</span>
+                <input type="number" id="bet-penalty" min="0" step="1">
+              </div>
             </div>
           </div>
+          <p class="gc-sub">La multa solo aplica en Cucaracha II y Bendito 7.</p>
         </div>
-        <div class="num-field" style="margin-top:10px;">
+      </div>
+
+      <div class="settings-section">
+        <h4>Rummy</h4>
+        <div class="num-field">
           <label>Nivel de juego por defecto</label>
           <div class="level-picker" id="rummyLevelPicker" role="radiogroup" aria-label="Nivel de juego">
             <button type="button" class="level-opt" data-seconds="120" role="radio" aria-checked="false">
@@ -164,32 +209,7 @@
 
       <div class="settings-section">
         <h4>Cucaracha II</h4>
-        <div class="config-row">
-          <label for="bet-cucaracha-enabled">Activar apuesta</label>
-          <span class="switch">
-            <input type="checkbox" id="bet-cucaracha-enabled" data-game="cucaracha">
-            <span class="switch-track"></span>
-          </span>
-        </div>
-        <div class="amount-fields" id="bet-cucaracha-fields">
-          <div class="field-grid">
-            <div class="amount-field">
-              <label for="bet-cucaracha-amount">Monto de apuesta</label>
-              <div class="input-money">
-                <span>$</span>
-                <input type="number" id="bet-cucaracha-amount" min="0" step="1">
-              </div>
-            </div>
-            <div class="amount-field">
-              <label for="bet-cucaracha-penalty">Multa / castigo</label>
-              <div class="input-money">
-                <span>$</span>
-                <input type="number" id="bet-cucaracha-penalty" min="0" step="1">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="num-field" style="margin-top:10px;">
+        <div class="num-field">
           <label for="cuc-maxplayers">Jugadores máx. (2-6)</label>
           <input type="number" id="cuc-maxplayers" min="2" max="6" step="1">
         </div>
@@ -197,32 +217,7 @@
 
       <div class="settings-section">
         <h4>Bendito 7</h4>
-        <div class="config-row">
-          <label for="bet-benditosiete-enabled">Activar apuesta</label>
-          <span class="switch">
-            <input type="checkbox" id="bet-benditosiete-enabled" data-game="benditosiete">
-            <span class="switch-track"></span>
-          </span>
-        </div>
-        <div class="amount-fields" id="bet-benditosiete-fields">
-          <div class="field-grid">
-            <div class="amount-field">
-              <label for="bet-benditosiete-amount">Monto de apuesta</label>
-              <div class="input-money">
-                <span>$</span>
-                <input type="number" id="bet-benditosiete-amount" min="0" step="1">
-              </div>
-            </div>
-            <div class="amount-field">
-              <label for="bet-benditosiete-penalty">Multa / castigo</label>
-              <div class="input-money">
-                <span>$</span>
-                <input type="number" id="bet-benditosiete-penalty" min="0" step="1">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="field-grid" style="margin-top:10px;">
+        <div class="field-grid">
           <div class="num-field">
             <label for="bs-maxplayers">Jugadores máx. (2-8)</label>
             <input type="number" id="bs-maxplayers" min="2" max="8" step="1">
@@ -236,23 +231,7 @@
 
       <div class="settings-section">
         <h4>¿Por qué siempre yo?</h4>
-        <div class="config-row">
-          <label for="bet-porqueyo-enabled">Activar apuesta</label>
-          <span class="switch">
-            <input type="checkbox" id="bet-porqueyo-enabled" data-game="porqueyo">
-            <span class="switch-track"></span>
-          </span>
-        </div>
-        <div class="amount-fields" id="bet-porqueyo-fields">
-          <div class="amount-field">
-            <label for="bet-porqueyo-amount">Monto de apuesta</label>
-            <div class="input-money">
-              <span>$</span>
-              <input type="number" id="bet-porqueyo-amount" min="0" step="1">
-            </div>
-          </div>
-        </div>
-        <div class="field-grid" style="margin-top:10px;">
+        <div class="field-grid">
           <div class="num-field">
             <label for="pq-maxplayers">Jugadores máx. (2-8)</label>
             <input type="number" id="pq-maxplayers" min="2" max="8" step="1">
@@ -261,6 +240,22 @@
             <label for="pq-marbles">Canicas iniciales (3-30)</label>
             <input type="number" id="pq-marbles" min="3" max="30" step="1">
           </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>Tapados</h4>
+        <div class="num-field">
+          <label for="tp-maxplayers">Jugadores máx. (2-6)</label>
+          <input type="number" id="tp-maxplayers" min="2" max="6" step="1">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>Toma 6</h4>
+        <div class="num-field">
+          <label for="t6-maxplayers">Jugadores máx. (2-10)</label>
+          <input type="number" id="t6-maxplayers" min="2" max="10" step="1">
         </div>
       </div>
 

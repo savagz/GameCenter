@@ -83,7 +83,6 @@ module.exports = {
   TOTAL,
   FINAL_SLOT,
   BY_ID,
-  SLOTS,
   rollDice,
   analyzeRoll,
   newBoard,

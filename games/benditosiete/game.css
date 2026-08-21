@@ -418,8 +418,7 @@
 @keyframes toast-out{to{opacity:0;transform:translateY(-10px)}}
 
 .toast.t-penalty{border-color:rgba(239,91,76,.6);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 22px rgba(239,91,76,.25)}
-.toast.t-jackpot,
-.toast.t-cover{border-color:rgba(74,222,90,.6);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 22px rgba(74,222,90,.25)}
+.toast.t-jackpot{border-color:rgba(74,222,90,.6);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 22px rgba(74,222,90,.25)}
 .toast.t-win{border-color:var(--gold);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 26px rgba(240,182,74,.4)}
 
 /* cartel de cambio de turno */

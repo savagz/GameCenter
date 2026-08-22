@@ -774,3 +774,130 @@ input:focus {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   INDUSTRIAL BRUTALIST OVERRIDE — pantallas de crear / unirse
+   Solo afecta .lobby-screen (inicio + sala de espera). El
+   tablero de juego (.game) no se toca.
+   ============================================================ */
+
+.lobby-screen {
+  background: var(--bru-bg);
+}
+
+.lobby-screen .panel {
+  background: var(--bru-panel);
+  border: 1px solid var(--bru-line-strong);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  animation: none;
+  position: relative;
+}
+.lobby-screen .panel::before,
+.lobby-screen .panel::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--bru-red);
+  border-left: 2px solid var(--bru-red);
+  top: -1px; left: -1px;
+}
+.lobby-screen .panel::after {
+  top: auto; left: auto; bottom: -1px; right: -1px;
+  border-top: none; border-left: none;
+  border-bottom: 2px solid var(--bru-red);
+  border-right: 2px solid var(--bru-red);
+}
+
+.lobby-screen .logo {
+  font-family: var(--bru-font-macro);
+  letter-spacing: 0.04em;
+  color: var(--bru-ink);
+  text-shadow: none;
+}
+.lobby-screen .logo span { color: var(--bru-red); }
+
+.lobby-screen .field span {
+  font-family: var(--bru-font-micro);
+  color: var(--bru-dim);
+  opacity: 1;
+}
+
+.lobby-screen input {
+  color: var(--bru-ink);
+  background: var(--bru-bg);
+  border: 1px solid var(--bru-line-strong);
+  border-radius: 0;
+  font-family: var(--bru-font-micro);
+}
+.lobby-screen input:focus {
+  border-color: var(--bru-red);
+  box-shadow: none;
+}
+
+.lobby-screen .btn {
+  border-radius: 0;
+  border: 1px solid var(--bru-line-strong);
+  background: transparent;
+  color: var(--bru-ink);
+  font-family: var(--bru-font-micro);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: none;
+}
+.lobby-screen .btn:hover:not(:disabled) { background: rgba(234, 234, 234, 0.06); }
+
+.lobby-screen .btn-primary {
+  background: var(--bru-red);
+  border-color: var(--bru-red);
+  color: #0a0a0a;
+  text-shadow: none;
+  box-shadow: none;
+}
+.lobby-screen .btn-primary:hover:not(:disabled) { background: #ff2a2a; }
+
+.lobby-screen .level-picker { gap: 1px; background: var(--bru-line-strong); border: 1px solid var(--bru-line-strong); }
+.lobby-screen .level-opt {
+  border-radius: 0;
+  border: none;
+  background: var(--bru-bg);
+  color: var(--bru-dim);
+  box-shadow: none;
+}
+.lobby-screen .level-opt strong { font-family: var(--bru-font-micro); text-transform: uppercase; }
+.lobby-screen .level-opt.selected {
+  border-color: transparent;
+  background: rgba(230, 25, 25, 0.14);
+  box-shadow: none;
+}
+.lobby-screen .level-opt.selected strong { color: var(--bru-red); }
+
+.lobby-screen .divider { color: var(--bru-faint); font-family: var(--bru-font-micro); font-size: 0.68rem; letter-spacing: 0.08em; }
+
+.lobby-screen .code-input {
+  font-family: var(--bru-font-micro);
+  color: var(--bru-ink);
+}
+
+.lobby-screen .form-error { color: var(--bru-red); font-family: var(--bru-font-micro); }
+
+.lobby-screen .room-code-label { font-family: var(--bru-font-micro); color: var(--bru-dim); }
+.lobby-screen .room-code {
+  font-family: var(--bru-font-micro);
+  color: var(--bru-ink);
+  text-shadow: none;
+}
+
+.lobby-screen .hint { font-family: var(--bru-font-micro); font-size: 0.78rem; }
+
+.lobby-screen .waiting-players li {
+  background: var(--bru-bg);
+  border: 1px solid var(--bru-line);
+  border-radius: 0;
+  animation: none;
+}
+.lobby-screen .waiting-players .dot { border-radius: 50%; background: var(--bru-green); box-shadow: 0 0 6px var(--bru-green); }
+.lobby-screen .waiting-players li.off .dot { background: var(--bru-faint); box-shadow: none; }

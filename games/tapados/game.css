@@ -520,3 +520,214 @@
   .die.is-rolling,.die.is-landing,
   .board-frame.is-my-turn,.btn-roll.is-hot,.board-grid.is-winner .cell{animation:none}
 }
+
+/* ============================================================
+   INDUSTRIAL BRUTALIST OVERRIDE — pantallas de crear / unirse
+   Solo afecta .screen (#screenHome + #screenLobby). El tablero
+   de juego (#screenGame) no se toca.
+   ============================================================ */
+
+.screen {
+  background: var(--bru-bg);
+}
+
+.screen .screen-box { animation: none; }
+
+.screen .screen-foot { font-family: var(--bru-font-micro); font-size: 0.7rem; letter-spacing: 0.03em; color: var(--bru-dim); }
+.screen .screen-foot b { color: var(--bru-red); }
+
+.screen .logo-plate {
+  background: var(--bru-panel);
+  border: 1px solid var(--bru-line-strong);
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+}
+.screen .logo-plate::before,
+.screen .logo-plate::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--bru-red);
+  border-left: 2px solid var(--bru-red);
+  top: -1px; left: -1px;
+}
+.screen .logo-plate::after {
+  top: auto; left: auto; bottom: -1px; right: -1px;
+  border-top: none; border-left: none;
+  border-bottom: 2px solid var(--bru-red);
+  border-right: 2px solid var(--bru-red);
+}
+.screen .logo-title {
+  font-family: var(--bru-font-macro);
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: var(--bru-ink);
+  color: var(--bru-ink);
+  text-shadow: none;
+}
+.screen .logo-flourish { color: var(--bru-red); }
+
+.screen .tabs {
+  border-radius: 0;
+  background: var(--bru-bg);
+  border: 1px solid var(--bru-line-strong);
+  padding: 0;
+  gap: 0;
+}
+.screen .tab {
+  border-radius: 0;
+  color: var(--bru-dim);
+  font-family: var(--bru-font-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.screen .tab + .tab { border-left: 1px solid var(--bru-line-strong); }
+.screen .tab.is-on {
+  color: #0a0a0a;
+  background: var(--bru-red);
+  box-shadow: none;
+}
+
+.screen .field > span {
+  font-family: var(--bru-font-micro);
+  color: var(--bru-dim);
+}
+
+.screen .field input,
+.screen .field select {
+  border-radius: 0;
+  background: var(--bru-bg);
+  border: 1px solid var(--bru-line-strong);
+  color: var(--bru-ink);
+  font-family: var(--bru-font-micro);
+}
+.screen .field input:focus,
+.screen .field select:focus {
+  border-color: var(--bru-red);
+  box-shadow: none;
+}
+
+.screen .code-input {
+  font-family: var(--bru-font-micro);
+  color: var(--bru-red) !important;
+}
+
+.screen .form-note {
+  border-radius: 0;
+  background: var(--bru-bg);
+  border: 1px solid var(--bru-line);
+  color: var(--bru-dim);
+  font-family: var(--bru-font-micro);
+  font-size: 0.72rem;
+}
+
+.screen .form-error {
+  border-radius: 0;
+  background: rgba(230, 25, 25, 0.12);
+  border: 1px solid var(--bru-red);
+  color: var(--bru-ink);
+  font-family: var(--bru-font-micro);
+}
+
+.screen .btn-main {
+  border-radius: 0;
+  background: var(--bru-red);
+  border: 1px solid var(--bru-red);
+  color: #0a0a0a;
+  font-family: var(--bru-font-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: none;
+  text-shadow: none;
+}
+.screen .btn-main:hover { filter: none; background: #ff2a2a; }
+
+.screen .btn-ghost {
+  border-radius: 0;
+  border: 1px solid var(--bru-line-strong);
+  color: var(--bru-dim);
+  font-family: var(--bru-font-micro);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.screen .btn-ghost:hover { color: var(--bru-ink); border-color: var(--bru-ink); }
+
+.screen .panel {
+  background: var(--bru-panel);
+  border: 1px solid var(--bru-line-strong);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.screen .panel-head { border-bottom: 1px solid var(--bru-line); }
+.screen .panel-head.center { border-bottom-color: transparent; }
+.screen .panel-head h2 {
+  font-family: var(--bru-font-micro);
+  letter-spacing: 0.1em;
+  color: var(--bru-ink);
+}
+.screen .panel-icon { filter: grayscale(1) contrast(1.3); }
+
+.screen .code-box { border-bottom: 1px solid var(--bru-line); }
+.screen .code-label { font-family: var(--bru-font-micro); color: var(--bru-dim); }
+.screen .code-value {
+  font-family: var(--bru-font-micro);
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: var(--bru-ink);
+  color: var(--bru-ink);
+}
+.screen .btn-copy {
+  border-radius: 0;
+  background: transparent;
+  border: 1px solid var(--bru-line-strong);
+  color: var(--bru-ink);
+  font-family: var(--bru-font-micro);
+}
+.screen .btn-copy:hover { background: rgba(234, 234, 234, 0.08); }
+.screen .code-hint { font-family: var(--bru-font-micro); color: var(--bru-faint); font-size: 0.7rem; }
+
+.screen .count-badge {
+  border-radius: 0;
+  color: var(--bru-ink);
+  background: transparent;
+  border: 1px solid var(--bru-red);
+  font-family: var(--bru-font-micro);
+}
+
+.screen .waiting { font-family: var(--bru-font-micro); color: var(--bru-dim); font-size: 0.78rem; }
+
+.screen .stat-list { }
+.screen .stat-row { border-bottom: 1px dashed var(--bru-line); font-family: var(--bru-font-micro); font-size: 0.82rem; }
+.screen .stat-row dt { color: var(--bru-dim); }
+.screen .stat-row dd { color: var(--bru-ink); }
+.screen .stat-row dd.val-gold { color: var(--bru-red) !important; }
+
+.screen .player-row {
+  border-radius: 0;
+  border: 1px solid var(--bru-line);
+  background: var(--bru-bg);
+}
+.screen .player-row[data-turn] {
+  border-color: var(--bru-red);
+  background: rgba(230, 25, 25, 0.08);
+  box-shadow: none;
+}
+.screen .avatar {
+  border-radius: 0;
+  background: var(--p, var(--bru-dim));
+  border: none;
+  box-shadow: none;
+  color: #0a0a0a;
+  font-family: var(--bru-font-micro);
+}
+.screen .player-name { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--bru-ink); }
+.screen .player-meta { font-family: var(--bru-font-micro); color: var(--bru-faint); }
+.screen .player-row[data-me]::before { background: var(--bru-panel); color: var(--bru-dim); font-family: var(--bru-font-micro); }
+
+.screen .panel-head.center h2::before { content: "/// "; color: var(--bru-red); }
+.screen .tab { position: relative; }

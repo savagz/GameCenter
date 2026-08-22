@@ -7,8 +7,9 @@
 <title>Toma 6 — Multijugador</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Russo+One&family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/ui/turn-banner.css">
+<link rel="stylesheet" href="/shared/ui/brutalist.css">
 <link rel="stylesheet" href="game.css">
 </head>
 <body>
@@ -43,13 +44,13 @@
       </select>
     </label>
 
-    <button class="btn btn-primary" type="button" id="btnCreate">Crear sala</button>
+    <button class="btn btn-primary" type="button" id="btnCreate">[ CREAR SALA ]</button>
 
-    <div class="divider"><span>o únete a una</span></div>
+    <div class="divider"><span>/// UNIRSE CON CÓDIGO</span></div>
 
     <div class="join-row">
       <input class="code-input" id="joinCode" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
-      <button class="btn" type="button" id="btnJoin">Unirse</button>
+      <button class="btn" type="button" id="btnJoin">UNIRSE</button>
     </div>
 
     <p class="form-error is-hidden" id="homeError"></p>
@@ -62,13 +63,13 @@
 <div class="lobby-screen is-hidden" id="screenLobby">
   <div class="panel waiting">
     <h1 class="logo">TOMA<span>6</span></h1>
-    <p class="room-code-label">Código de sala</p>
+    <p class="room-code-label">/// código de sala</p>
     <div class="room-code" id="lobbyCode">----</div>
     <p class="hint" id="lobbyHint">Comparte este código.</p>
     <ul class="waiting-players" id="lobbyPlayers"></ul>
-    <button class="btn btn-primary" type="button" id="btnStart">Comenzar partida</button>
-    <p class="hint pulse is-hidden" id="lobbyWait">Esperando a que el anfitrión inicie…</p>
-    <button class="btn" type="button" id="btnLeaveLobby">Salir de la sala</button>
+    <button class="btn btn-primary" type="button" id="btnStart">[ COMENZAR PARTIDA ]</button>
+    <p class="hint pulse is-hidden" id="lobbyWait">ESPERANDO AL ANFITRIÓN…</p>
+    <button class="btn" type="button" id="btnLeaveLobby">SALIR DE LA SALA</button>
   </div>
 </div>
 

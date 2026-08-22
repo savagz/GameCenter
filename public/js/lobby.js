@@ -353,7 +353,7 @@
 
   function openJoinPrompt(slug) {
     joinSlug = slug;
-    $('joinModalTitle').textContent = 'Unirse a sala — ' + GAME_NAMES[slug];
+    $('joinModalTitle').textContent = '[ UNIRSE — ' + GAME_NAMES[slug] + ' ]';
     $('joinCodeInput').value = '';
     $('joinError').classList.add('is-hidden');
     $('joinModal').classList.add('is-open');

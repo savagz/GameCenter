@@ -197,6 +197,15 @@
     tomaseis: 'TOMA 6'
   };
 
+  const GAME_DISPLAY = {
+    rummy: 'Rummy',
+    cucaracha: 'Cucaracha II',
+    benditosiete: 'Bendito 7',
+    porqueyo: '¿Por qué siempre yo?',
+    tapados: 'Tapados',
+    tomaseis: 'Toma 6'
+  };
+
   function toast(msg) {
     const el = document.createElement('div');
     el.className = 'gc-toast';
@@ -353,7 +362,7 @@
 
   function openJoinPrompt(slug) {
     joinSlug = slug;
-    $('joinModalTitle').textContent = '[ UNIRSE — ' + GAME_NAMES[slug] + ' ]';
+    $('joinModalTitle').textContent = 'Unirse · ' + GAME_DISPLAY[slug];
     $('joinCodeInput').value = '';
     $('joinError').classList.add('is-hidden');
     $('joinModal').classList.add('is-open');
@@ -439,6 +448,48 @@
     dot.addEventListener('click', () => {
       cards[i].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     });
+  });
+
+  /* foco de luz que sigue al cursor en cada tarjeta */
+  cards.forEach((card) => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  /* ---------- hero, barra superior y revelado al hacer scroll ---------- */
+  $('heroSettings').addEventListener('click', () => $('settingsBtn').click());
+
+  const topbar = $('topbar');
+  const onScroll = () => topbar.classList.toggle('is-scrolled', window.scrollY > 24);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  const revealEls = Array.from(document.querySelectorAll('.reveal'));
+  if ('IntersectionObserver' in window) {
+    const ro = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          ro.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealEls.forEach((el) => ro.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add('is-in'));
+  }
+
+  /* cerrar modales con Escape o clic fuera (la sala solo se abandona con su botón) */
+  document.querySelectorAll('.gc-overlay').forEach((overlay) => {
+    if (overlay.id === 'roomModal') return;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('is-open'); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.gc-overlay.is-open').forEach((o) => { if (o.id !== 'roomModal') o.classList.remove('is-open'); });
   });
 
   loadPlayerName();

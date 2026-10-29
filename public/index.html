@@ -3,135 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>GAMECENTER // TERMINAL DE MESAS</title>
+<meta name="theme-color" content="#07090a">
+<meta name="description" content="GameCenter: club privado de mesas. Rummy, dados y cartas para jugar con los tuyos en salas privadas.">
+<title>GameCenter · Club de mesas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/shared/ui/brutalist.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/gamecenter.css">
 </head>
-<body class="bru">
+<body>
 
-  <div class="bru-scan" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
 
-  <header class="topbar">
+  <header class="topbar" id="topbar">
     <button class="player-btn" id="playerBtn" type="button">
       <span class="icon-circle">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6">
           <circle cx="12" cy="8" r="4"/>
           <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
         </svg>
       </span>
-      <span class="bru-ascii">GAMER</span>
-      <span id="playerLabel">SIN NOMBRE</span>
+      <span class="player-meta">
+        <small>Jugador</small>
+        <span id="playerLabel">Sin nombre</span>
+      </span>
     </button>
 
-    <div class="brand">
-      <div class="brand-logo" aria-hidden="true">G</div>
-      <h1>GAMECENTER</h1>
-      <p class="brand-sub">TERMINAL DE MESAS · REV 2.6</p>
-    </div>
+    <a class="brand" href="#top" aria-label="GameCenter, inicio">
+      <span class="brand-mark" aria-hidden="true">G</span>
+      <span class="brand-word">Game<em>Center</em></span>
+    </a>
 
     <button class="settings-btn" id="settingsBtn" type="button" aria-label="Configuración">
-      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1L15 3h-6l-.3 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4L4.6 11a8 8 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1L9 21h6l.3-2.6a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6Z"/>
       </svg>
+      <span class="settings-label">Ajustes</span>
     </button>
   </header>
 
-  <main class="lobby" id="lobby-main">
-    <p class="lobby-lead"><span class="bru-tag"><span class="dot"></span>SEIS MESAS EN LÍNEA: Selecciona un Juego</span></p>
+  <section class="hero" id="top" aria-labelledby="heroTitle">
+    <div class="hero-media" aria-hidden="true">
+      <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="assets/lobby/hero.jpg">
+        <source src="assets/lobby/hero.mp4" type="video/mp4">
+      </video>
+      <div class="hero-shade"></div>
+    </div>
+
+    <div class="hero-inner">
+      <p class="eyebrow reveal"><span class="eyebrow-line"></span>Club privado de mesas</p>
+      <h1 class="hero-title reveal" id="heroTitle">La casa abre<br><em>esta noche.</em></h1>
+      <p class="hero-lead reveal">Seis mesas de cartas y dados para jugar con los tuyos. Crea una sala, comparte el código y que la suerte decida.</p>
+      <div class="hero-actions reveal">
+        <a class="btn btn-gold" href="#mesas">
+          Elegir mesa
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <button class="btn btn-ghost" type="button" id="heroSettings">Configurar apuestas</button>
+      </div>
+    </div>
+
+    <dl class="hero-stats reveal">
+      <div><dt>Mesas</dt><dd>06</dd></div>
+      <div><dt>Jugadores</dt><dd>2<span>–</span>10</dd></div>
+      <div><dt>Salas</dt><dd>Privadas</dd></div>
+    </dl>
+
+    <a class="scroll-cue" href="#mesas" aria-label="Ver las mesas"><span></span></a>
+  </section>
+
+  <main class="lobby" id="mesas">
+    <div class="section-head reveal">
+      <p class="eyebrow"><span class="eyebrow-line"></span>La colección</p>
+      <h2 class="section-title">Elige tu <em>mesa.</em></h2>
+      <p class="section-lead">Cada juego conserva sus propias reglas. GameCenter pone la sala, las apuestas y los turnos.</p>
+    </div>
 
     <div class="game-grid" id="gameGrid">
 
-      <article class="game-card selected" data-game="rummy" style="--accent:#5f8fd6" tabindex="0">
-        <span class="unit-id">UNIT / RM-01</span>
-        <span class="selected-flag"><span class="dot"></span>ACTIVA</span>
-        <div class="badge">🃏</div>
-        <h2 class="game-title">RUMMY</h2>
-        <p class="game-desc">Combina fichas, forma escaleras y grupos.</p>
-        <ul class="chips">
-          <li>2—4 JUG</li><li>~20 MIN</li><li>APUESTA OPC</li>
-        </ul>
-        <div class="game-actions">
-          <button class="enter-btn" data-action="create" data-game="rummy">CREAR SALA</button>
-          <button class="enter-btn" data-action="join" data-game="rummy">UNIRSE</button>
+      <article class="game-card selected" data-game="rummy" style="--accent:#7fa6e6" tabindex="0">
+        <figure class="cover"><img src="assets/lobby/rummy.jpg" alt="" loading="lazy"></figure>
+        <span class="card-index">01</span>
+        <span class="selected-flag"><span class="dot"></span>Seleccionada</span>
+        <div class="card-body">
+          <p class="card-kicker">Fichas · Estrategia</p>
+          <h3 class="game-title">Rummy</h3>
+          <p class="game-desc">Combina fichas, forma escaleras y grupos.</p>
+          <ul class="chips">
+            <li>2–4 jug</li><li>~20 min</li><li>Apuesta opc.</li>
+          </ul>
+          <div class="game-actions">
+            <button class="enter-btn enter-primary" data-action="create" data-game="rummy">Crear sala</button>
+            <button class="enter-btn" data-action="join" data-game="rummy">Unirse</button>
+          </div>
         </div>
       </article>
 
-      <article class="game-card" data-game="cucaracha" style="--accent:#4fae74" tabindex="0">
-        <span class="unit-id">UNIT / CR-02</span>
-        <span class="selected-flag"><span class="dot"></span>ACTIVA</span>
-        <div class="badge">🪳</div>
-        <h2 class="game-title">CUCARACHA II</h2>
-        <p class="game-desc">Lanza los dados y esquiva a la cucaracha.</p>
-        <ul class="chips">
-          <li>2—6 JUG</li><li>~15 MIN</li><li>CON CASTIGO</li>
-        </ul>
-        <div class="game-actions">
-          <button class="enter-btn" data-action="create" data-game="cucaracha">CREAR SALA</button>
-          <button class="enter-btn" data-action="join" data-game="cucaracha">UNIRSE</button>
+      <article class="game-card" data-game="cucaracha" style="--accent:#6cc995" tabindex="0">
+        <figure class="cover"><img src="assets/lobby/cucaracha.jpg" alt="" loading="lazy"></figure>
+        <span class="card-index">02</span>
+        <span class="selected-flag"><span class="dot"></span>Seleccionada</span>
+        <div class="card-body">
+          <p class="card-kicker">Dados · Azar</p>
+          <h3 class="game-title">Cucaracha II</h3>
+          <p class="game-desc">Lanza los dados y esquiva a la cucaracha.</p>
+          <ul class="chips">
+            <li>2–6 jug</li><li>~15 min</li><li>Con castigo</li>
+          </ul>
+          <div class="game-actions">
+            <button class="enter-btn enter-primary" data-action="create" data-game="cucaracha">Crear sala</button>
+            <button class="enter-btn" data-action="join" data-game="cucaracha">Unirse</button>
+          </div>
         </div>
       </article>
 
-      <article class="game-card" data-game="benditosiete" style="--accent:#a06ee0" tabindex="0">
-        <span class="unit-id">UNIT / B7-03</span>
-        <span class="selected-flag"><span class="dot"></span>ACTIVA</span>
-        <div class="badge">🎲</div>
-        <h2 class="game-title">BENDITO 7</h2>
-        <p class="game-desc">Completa tu tablero antes de que caiga el 7.</p>
-        <ul class="chips">
-          <li>2—8 JUG</li><li>~25 MIN</li><li>CON CASTIGO</li>
-        </ul>
-        <div class="game-actions">
-          <button class="enter-btn" data-action="create" data-game="benditosiete">CREAR SALA</button>
-          <button class="enter-btn" data-action="join" data-game="benditosiete">UNIRSE</button>
+      <article class="game-card" data-game="benditosiete" style="--accent:#b994f0" tabindex="0">
+        <figure class="cover"><img src="assets/lobby/benditosiete.jpg" alt="" loading="lazy"></figure>
+        <span class="card-index">03</span>
+        <span class="selected-flag"><span class="dot"></span>Seleccionada</span>
+        <div class="card-body">
+          <p class="card-kicker">Dados · Tablero</p>
+          <h3 class="game-title">Bendito 7</h3>
+          <p class="game-desc">Completa tu tablero antes de que caiga el 7.</p>
+          <ul class="chips">
+            <li>2–8 jug</li><li>~25 min</li><li>Con castigo</li>
+          </ul>
+          <div class="game-actions">
+            <button class="enter-btn enter-primary" data-action="create" data-game="benditosiete">Crear sala</button>
+            <button class="enter-btn" data-action="join" data-game="benditosiete">Unirse</button>
+          </div>
         </div>
       </article>
 
-      <article class="game-card" data-game="porqueyo" style="--accent:#3fb6ae" tabindex="0">
-        <span class="unit-id">UNIT / PQ-04</span>
-        <span class="selected-flag"><span class="dot"></span>ACTIVA</span>
-        <div class="badge">🎡</div>
-        <h2 class="game-title">¿POR QUÉ SIEMPRE YO?</h2>
-        <p class="game-desc">La rueda decide. ¿Te toca a ti otra vez?</p>
-        <ul class="chips">
-          <li>2—6 JUG</li><li>~10 MIN</li><li>APUESTA OPC</li>
-        </ul>
-        <div class="game-actions">
-          <button class="enter-btn" data-action="create" data-game="porqueyo">CREAR SALA</button>
-          <button class="enter-btn" data-action="join" data-game="porqueyo">UNIRSE</button>
+      <article class="game-card" data-game="porqueyo" style="--accent:#5fd0c6" tabindex="0">
+        <figure class="cover"><img src="assets/lobby/porqueyo.jpg" alt="" loading="lazy"></figure>
+        <span class="card-index">04</span>
+        <span class="selected-flag"><span class="dot"></span>Seleccionada</span>
+        <div class="card-body">
+          <p class="card-kicker">Rueda · Canicas</p>
+          <h3 class="game-title">¿Por qué siempre yo?</h3>
+          <p class="game-desc">La rueda decide. ¿Te toca a ti otra vez?</p>
+          <ul class="chips">
+            <li>2–6 jug</li><li>~10 min</li><li>Apuesta opc.</li>
+          </ul>
+          <div class="game-actions">
+            <button class="enter-btn enter-primary" data-action="create" data-game="porqueyo">Crear sala</button>
+            <button class="enter-btn" data-action="join" data-game="porqueyo">Unirse</button>
+          </div>
         </div>
       </article>
 
-      <article class="game-card" data-game="tapados" style="--accent:#7a4fb0" tabindex="0">
-        <span class="unit-id">UNIT / TP-05</span>
-        <span class="selected-flag"><span class="dot"></span>ACTIVA</span>
-        <div class="badge">🔲</div>
-        <h2 class="game-title">TAPADOS</h2>
-        <p class="game-desc">Lanza el dado y tapa las 6 posiciones antes que nadie.</p>
-        <ul class="chips">
-          <li>2—6 JUG</li><li>~10 MIN</li><li>APUESTA OPC</li>
-        </ul>
-        <div class="game-actions">
-          <button class="enter-btn" data-action="create" data-game="tapados">CREAR SALA</button>
-          <button class="enter-btn" data-action="join" data-game="tapados">UNIRSE</button>
+      <article class="game-card" data-game="tapados" style="--accent:#d6b06a" tabindex="0">
+        <figure class="cover"><img src="assets/lobby/tapados.jpg" alt="" loading="lazy"></figure>
+        <span class="card-index">05</span>
+        <span class="selected-flag"><span class="dot"></span>Seleccionada</span>
+        <div class="card-body">
+          <p class="card-kicker">Dado · Carrera</p>
+          <h3 class="game-title">Tapados</h3>
+          <p class="game-desc">Lanza el dado y tapa las 6 posiciones antes que nadie.</p>
+          <ul class="chips">
+            <li>2–6 jug</li><li>~10 min</li><li>Apuesta opc.</li>
+          </ul>
+          <div class="game-actions">
+            <button class="enter-btn enter-primary" data-action="create" data-game="tapados">Crear sala</button>
+            <button class="enter-btn" data-action="join" data-game="tapados">Unirse</button>
+          </div>
         </div>
       </article>
 
-      <article class="game-card" data-game="tomaseis" style="--accent:#c6392f" tabindex="0">
-        <span class="unit-id">UNIT / T6-06</span>
-        <span class="selected-flag"><span class="dot"></span>ACTIVA</span>
-        <div class="badge">🐴</div>
-        <h2 class="game-title">TOMA 6</h2>
-        <p class="game-desc">Elige carta a la vez que todos y evita cargarte de estrellas.</p>
-        <ul class="chips">
-          <li>2—10 JUG</li><li>~20 MIN</li><li>APUESTA OPC</li>
-        </ul>
-        <div class="game-actions">
-          <button class="enter-btn" data-action="create" data-game="tomaseis">CREAR SALA</button>
-          <button class="enter-btn" data-action="join" data-game="tomaseis">UNIRSE</button>
+      <article class="game-card" data-game="tomaseis" style="--accent:#e2665b" tabindex="0">
+        <figure class="cover"><img src="assets/lobby/tomaseis.jpg" alt="" loading="lazy"></figure>
+        <span class="card-index">06</span>
+        <span class="selected-flag"><span class="dot"></span>Seleccionada</span>
+        <div class="card-body">
+          <p class="card-kicker">Cartas · Simultáneo</p>
+          <h3 class="game-title">Toma 6</h3>
+          <p class="game-desc">Elige carta a la vez que todos y evita cargarte de estrellas.</p>
+          <ul class="chips">
+            <li>2–10 jug</li><li>~20 min</li><li>Apuesta opc.</li>
+          </ul>
+          <div class="game-actions">
+            <button class="enter-btn enter-primary" data-action="create" data-game="tomaseis">Crear sala</button>
+            <button class="enter-btn" data-action="join" data-game="tomaseis">Unirse</button>
+          </div>
         </div>
       </article>
 
@@ -145,32 +200,59 @@
       <button aria-label="Ir a Tapados"></button>
       <button aria-label="Ir a Toma 6"></button>
     </div>
-    <p class="swipe-hint">&lt;&lt;&lt; DESLIZA PARA VER LAS MESAS &gt;&gt;&gt;</p>
+
+    <section class="ritual" aria-labelledby="ritualTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span class="eyebrow-line"></span>El ritual</p>
+        <h2 class="section-title" id="ritualTitle">Tres pasos <em>a la mesa.</em></h2>
+      </div>
+      <ol class="steps">
+        <li class="step reveal">
+          <span class="step-num">I</span>
+          <h3>Tu nombre</h3>
+          <p>Así te verán los demás en cada sala y en cada turno.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step-num">II</span>
+          <h3>Abre la sala</h3>
+          <p>Elige un juego, ajusta jugadores y apuesta si lo deseas.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step-num">III</span>
+          <h3>Comparte el código</h3>
+          <p>Cuatro letras. Tus amigos entran y el anfitrión reparte.</p>
+        </li>
+      </ol>
+    </section>
   </main>
 
   <footer class="site-footer">
-    <span>GAMECENTER © / SIX-TABLE HOUSE</span>
+    <span class="brand-mark brand-mark-sm" aria-hidden="true">G</span>
+    <span>GameCenter · Club de seis mesas</span>
+    <span class="footer-dim">Juega con responsabilidad.</span>
   </footer>
 
   <div class="gc-overlay" id="playerModal">
     <div class="gc-modal">
-      <h3>[ NOMBRE DEL JUGADOR ]</h3>
+      <p class="modal-kicker">Bienvenido</p>
+      <h3>Nombre del jugador</h3>
       <p class="gc-sub">Así te verán las demás mesas.</p>
       <input type="text" id="playerNameInput" maxlength="16" placeholder="Tu nombre" autocomplete="off">
       <div class="gc-modal-actions">
-        <button class="gc-btn gc-btn-ghost" id="playerCancel">CANCELAR</button>
-        <button class="gc-btn gc-btn-gold" id="playerSave">GUARDAR</button>
+        <button class="gc-btn gc-btn-ghost" id="playerCancel">Cancelar</button>
+        <button class="gc-btn gc-btn-gold" id="playerSave">Guardar</button>
       </div>
     </div>
   </div>
 
   <div class="gc-overlay" id="settingsModal">
     <div class="gc-modal gc-modal-wide">
-      <h3>[ CONFIGURACIÓN GENERAL ]</h3>
+      <p class="modal-kicker">Preferencias de la casa</p>
+      <h3>Configuración general</h3>
 
       <div class="settings-section">
-        <h4>/// Apuesta</h4>
-        <p class="gc-sub">Se aplica igual en las cuatro mesas.</p>
+        <h4>Apuesta</h4>
+        <p class="gc-sub">Se aplica igual en todas las mesas.</p>
         <div class="config-row">
           <label for="bet-enabled">Activar apuesta</label>
           <span class="switch">
@@ -200,7 +282,7 @@
       </div>
 
       <div class="settings-section">
-        <h4>/// Rummy</h4>
+        <h4>Rummy</h4>
         <div class="num-field">
           <label>Nivel de juego por defecto</label>
           <div class="level-picker" id="rummyLevelPicker" role="radiogroup" aria-label="Nivel de juego">
@@ -218,7 +300,7 @@
       </div>
 
       <div class="settings-section">
-        <h4>/// Cucaracha II</h4>
+        <h4>Cucaracha II</h4>
         <div class="num-field">
           <label for="cuc-maxplayers">Jugadores máx. (2-6)</label>
           <input type="number" id="cuc-maxplayers" min="2" max="6" step="1">
@@ -226,7 +308,7 @@
       </div>
 
       <div class="settings-section">
-        <h4>/// Bendito 7</h4>
+        <h4>Bendito 7</h4>
         <div class="field-grid">
           <div class="num-field">
             <label for="bs-maxplayers">Jugadores máx. (2-8)</label>
@@ -240,7 +322,7 @@
       </div>
 
       <div class="settings-section">
-        <h4>/// ¿Por qué siempre yo?</h4>
+        <h4>¿Por qué siempre yo?</h4>
         <div class="field-grid">
           <div class="num-field">
             <label for="pq-maxplayers">Jugadores máx. (2-8)</label>
@@ -254,7 +336,7 @@
       </div>
 
       <div class="settings-section">
-        <h4>/// Tapados</h4>
+        <h4>Tapados</h4>
         <div class="num-field">
           <label for="tp-maxplayers">Jugadores máx. (2-6)</label>
           <input type="number" id="tp-maxplayers" min="2" max="6" step="1">
@@ -262,7 +344,7 @@
       </div>
 
       <div class="settings-section">
-        <h4>/// Toma 6</h4>
+        <h4>Toma 6</h4>
         <div class="num-field">
           <label for="t6-maxplayers">Jugadores máx. (2-10)</label>
           <input type="number" id="t6-maxplayers" min="2" max="10" step="1">
@@ -270,35 +352,36 @@
       </div>
 
       <div class="gc-modal-actions">
-        <button class="gc-btn gc-btn-gold" id="settingsClose">CERRAR</button>
+        <button class="gc-btn gc-btn-gold" id="settingsClose">Listo</button>
       </div>
     </div>
   </div>
 
   <div class="gc-overlay" id="joinModal">
     <div class="gc-modal">
-      <h3 id="joinModalTitle">[ UNIRSE A SALA ]</h3>
-      <input type="text" id="joinCodeInput" class="code-input-big" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
+      <p class="modal-kicker">Código de sala</p>
+      <h3 id="joinModalTitle">Unirse a sala</h3>
+      <input type="text" id="joinCodeInput" class="code-input-big" maxlength="4" placeholder="····" autocomplete="off">
       <p class="room-error is-hidden" id="joinError"></p>
       <div class="gc-modal-actions">
-        <button class="gc-btn gc-btn-ghost" id="joinCancel">CANCELAR</button>
-        <button class="gc-btn gc-btn-gold" id="joinConfirm">ENTRAR</button>
+        <button class="gc-btn gc-btn-ghost" id="joinCancel">Cancelar</button>
+        <button class="gc-btn gc-btn-gold" id="joinConfirm">Entrar</button>
       </div>
     </div>
   </div>
 
   <div class="gc-overlay" id="roomModal">
     <div class="gc-modal gc-modal-wide">
-      <h3 id="roomModalTitle">[ SALA ]</h3>
-      <p class="room-game-name" id="roomGameName"></p>
+      <p class="modal-kicker" id="roomGameName"></p>
+      <h3 id="roomModalTitle">Sala privada</h3>
       <div class="room-code-big" id="roomCode">----</div>
       <p class="room-hint" id="roomHint"></p>
       <p class="room-bet-note is-hidden" id="roomBetNote"></p>
       <ul class="room-players" id="roomPlayers"></ul>
       <p class="room-error is-hidden" id="roomError"></p>
       <div class="gc-modal-actions">
-        <button class="gc-btn gc-btn-ghost" id="roomLeave">SALIR DE LA SALA</button>
-        <button class="gc-btn gc-btn-gold" id="roomStart">INICIAR PARTIDA</button>
+        <button class="gc-btn gc-btn-ghost" id="roomLeave">Salir de la sala</button>
+        <button class="gc-btn gc-btn-gold" id="roomStart">Iniciar partida</button>
       </div>
       <p class="room-wait is-hidden" id="roomWait"></p>
     </div>

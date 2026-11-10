@@ -64,15 +64,6 @@ button { font: inherit; }
 
 /* ================= LOBBY ================= */
 
-.lobby-screen {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  overflow: auto;
-}
-
 .panel {
   background: var(--panel);
   border: 1px solid rgba(244, 196, 48, 0.18);
@@ -89,16 +80,6 @@ button { font: inherit; }
 }
 
 @keyframes panel-in { from { opacity: 0; transform: translateY(24px) scale(0.96); } }
-
-.logo {
-  font-family: 'Russo One', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 2px;
-  text-align: center;
-  color: var(--ivory-1);
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(244, 196, 48, 0.25);
-}
-.logo span { color: var(--accent); margin-left: 6px; }
 
 input, select {
   font: inherit;
@@ -141,30 +122,7 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #ffe07a, #eab30f); }
 
 .hint { opacity: 0.65; font-size: 0.9rem; text-align: center; }
-.pulse { animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.3; } }
-
-.room-code-label { text-align: center; opacity: 0.7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; }
-.room-code {
-  font-family: 'Russo One', sans-serif;
-  font-size: 3rem;
-  letter-spacing: 14px;
-  text-align: center;
-  color: var(--accent);
-  text-shadow: 0 0 30px rgba(244, 196, 48, 0.4);
-  padding-left: 14px;
-}
-
-.waiting-players { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 40vh; overflow-y: auto; }
-.waiting-players li {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px; padding: 10px 14px;
-  animation: panel-in 0.3s ease;
-}
-.waiting-players li em { opacity: 0.55; font-style: normal; font-size: 0.8rem; }
-.waiting-players .dot { width: 9px; height: 9px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px #4ade80; }
-.waiting-players li.off .dot { background: #777; box-shadow: none; }
 
 /* ================= GAME LAYOUT ================= */
 
@@ -556,81 +514,3 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
     transition-duration: 0.01ms !important;
   }
 }
-
-/* ============================================================
-   INDUSTRIAL BRUTALIST OVERRIDE — pantallas de crear / unirse
-   Solo afecta .lobby-screen (inicio + sala de espera). El
-   tablero de juego (.game) no se toca.
-   ============================================================ */
-
-.lobby-screen { background: var(--bru-bg); }
-
-.lobby-screen .panel {
-  background: var(--bru-panel);
-  border: 1px solid var(--bru-line-strong);
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  animation: none;
-  position: relative;
-}
-.lobby-screen .panel::before,
-.lobby-screen .panel::after {
-  content: "";
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid var(--bru-red);
-  border-left: 2px solid var(--bru-red);
-  top: -1px; left: -1px;
-}
-.lobby-screen .panel::after {
-  top: auto; left: auto; bottom: -1px; right: -1px;
-  border-top: none; border-left: none;
-  border-bottom: 2px solid var(--bru-red);
-  border-right: 2px solid var(--bru-red);
-}
-
-.lobby-screen .logo { font-family: var(--bru-font-macro); letter-spacing: 0.04em; color: var(--bru-ink); text-shadow: none; }
-.lobby-screen .logo span { color: var(--bru-red); }
-
-.lobby-screen input,
-.lobby-screen select {
-  color: var(--bru-ink);
-  background: var(--bru-bg);
-  border: 1px solid var(--bru-line-strong);
-  border-radius: 0;
-  font-family: var(--bru-font-micro);
-}
-.lobby-screen input:focus,
-.lobby-screen select:focus { border-color: var(--bru-red); box-shadow: none; }
-
-.lobby-screen .btn {
-  border-radius: 0;
-  border: 1px solid var(--bru-line-strong);
-  background: transparent;
-  color: var(--bru-ink);
-  font-family: var(--bru-font-micro);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  box-shadow: none;
-}
-.lobby-screen .btn:hover:not(:disabled) { background: rgba(234, 234, 234, 0.06); }
-
-.lobby-screen .btn-primary { background: var(--bru-red); border-color: var(--bru-red); color: #0a0a0a; text-shadow: none; box-shadow: none; }
-.lobby-screen .btn-primary:hover:not(:disabled) { background: #ff2a2a; }
-
-.lobby-screen .room-code-label { font-family: var(--bru-font-micro); color: var(--bru-dim); }
-.lobby-screen .room-code { font-family: var(--bru-font-micro); color: var(--bru-ink); text-shadow: none; }
-
-.lobby-screen .hint { font-family: var(--bru-font-micro); font-size: 0.78rem; }
-
-.lobby-screen .waiting-players li {
-  background: var(--bru-bg);
-  border: 1px solid var(--bru-line);
-  border-radius: 0;
-  animation: none;
-}
-.lobby-screen .waiting-players .dot { border-radius: 50%; background: var(--bru-green); box-shadow: 0 0 6px var(--bru-green); }
-.lobby-screen .waiting-players li.off .dot { background: var(--bru-faint); box-shadow: none; }

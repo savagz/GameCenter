@@ -755,29 +755,42 @@ function checkFinish(st) {
 /* ---------- sala de espera ---------- */
 
 function renderLobby(st) {
-  $('lobbyCode').textContent = st.id;
-  $('lobbyCount').textContent = `${st.players.length}/${st.config.maxPlayers}`;
+  const cfg = st.config || {};
+  const max = cfg.maxPlayers || 6;
+  const cash = (n) => '$' + Number(n || 0).toLocaleString('en-US');
 
-  $('lobbyConfig').innerHTML = `
-    ${st.config.bettingEnabled ? `
-    <div class="stat-row"><dt>Apuesta inicial</dt><dd class="val-gold">${money(st.config.apuesta)}</dd></div>
-    <div class="stat-row"><dt>Multa</dt><dd>${money(st.config.castigo)}</dd></div>` : ''}
-    <div class="stat-row"><dt>Jugadores máx.</dt><dd>${st.config.maxPlayers}</dd></div>`;
+  $('lobbyCode').textContent = st.id;
+  $('lobbyCount').textContent = `${st.players.length}/${max}`;
+  $('lobbyHint').textContent = `Compártelo con los demás. Máximo ${max} jugadores.`;
+
+  const rows = [
+    cfg.bettingEnabled && ['Apuesta inicial', cash(cfg.apuesta), true],
+    cfg.bettingEnabled && ['Multa', cash(cfg.castigo)],
+    ['Jugadores máx.', max]
+  ].filter(Boolean);
+  $('lobbyConfig').innerHTML = rows.map(([k, v, gold]) =>
+    `<div class="gch-stat${gold ? ' is-gold' : ''}"><dt>${k}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join('');
 
   const list = $('lobbyPlayers');
   list.textContent = '';
-  st.players.forEach((p) => {
+  st.players.forEach((p, i) => {
     const li = document.createElement('li');
-    li.className = 'player-row';
-    li.style.setProperty('--p', playerColor(st, p.id));
-    if (!p.online) li.classList.add('off');
-    if (p.id === S.me.playerId) li.setAttribute('data-me', '');
-    li.innerHTML = `
-      <span class="avatar">${initial(p.name)}</span>
-      <span class="player-info"><span class="player-name">${escapeHtml(p.name)}</span></span>
-      ${p.id === st.hostId ? '<span class="turn-tag">ANFITRIÓN</span>' : ''}`;
+    li.className = 'gch-player' + (p.online ? '' : ' is-off') + (p.id === S.me.playerId ? ' is-me' : '');
+    li.style.setProperty('--p', 'var(--p' + ((i % 6) + 1) + ')');
+    const tags = [];
+    if (p.id === st.hostId) tags.push('<span class="gch-tag is-host">Anfitrión</span>');
+    if (p.id === S.me.playerId) tags.push('<span class="gch-tag">Tú</span>');
+    if (!p.online) tags.push('<span class="gch-tag is-off">Desconectado</span>');
+    li.innerHTML = `<span class="gch-avatar">${escapeHtml(initial(p.name))}</span>` +
+      `<span class="gch-player-name">${escapeHtml(p.name)}</span>${tags.join('')}`;
     list.appendChild(li);
   });
+  for (let k = st.players.length; k < max; k++) {
+    const li = document.createElement('li');
+    li.className = 'gch-player is-empty';
+    li.innerHTML = '<span class="gch-avatar"></span><span class="gch-player-name">Asiento libre</span>';
+    list.appendChild(li);
+  }
 
   const isHost = st.hostId === S.me.playerId;
   const enough = st.players.length >= 2;

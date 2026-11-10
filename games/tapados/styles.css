@@ -149,8 +149,6 @@ body{
 .stat-row dt{color:var(--text)}
 .stat-row dd{font-weight:600;color:var(--cream)}
 
-.val-gold{color:var(--gold)!important}
-
 /* ---------------- jugadores ---------------- */
 
 .player-list{list-style:none;display:flex;flex-direction:column;gap:8px}

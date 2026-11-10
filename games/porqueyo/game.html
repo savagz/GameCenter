@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="/shared/ui/brutalist.css">
 <link rel="stylesheet" href="game.css">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/ui/premium-home.css">
@@ -103,36 +102,57 @@
 </div>
 
 <!-- ============================================================
-     PANTALLA: SALA DE ESPERA
+     PANTALLA: SALA DE ESPERA · presentación premium
      ============================================================ -->
-<div class="screen is-hidden" id="screenLobby">
-  <div class="screen-box">
-    <div class="panel">
-      <header class="panel-head center"><h2>Sala de espera</h2></header>
+<div class="gch gch-room is-hidden" id="screenLobby" style="--accent:#5fd0c6">
+  <div class="gch-media" aria-hidden="true">
+    <img src="/assets/lobby/porqueyo.jpg" alt="">
+    <div class="gch-shade"></div>
+  </div>
+  <div class="gch-grain" aria-hidden="true"></div>
 
-      <div class="code-box">
-        <span class="code-label">Código de sala</span>
-        <div class="code-row">
-          <strong class="code-value" id="lobbyCode">----</strong>
-          <button class="btn-copy" type="button" id="btnCopy">Copiar</button>
+  <header class="gch-top">
+    <span class="gch-status"><span class="gch-dot"></span>Sala abierta</span>
+    <span class="gch-brand">
+      <span class="gch-mark" aria-hidden="true">G</span>
+      <span class="gch-word">Game<em>Center</em></span>
+    </span>
+    <span class="gch-index">Mesa <b>04</b></span>
+  </header>
+
+  <main class="gch-layout">
+    <section class="gch-intro">
+      <p class="gch-eyebrow gch-rise"><span class="gch-eyebrow-line"></span>Sala de espera</p>
+      <h1 class="gch-title gch-title-sm gch-rise">¿Por qué<br><em>siempre yo?</em></h1>
+
+      <div class="gch-code-block gch-rise">
+        <span class="gch-label">Código de sala</span>
+        <div class="gch-code-row">
+          <strong class="gch-room-code" id="lobbyCode">----</strong>
+          <button class="gch-btn gch-btn-ghost gch-copy" type="button" id="btnCopy">Copiar</button>
         </div>
-        <span class="code-hint">Compártelo para que entren los demás jugadores.</span>
+        <p class="gch-hint" id="lobbyHint">Compártelo para que entren los demás jugadores.</p>
       </div>
 
-      <dl class="stat-list" id="lobbyConfig"></dl>
-    </div>
+      <dl class="gch-stats gch-rise" id="lobbyConfig"></dl>
+    </section>
 
-    <div class="panel">
-      <header class="panel-head">
-        <h2>Jugadores</h2>
-        <span class="count-badge" id="lobbyCount">0/6</span>
-      </header>
-      <ul class="player-list" id="lobbyPlayers"></ul>
-      <button class="btn-main" type="button" id="btnStart">Iniciar partida</button>
-      <p class="waiting" id="lobbyWait">Esperando a que el anfitrión inicie la partida…</p>
-      <button class="btn-ghost" type="button" id="btnLeaveLobby">Salir de la sala</button>
-    </div>
-  </div>
+    <section class="gch-card gch-rise" aria-label="Jugadores en la sala">
+      <div class="gch-card-head">
+        <div>
+          <p class="gch-card-kicker">Jugadores</p>
+          <h2 class="gch-card-title">En la <em>mesa.</em></h2>
+        </div>
+        <span class="gch-count" id="lobbyCount">0/8</span>
+      </div>
+
+      <ul class="gch-players" id="lobbyPlayers"></ul>
+
+      <button class="gch-btn gch-btn-gold" type="button" id="btnStart">Iniciar partida</button>
+      <p class="gch-wait" id="lobbyWait">Esperando a que el anfitrión inicie la partida…</p>
+      <button class="gch-btn gch-btn-ghost gch-leave" type="button" id="btnLeaveLobby">Salir de la sala</button>
+    </section>
+  </main>
 </div>
 
 <!-- ============================================================

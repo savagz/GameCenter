@@ -495,19 +495,41 @@ function renderRowPicker(st) {
 /* ---------- sala de espera ---------- */
 
 function renderLobby(st) {
+  const cfg = st.config || {};
+  const max = cfg.maxPlayers || 10;
+  const cash = (n) => '$' + Number(n || 0).toLocaleString('en-US');
+
   $('lobbyCode').textContent = st.id;
-  $('lobbyHint').textContent = `Comparte este código. Máximo ${st.config.maxPlayers} jugadores.`;
+  $('lobbyCount').textContent = `${st.players.length}/${max}`;
+  $('lobbyHint').textContent = `Compártelo con los demás. Máximo ${max} jugadores.`;
+
+  const rows = [
+    cfg.bettingEnabled && ['Apuesta', cash(cfg.apuesta), true],
+    ['Jugadores máx.', max]
+  ].filter(Boolean);
+  $('lobbyConfig').innerHTML = rows.map(([k, v, gold]) =>
+    `<div class="gch-stat${gold ? ' is-gold' : ''}"><dt>${k}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join('');
 
   const list = $('lobbyPlayers');
   list.textContent = '';
-  st.players.forEach((p) => {
+  st.players.forEach((p, i) => {
     const li = document.createElement('li');
-    if (!p.online) li.classList.add('off');
-    li.innerHTML = `<span class="dot"></span>${escapeHtml(p.name)}` +
-      (p.id === st.hostId ? '<em> · anfitrión</em>' : '') +
-      (p.id === S.me.playerId ? '<em> · tú</em>' : '');
+    li.className = 'gch-player' + (p.online ? '' : ' is-off') + (p.id === S.me.playerId ? ' is-me' : '');
+    li.style.setProperty('--p', 'var(--p' + ((i % 6) + 1) + ')');
+    const tags = [];
+    if (p.id === st.hostId) tags.push('<span class="gch-tag is-host">Anfitrión</span>');
+    if (p.id === S.me.playerId) tags.push('<span class="gch-tag">Tú</span>');
+    if (!p.online) tags.push('<span class="gch-tag is-off">Desconectado</span>');
+    li.innerHTML = `<span class="gch-avatar">${escapeHtml(initial(p.name))}</span>` +
+      `<span class="gch-player-name">${escapeHtml(p.name)}</span>${tags.join('')}`;
     list.appendChild(li);
   });
+  for (let k = st.players.length; k < max; k++) {
+    const li = document.createElement('li');
+    li.className = 'gch-player is-empty';
+    li.innerHTML = '<span class="gch-avatar"></span><span class="gch-player-name">Asiento libre</span>';
+    list.appendChild(li);
+  }
 
   const isHost = st.hostId === S.me.playerId;
   const enough = st.players.length >= 2;
@@ -758,6 +780,13 @@ function wire() {
   $('joinCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') doJoin(); });
 
   $('btnStart').addEventListener('click', () => api('start').catch((e) => toast(e.message, 'error')));
+  $('btnCopy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(S.state ? S.state.id : '');
+      $('btnCopy').textContent = '¡Copiado!';
+      setTimeout(() => ($('btnCopy').textContent = 'Copiar'), 1600);
+    } catch (_) { toast('Copia el código manualmente: ' + (S.state ? S.state.id : '')); }
+  });
   $('btnLeaveLobby').addEventListener('click', () => api('leave').catch(() => {}).then(() => leaveToHome()));
 
   $('btnMute').addEventListener('click', toggleMute);

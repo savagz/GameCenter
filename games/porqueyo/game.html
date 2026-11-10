@@ -10,75 +10,96 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="/shared/ui/brutalist.css">
 <link rel="stylesheet" href="game.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/ui/premium-home.css">
 </head>
 <body>
 
 <!-- ============================================================
-     PANTALLA: INICIO (crear / unirse)
+     PANTALLA: INICIO (crear / unirse) · presentación premium
      ============================================================ -->
-<div class="screen" id="screenHome">
-  <div class="screen-box">
+<div class="gch" id="screenHome" style="--accent:#5fd0c6">
+  <div class="gch-media" aria-hidden="true">
+    <img src="/assets/lobby/porqueyo.jpg" alt="">
+    <div class="gch-shade"></div>
+  </div>
+  <div class="gch-grain" aria-hidden="true"></div>
 
-    <div class="brand brand-center">
-      <span class="brand-l1">¿POR QUÉ</span>
-      <span class="brand-l2">SIEMPRE YO?</span>
-    </div>
+  <header class="gch-top">
+    <a class="gch-back" href="/">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span>Lobby</span>
+    </a>
+    <a class="gch-brand" href="/" aria-label="GameCenter, volver al lobby">
+      <span class="gch-mark" aria-hidden="true">G</span>
+      <span class="gch-word">Game<em>Center</em></span>
+    </a>
+    <span class="gch-index">Mesa <b>04</b></span>
+  </header>
 
-    <div class="panel">
-      <div class="tabs">
-        <button class="tab is-on" type="button" data-tab="create">Crear sala</button>
-        <button class="tab" type="button" data-tab="join">Unirse</button>
+  <main class="gch-layout">
+    <section class="gch-intro">
+      <p class="gch-eyebrow gch-rise"><span class="gch-eyebrow-line"></span>Dado · Canicas</p>
+      <h1 class="gch-title gch-rise">¿Por qué<br><em>siempre yo?</em></h1>
+      <p class="gch-lead gch-rise">Un dado de seis colores y un tablero compartido. Deja tus canicas en las zonas, llévate las que rebosan y sé el primero en quedarte sin ninguna.</p>
+      <ul class="gch-chips gch-rise"><li>2–8 jugadores</li><li>~10 min</li><li>6 colores</li><li>Apuesta opc.</li></ul>
+      <ol class="gch-rules gch-rise">
+        <li><span>I</span><p>Zona con hueco: dejas una canica.</p></li>
+        <li><span>II</span><p>Zona llena: te llevas todas las acumuladas.</p></li>
+        <li><span>III</span><p>Negro: una canica sale del juego.</p></li>
+      </ol>
+    </section>
+
+    <section class="gch-card gch-rise" aria-label="Crear o unirse a una sala">
+      <p class="gch-card-kicker">Tu asiento</p>
+      <h2 class="gch-card-title">Abre la mesa o <em>siéntate.</em></h2>
+
+      <div class="gch-tabs" role="tablist">
+        <button class="tab gch-tab is-on" type="button" data-tab="create">Crear sala</button>
+        <button class="tab gch-tab" type="button" data-tab="join">Unirse</button>
       </div>
 
-      <!-- crear -->
-      <form class="form" id="formCreate">
-        <label class="field">
+      <form class="gch-form" id="formCreate">
+        <label class="gch-field">
           <span>Tu nombre</span>
-          <input type="text" id="createName" maxlength="16" placeholder="Anfitrión" required>
+          <input class="gch-input" type="text" id="createName" maxlength="16" placeholder="Anfitrión" autocomplete="off" required>
         </label>
 
-        <p class="form-note">Configuración inicial de la partida — la define quien crea la sala.</p>
-
-        <div class="field-grid">
-          <label class="field">
+        <div class="gch-grid">
+          <label class="gch-field">
             <span>Jugadores máx.</span>
-            <select id="cfgMax">
-              <option>2</option><option>3</option><option>4</option>
-              <option selected>5</option><option>6</option><option>7</option><option>8</option>
-            </select>
+            <select class="gch-input" id="cfgMax"><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option></select>
           </label>
-          <label class="field">
+          <label class="gch-field">
             <span>Canicas iniciales</span>
-            <input type="number" id="cfgMarbles" value="10" min="3" max="30" step="1">
+            <input class="gch-input" type="number" id="cfgMarbles" value="10" min="3" max="30" step="1">
           </label>
-          <label class="field is-hidden" id="cfgApuestaWrap">
+          <label class="gch-field is-hidden" id="cfgApuestaWrap">
             <span>Apuesta / CASE</span>
-            <input type="number" id="cfgApuesta" value="0" min="0" step="10" readonly>
+            <input class="gch-input" type="number" id="cfgApuesta" value="0" min="0" step="10" readonly>
           </label>
         </div>
+        <p class="gch-note">La configuración la define quien crea la sala.</p>
 
-        <button class="btn-main" type="submit">Crear sala</button>
+        <button class="gch-btn gch-btn-gold" type="submit">Crear sala <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
       </form>
 
-      <!-- unirse -->
-      <form class="form is-hidden" id="formJoin">
-        <label class="field">
+      <form class="gch-form is-hidden" id="formJoin">
+        <label class="gch-field">
           <span>Tu nombre</span>
-          <input type="text" id="joinName" maxlength="16" placeholder="Jugador" required>
+          <input class="gch-input" type="text" id="joinName" maxlength="16" placeholder="Jugador" autocomplete="off" required>
         </label>
-        <label class="field">
+        <label class="gch-field">
           <span>Código de sala</span>
-          <input type="text" id="joinCode" maxlength="4" placeholder="ABCD"
-                 class="code-input" autocomplete="off" required>
+          <input class="gch-input gch-code" type="text" id="joinCode" maxlength="4" placeholder="ABCD" autocomplete="off" required>
         </label>
-        <button class="btn-main" type="submit">Entrar a la sala</button>
+        <button class="gch-btn gch-btn-gold" type="submit">Entrar a la sala <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
       </form>
 
-      <p class="form-error is-hidden" id="homeError"></p>
-    </div>
-
-    <p class="screen-foot">2 a 8 jugadores · el objetivo es <b>quedarse sin canicas</b></p>
-  </div>
+      <p class="gch-error is-hidden" id="homeError"></p>
+      <p class="gch-card-foot"><span class="gch-dot"></span>Sala privada · código de 4 letras</p>
+    </section>
+  </main>
 </div>
 
 <!-- ============================================================

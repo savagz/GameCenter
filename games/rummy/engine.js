@@ -147,10 +147,7 @@ function meldLabel(meld) {
 }
 
 module.exports = {
-  COLORS,
   createDeck,
-  shuffle,
-  validateMeld,
   validateTurn,
   handPoints
 };

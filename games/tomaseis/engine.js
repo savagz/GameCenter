@@ -65,7 +65,4 @@ function placeCard(rows, card) {
   return { type: 'append', rowIndex: bestIdx };
 }
 
-module.exports = {
-  HAND_SIZE, ROWS, ROW_LIMIT,
-  starValue, createDeck, shuffle, dealGame, rowStars, placeCard
-};
+module.exports = { HAND_SIZE, dealGame, rowStars, placeCard };

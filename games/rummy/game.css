@@ -105,22 +105,6 @@ button { font: inherit; }
   margin-left: 6px;
 }
 
-.lobby-tiles {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px 0 2px;
-}
-
-.lobby-tiles .tile { cursor: default; }
-.lobby-tiles .tile:nth-child(1) { transform: rotate(-6deg); }
-.lobby-tiles .tile:nth-child(2) { transform: rotate(-2deg) translateY(-4px); }
-.lobby-tiles .tile:nth-child(3) { transform: rotate(3deg); }
-.lobby-tiles .tile:nth-child(4) { transform: rotate(8deg) translateY(-2px); }
-
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.75; }
-
 input {
   font: inherit;
   color: var(--ivory-1);
@@ -203,36 +187,9 @@ input:focus {
 }
 .level-opt.selected small { opacity: 0.85; }
 
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  opacity: 0.5;
-  font-size: 0.85rem;
-}
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: currentColor; }
-
-.join-row { display: flex; gap: 10px; }
-.code-input {
-  flex: 1;
-  min-width: 0;
-  text-transform: uppercase;
-  letter-spacing: 8px;
-  font-family: 'Russo One', sans-serif;
-  text-align: center;
-  font-size: 1.2rem;
-}
-
-@media (max-width: 360px) {
-  .code-input { letter-spacing: 4px; font-size: 1.05rem; padding-left: 8px; padding-right: 8px; }
-  .join-row .btn { padding-left: 12px; padding-right: 12px; }
-}
-
 .hint { opacity: 0.65; font-size: 0.9rem; text-align: center; }
 .pulse { animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.3; } }
-
-.form-error { color: #ffc9c9; text-align: center; font-size: 0.88rem; }
 
 /* waiting room */
 .room-code-label { text-align: center; opacity: 0.7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; }
@@ -819,12 +776,6 @@ input:focus {
 }
 .lobby-screen .logo span { color: var(--bru-red); }
 
-.lobby-screen .field span {
-  font-family: var(--bru-font-micro);
-  color: var(--bru-dim);
-  opacity: 1;
-}
-
 .lobby-screen input {
   color: var(--bru-ink);
   background: var(--bru-bg);
@@ -874,15 +825,6 @@ input:focus {
   box-shadow: none;
 }
 .lobby-screen .level-opt.selected strong { color: var(--bru-red); }
-
-.lobby-screen .divider { color: var(--bru-faint); font-family: var(--bru-font-micro); font-size: 0.68rem; letter-spacing: 0.08em; }
-
-.lobby-screen .code-input {
-  font-family: var(--bru-font-micro);
-  color: var(--bru-ink);
-}
-
-.lobby-screen .form-error { color: var(--bru-red); font-family: var(--bru-font-micro); }
 
 .lobby-screen .room-code-label { font-family: var(--bru-font-micro); color: var(--bru-dim); }
 .lobby-screen .room-code {

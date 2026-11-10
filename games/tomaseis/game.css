@@ -100,14 +100,6 @@ button { font: inherit; }
 }
 .logo span { color: var(--accent); margin-left: 6px; }
 
-.lobby-cards { display: flex; justify-content: center; gap: 10px; padding: 6px 0 2px; }
-.lobby-cards .card:nth-child(1) { transform: rotate(-6deg); }
-.lobby-cards .card:nth-child(2) { transform: translateY(-4px); }
-.lobby-cards .card:nth-child(3) { transform: rotate(6deg); }
-
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.75; }
-
 input, select {
   font: inherit;
   color: var(--ivory-1);
@@ -148,24 +140,9 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 }
 .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #ffe07a, #eab30f); }
 
-.divider { display: flex; align-items: center; gap: 12px; opacity: 0.5; font-size: 0.85rem; }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: currentColor; }
-
-.join-row { display: flex; gap: 10px; }
-.code-input {
-  flex: 1;
-  min-width: 0;
-  text-transform: uppercase;
-  letter-spacing: 8px;
-  font-family: 'Russo One', sans-serif;
-  text-align: center;
-  font-size: 1.2rem;
-}
-
 .hint { opacity: 0.65; font-size: 0.9rem; text-align: center; }
 .pulse { animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.3; } }
-.form-error { color: #ffc9c9; text-align: center; font-size: 0.88rem; }
 
 .room-code-label { text-align: center; opacity: 0.7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; }
 .room-code {
@@ -291,7 +268,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
   position: relative;
   transition: box-shadow 0.25s;
 }
-.board-row.can-take { box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45), 0 0 0 2px rgba(244, 196, 48, 0.55), 0 0 18px rgba(244, 196, 48, 0.25); cursor: pointer; }
 .board-row.row-flash { animation: row-flash 0.5s ease; }
 @keyframes row-flash { 0%, 100% { background: rgba(0, 0, 0, 0.22); } 40% { background: rgba(244, 196, 48, 0.2); } }
 
@@ -408,21 +384,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
     0 0 14px color-mix(in srgb, var(--star-c) 45%, transparent);
 }
 
-.card.owner-badge::after {
-  content: attr(data-owner);
-  position: absolute;
-  bottom: -9px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.62rem;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--p, var(--accent)) 65%, #1a1a1a);
-  color: #fff;
-  white-space: nowrap;
-}
-
 .card.selectable { cursor: pointer; }
 .card.selectable:hover { transform: translateY(-4px); }
 .card.chosen-mine {
@@ -476,22 +437,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 @keyframes confirming-pulse {
   0%, 100% { box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.95), inset 0 -3px 4px rgba(124, 96, 42, 0.4), 0 3px 5px rgba(0, 0, 0, 0.45), 0 0 0 3px rgba(120, 220, 140, 0.95), 0 0 10px rgba(120, 220, 140, 0.45); }
   50% { box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.95), inset 0 -3px 4px rgba(124, 96, 42, 0.4), 0 3px 5px rgba(0, 0, 0, 0.45), 0 0 0 3px rgba(120, 220, 140, 0.95), 0 0 20px rgba(120, 220, 140, 0.85); }
-}
-
-.card.face-down {
-  background: linear-gradient(150deg, #3a2a12, #1c1206);
-  color: transparent;
-  box-shadow: inset 0 0 0 2px rgba(244, 196, 48, 0.25), 0 3px 5px rgba(0, 0, 0, 0.45);
-}
-.card.face-down::before {
-  content: '?';
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: rgba(244, 196, 48, 0.35);
-  font-family: 'Russo One', sans-serif;
-  font-size: calc(var(--card-w) * 0.4);
 }
 
 .card.just-placed {
@@ -649,8 +594,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 .lobby-screen .logo { font-family: var(--bru-font-macro); letter-spacing: 0.04em; color: var(--bru-ink); text-shadow: none; }
 .lobby-screen .logo span { color: var(--bru-red); }
 
-.lobby-screen .field span { font-family: var(--bru-font-micro); color: var(--bru-dim); opacity: 1; }
-
 .lobby-screen input,
 .lobby-screen select {
   color: var(--bru-ink);
@@ -677,12 +620,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 
 .lobby-screen .btn-primary { background: var(--bru-red); border-color: var(--bru-red); color: #0a0a0a; text-shadow: none; box-shadow: none; }
 .lobby-screen .btn-primary:hover:not(:disabled) { background: #ff2a2a; }
-
-.lobby-screen .divider { color: var(--bru-faint); font-family: var(--bru-font-micro); font-size: 0.68rem; letter-spacing: 0.08em; }
-
-.lobby-screen .code-input { font-family: var(--bru-font-micro); color: var(--bru-ink); }
-
-.lobby-screen .form-error { color: var(--bru-red); font-family: var(--bru-font-micro); }
 
 .lobby-screen .room-code-label { font-family: var(--bru-font-micro); color: var(--bru-dim); }
 .lobby-screen .room-code { font-family: var(--bru-font-micro); color: var(--bru-ink); text-shadow: none; }

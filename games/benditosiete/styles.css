@@ -3,12 +3,8 @@
    ============================================================ */
 
 :root{
-  --wood-dark:#1b0f06;
-  --wood-mid:#2a180b;
   --walnut:#4b2a12;
   --walnut-lt:#6b3d1a;
-  --oak:#c99553;
-  --oak-lt:#e8bd7d;
   --orange:#e08b1e;
   --orange-hi:#ffc262;
   --gold:#f0b64a;
@@ -17,7 +13,6 @@
   --text:#e9dcc4;
   --text-dim:#a89272;
   --green:#4ade5a;
-  --green-deep:#1d6b26;
   --red:#ef5b4c;
   --blue:#4f9fe0;
   --panel-1:#241608;

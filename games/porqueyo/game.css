@@ -24,29 +24,10 @@
   flex-direction: column;
   gap: 18px;
 }
-
-.brand-center {
-  align-self: center;
-  text-align: center;
-  align-items: center;
-}
-
-.screen-foot {
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-dim);
-}
-.screen-foot b { color: var(--gold); }
-
 /* =========================================================
    PESTAÑAS Y FORMULARIOS
    ========================================================= */
 
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
 .tab {
   flex: 1;
   padding: 10px;
@@ -65,62 +46,6 @@
   color: var(--gold);
   border-color: var(--gold-dim);
   background: rgba(242, 193, 78, .10);
-}
-
-.form { display: flex; flex-direction: column; gap: 14px; }
-
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field > span {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-}
-.field input,
-.field select {
-  padding: 11px 13px;
-  font-family: inherit;
-  font-size: 15px;
-  color: var(--text);
-  background: rgba(0, 0, 0, .35);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  outline: none;
-  transition: border-color .18s;
-}
-.field input:focus,
-.field select:focus { border-color: var(--gold-dim); }
-.field select { appearance: none; cursor: pointer; }
-
-.code-input {
-  text-transform: uppercase;
-  letter-spacing: 6px;
-  font-weight: 800;
-  text-align: center;
-}
-
-.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-.form-note {
-  font-size: 12.5px;
-  color: var(--text-dim);
-  line-height: 1.4;
-}
-
-.form-error {
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  background: rgba(192, 57, 43, .15);
-  border: 1px solid rgba(192, 57, 43, .5);
-  color: #f0a89e;
-  font-size: 13px;
-  animation: shake .3s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
 }
 
 /* =========================================================
@@ -494,9 +419,6 @@
 
 .screen .screen-box { animation: none; }
 
-.screen .screen-foot { font-family: var(--bru-font-micro); font-size: 0.7rem; letter-spacing: 0.03em; color: var(--bru-dim); }
-.screen .screen-foot b { color: var(--bru-red); }
-
 .screen .brand {
   transform: none;
   font-style: normal;
@@ -511,14 +433,6 @@
   color: var(--bru-ink);
   -webkit-text-stroke: 0;
 }
-
-.screen .tabs {
-  border-radius: 0;
-  background: var(--bru-bg);
-  border: 1px solid var(--bru-line-strong);
-  padding: 0;
-  gap: 0;
-}
 .screen .tab {
   border-radius: 0;
   color: var(--bru-dim);
@@ -531,47 +445,6 @@
   color: #0a0a0a;
   background: var(--bru-red);
   box-shadow: none;
-}
-
-.screen .field > span {
-  font-family: var(--bru-font-micro);
-  color: var(--bru-dim);
-}
-
-.screen .field input,
-.screen .field select {
-  border-radius: 0;
-  background: var(--bru-bg);
-  border: 1px solid var(--bru-line-strong);
-  color: var(--bru-ink);
-  font-family: var(--bru-font-micro);
-}
-.screen .field input:focus,
-.screen .field select:focus {
-  border-color: var(--bru-red);
-  box-shadow: none;
-}
-
-.screen .code-input {
-  font-family: var(--bru-font-micro);
-  color: var(--bru-red) !important;
-}
-
-.screen .form-note {
-  border-radius: 0;
-  background: var(--bru-bg);
-  border: 1px solid var(--bru-line);
-  color: var(--bru-dim);
-  font-family: var(--bru-font-micro);
-  font-size: 0.72rem;
-}
-
-.screen .form-error {
-  border-radius: 0;
-  background: rgba(230, 25, 25, 0.12);
-  border: 1px solid var(--bru-red);
-  color: var(--bru-ink);
-  font-family: var(--bru-font-micro);
 }
 
 .screen .btn-main {
@@ -611,7 +484,6 @@
   letter-spacing: 0.1em;
   color: var(--bru-ink);
 }
-.screen .panel-icon { filter: grayscale(1) contrast(1.3); }
 
 .screen .code-box { border-bottom: 1px solid var(--bru-line); }
 .screen .code-label { font-family: var(--bru-font-micro); color: var(--bru-dim); }

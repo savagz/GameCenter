@@ -92,27 +92,6 @@ function recordPenalty({ gameSlug, roomCode, playerId, playerName, amount, reaso
   pushEvent(room, 'penalty', { playerId, amount, reason, toPlayerId });
 }
 
-function getPlayerBalance(gameSlug, roomCode, playerId) {
-  const room = getRoom(gameSlug, roomCode);
-  const p = room && room.players.get(playerId);
-  return p ? p.balance : 0;
-}
-
-function getRoomSummary(gameSlug, roomCode) {
-  const room = getRoom(gameSlug, roomCode);
-  if (!room) return null;
-  return {
-    bettingEnabled: room.bettingEnabled,
-    apuesta: room.apuesta,
-    castigo: room.castigo,
-    potTotal: room.potTotal,
-    winnerId: room.winnerId,
-    prizeAmount: room.prizeAmount,
-    players: Array.from(room.players, ([playerId, p]) => ({ playerId, ...p })),
-    events: room.events.slice(-15)
-  };
-}
-
 function disposeRoom(gameSlug, roomCode) {
   rooms.delete(roomKey(gameSlug, roomCode));
 }
@@ -130,7 +109,5 @@ module.exports = {
   recordEntry,
   recordWin,
   recordPenalty,
-  getPlayerBalance,
-  getRoomSummary,
   disposeRoom
 };

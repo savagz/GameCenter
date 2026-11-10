@@ -5,10 +5,8 @@
 
 :root {
   --bg: #07090a;
-  --bg-2: #0b0f0e;
   --panel: rgba(17, 22, 21, 0.72);
   --panel-solid: #111615;
-  --emerald: #0f2a22;
   --gold: #d6b26a;
   --gold-hi: #f2dca6;
   --gold-lo: #9c7a3c;
@@ -690,7 +688,6 @@ em {
   line-height: 1.1;
 }
 
-.gc-modal-note,
 .gc-sub { margin: 0 0 18px; color: var(--ink-dim); font-size: 0.84rem; }
 
 .gc-modal input[type="text"],

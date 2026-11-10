@@ -6,14 +6,19 @@
 (function () {
 'use strict';
 
-const { ZONES, BLACK } = window.PorqueyoZones;
+const { ZONES } = window.PorqueyoZones;
 const $ = (id) => document.getElementById(id);
+
+/* nombre definido en el lobby de GameCenter (mismo origen, misma pestaña) */
+function lobbyName() {
+  try { return (sessionStorage.getItem('gc_playerName') || '').trim().slice(0, 16); } catch (_) { return ''; }
+}
 
 /* nombre y apuesta llegan de GameCenter por query string (?name=&betting=&bet=) */
 const GC = (function () {
   const p = new URLSearchParams(location.search);
   return {
-    name: p.get('name') || '',
+    name: p.get('name') || lobbyName(),
     betting: p.get('betting') === '1',
     bet: Math.max(0, Math.floor(Number(p.get('bet')) || 0))
   };

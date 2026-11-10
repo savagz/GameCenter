@@ -3,12 +3,8 @@
    ============================================================ */
 
 :root{
-  --wood-dark:#1b0f06;
-  --wood-mid:#2a180b;
   --walnut:#4b2a12;
   --walnut-lt:#6b3d1a;
-  --oak:#c99553;
-  --oak-lt:#e8bd7d;
   --orange:#e08b1e;
   --orange-hi:#ffc262;
   --gold:#f0b64a;
@@ -17,10 +13,8 @@
   --text:#e9dcc4;
   --text-dim:#a89272;
   --green:#4ade5a;
-  --green-deep:#1d6b26;
   --red:#ef5b4c;
   --blue:#4f9fe0;
-  --purple:#a06ee0;
   --panel-1:#241608;
   --panel-2:#150c04;
   --line:rgba(240,182,74,.22);
@@ -513,7 +507,6 @@ body{
 }
 .hit.hit-cover{color:#eafbe6;background:radial-gradient(circle at 35% 28%,#5fd35a,#1c6b22);border:1px solid #6fd063}
 .hit.hit-uncover{color:#ffe9c9;background:rgba(224,139,30,.35);border:1px solid rgba(224,139,30,.6)}
-.hit.hit-win{color:#2a1a06;background:linear-gradient(180deg,#ffe9a8,#d19a34);border:1px solid #ffe6a6}
 
 /* ---------------- último evento ---------------- */
 

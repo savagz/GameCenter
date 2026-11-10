@@ -35,4 +35,4 @@ function resolveRoll(board, face) {
   return { type: 'steal', color: face, board: next, stolen: filled, cap: zone.cap };
 }
 
-module.exports = { ZONES, BLACK, FACES, BY_ID, newBoard, rollFace, resolveRoll };
+module.exports = { BY_ID, newBoard, rollFace, resolveRoll };

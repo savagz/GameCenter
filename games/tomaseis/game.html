@@ -11,50 +11,79 @@
 <link rel="stylesheet" href="/shared/ui/turn-banner.css">
 <link rel="stylesheet" href="/shared/ui/brutalist.css">
 <link rel="stylesheet" href="game.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/ui/premium-home.css">
 </head>
 <body>
 
 <!-- ============================================================
-     PANTALLA: INICIO (crear / unirse)
+     PANTALLA: INICIO (crear / unirse) · presentación premium
      ============================================================ -->
-<div class="lobby-screen" id="screenHome">
-  <div class="panel">
-    <h1 class="logo">TOMA<span>6</span></h1>
-
-    <div class="lobby-cards" aria-hidden="true">
-      <div class="card demo c-normal"><span class="num">23</span><span class="stars">★</span></div>
-      <div class="card demo c-mid"><span class="num">45</span><span class="stars">★★</span></div>
-      <div class="card demo c-hot"><span class="num">55</span><span class="stars">★★★★★★★</span></div>
-    </div>
-
-    <label class="field">
-      <span>Tu nombre</span>
-      <input type="text" id="nameInput" maxlength="16" placeholder="Ej: Samuel">
-    </label>
-
-    <div class="field is-hidden" id="bettingInfo">
-      <span>Apuesta de GameCenter: <b id="bettingAmount">$0</b></span>
-    </div>
-
-    <label class="field">
-      <span>Jugadores máx.</span>
-      <select id="cfgMax">
-        <option>2</option><option>3</option><option>4</option><option>5</option>
-        <option selected>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-      </select>
-    </label>
-
-    <button class="btn btn-primary" type="button" id="btnCreate">[ CREAR SALA ]</button>
-
-    <div class="divider"><span>/// UNIRSE CON CÓDIGO</span></div>
-
-    <div class="join-row">
-      <input class="code-input" id="joinCode" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
-      <button class="btn" type="button" id="btnJoin">UNIRSE</button>
-    </div>
-
-    <p class="form-error is-hidden" id="homeError"></p>
+<div class="gch" id="screenHome" style="--accent:#e2665b">
+  <div class="gch-media" aria-hidden="true">
+    <img src="/assets/lobby/tomaseis.jpg" alt="">
+    <div class="gch-shade"></div>
   </div>
+  <div class="gch-grain" aria-hidden="true"></div>
+
+  <header class="gch-top">
+    <a class="gch-back" href="/">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span>Lobby</span>
+    </a>
+    <a class="gch-brand" href="/" aria-label="GameCenter, volver al lobby">
+      <span class="gch-mark" aria-hidden="true">G</span>
+      <span class="gch-word">Game<em>Center</em></span>
+    </a>
+    <span class="gch-index">Mesa <b>06</b></span>
+  </header>
+
+  <main class="gch-layout">
+    <section class="gch-intro">
+      <p class="gch-eyebrow gch-rise"><span class="gch-eyebrow-line"></span>Cartas · Simultáneo</p>
+      <h1 class="gch-title gch-rise">Toma<br><em>seis.</em></h1>
+      <p class="gch-lead gch-rise">Todos eligen carta a la vez y sin mirar. Quien pone la sexta carta en una fila se la lleva entera; gana quien acumule menos estrellas.</p>
+      <ul class="gch-chips gch-rise"><li>2–10 jugadores</li><li>~20 min</li><li>104 cartas</li><li>Apuesta opc.</li></ul>
+      <ol class="gch-rules gch-rise">
+        <li><span>I</span><p>Eliges carta en secreto, todos a la vez.</p></li>
+        <li><span>II</span><p>Se colocan de menor a mayor en las filas.</p></li>
+        <li><span>III</span><p>La sexta carta se lleva la fila completa.</p></li>
+      </ol>
+    </section>
+
+    <section class="gch-card gch-rise" aria-label="Crear o unirse a una sala">
+      <p class="gch-card-kicker">Tu asiento</p>
+      <h2 class="gch-card-title">Abre la mesa o <em>siéntate.</em></h2>
+
+      <div class="gch-form">
+        <label class="gch-field">
+          <span>Tu nombre</span>
+          <input class="gch-input" type="text" id="nameInput" maxlength="16" placeholder="Tu nombre" autocomplete="off">
+        </label>
+
+        <div class="gch-bet is-hidden" id="bettingInfo">
+          <span>Apuesta de GameCenter</span><b id="bettingAmount">$0</b>
+        </div>
+
+        <label class="gch-field">
+            <span>Jugadores máx.</span>
+            <select class="gch-input" id="cfgMax"><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select>
+          </label>
+
+        <button class="gch-btn gch-btn-gold" type="button" id="btnCreate">Crear sala <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+
+        <div class="gch-divider">o únete con código</div>
+
+        <div class="gch-join">
+          <input class="gch-input gch-code" id="joinCode" maxlength="4" placeholder="ABCD" autocomplete="off" aria-label="Código de sala">
+          <button class="gch-btn gch-btn-ghost" type="button" id="btnJoin">Unirse</button>
+        </div>
+      </div>
+
+      <p class="gch-error is-hidden" id="homeError"></p>
+      <p class="gch-card-foot"><span class="gch-dot"></span>Sala privada · código de 4 letras</p>
+    </section>
+  </main>
 </div>
 
 <!-- ============================================================

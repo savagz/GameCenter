@@ -122,7 +122,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #ffe07a, #eab30f); }
 
 .hint { opacity: 0.65; font-size: 0.9rem; text-align: center; }
-@keyframes pulse { 50% { opacity: 0.3; } }
 
 /* ================= GAME LAYOUT ================= */
 

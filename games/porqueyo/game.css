@@ -289,11 +289,6 @@
    RESPONSIVE
    ========================================================= */
 
-@media (max-width: 620px) {
-  .field-grid { grid-template-columns: 1fr; }
-  .code-value { font-size: 24px; letter-spacing: 4px; }
-}
-
 @media (hover: none) {
   .btn-main:active { filter: brightness(1.08); }
   .btn-ghost:active { color: var(--gold); border-color: var(--gold-dim); }

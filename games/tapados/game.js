@@ -8,7 +8,6 @@
 
 const { NUMBERS } = window.TapadosBoard;
 const $ = (id) => document.getElementById(id);
-const money = (n) => '$' + Number(n || 0).toLocaleString('en-US');
 
 /* nombre definido en el lobby de GameCenter (mismo origen, misma pestaña) */
 function lobbyName() {

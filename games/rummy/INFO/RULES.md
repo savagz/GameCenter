@@ -43,14 +43,15 @@ Restricción:
 
 - Un comodín puede representar cualquier ficha.
 - Puede utilizarse en grupos o escaleras.
-- Un jugador puede recuperar un comodín colocando la ficha exacta que representa.
-- El comodín recuperado debe reutilizarse inmediatamente durante ese mismo turno.
+- Un comodín de la mesa puede moverse a otra combinación sin colocar la ficha que representaba, siempre que al terminar el turno todas las combinaciones sean válidas.
+- Un comodín recuperado de la mesa no puede volver a la mano: debe reutilizarse durante ese mismo turno.
 
 6. FIN DEL JUEGO
 
 - Gana el primer jugador que se quede sin fichas.
-- Si se agota el pozo y nadie gana, se cuentan los puntos de las fichas restantes.
-- El jugador con menor puntuación es el ganador.
+- Cuando el pozo se vacía, la partida termina en ese momento.
+- Se suman las fichas sin jugar de cada jugador: cada ficha vale su número y el comodín vale 10.
+- Gana quien tenga menos puntos. En caso de empate gana el primero en orden de asiento.
 
 ## REORGANIZACIÓN DE LA MESA
 

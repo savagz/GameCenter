@@ -137,8 +137,12 @@ function validateTurn({ oldBoard, oldHand, newBoard, newHand, hasMelded }) {
   return { ok: true, placedIds, meldedNow: !hasMelded };
 }
 
+/* valor de las fichas sin jugar al cerrar la partida por pozo vacio:
+   cada ficha vale su numero y el comodin vale 10 */
+const JOKER_HAND_POINTS = 10;
+
 function handPoints(hand) {
-  return hand.reduce((s, t) => s + (t.joker ? 30 : t.num), 0);
+  return hand.reduce((s, t) => s + (t.joker ? JOKER_HAND_POINTS : t.num), 0);
 }
 
 function meldLabel(meld) {

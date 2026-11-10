@@ -54,7 +54,6 @@ function createRouter({ Ledger } = {}) {
       turnDeadline: null,
       turnTimer: null,
       emptyTimer: null,
-      passStreak: 0,
       pendingPlay: null,
       lastResult: null,
       events: [],
@@ -98,7 +97,6 @@ function createRouter({ Ledger } = {}) {
   function beginGame(room) {
     room.pot = E.createDeck();
     room.board = [];
-    room.passStreak = 0;
     room.tileMap = null;
     room.status = 'playing';
     room.lastResult = null;
@@ -171,7 +169,6 @@ function createRouter({ Ledger } = {}) {
         room.board = pending.board;
         p.hand = pending.hand;
         if (result.meldedNow) p.hasMelded = true;
-        room.passStreak = 0;
         pushEvent(room, 'info', `${p.name} se quedó sin tiempo — su jugada era válida y fue aceptada.`);
         if (p.hand.length === 0) return finishGame(room, p, computeScores(room), 'se quedó sin fichas');
         nextTurn(room);
@@ -187,23 +184,19 @@ function createRouter({ Ledger } = {}) {
   }
 
   function drawForPlayer(room, p) {
-    if (room.pot.length > 0) {
-      p.hand.push(room.pot.pop());
-      room.passStreak = 0;
-    } else {
-      room.passStreak = (room.passStreak || 0) + 1;
-    }
+    if (room.pot.length > 0) p.hand.push(room.pot.pop());
   }
 
+  /* pozo vacio: la partida termina en ese momento. Se suman las fichas sin
+     jugar de cada jugador (comodin = 10) y gana quien menos tenga; en caso de
+     empate gana el primero en orden de asiento */
   function checkPotExhausted(room) {
-    if (room.pot.length === 0 && (room.passStreak || 0) >= room.players.length) {
-      const scores = computeScores(room);
-      const winner = room.players.reduce((a, b) =>
-        E.handPoints(b.hand) < E.handPoints(a.hand) ? b : a);
-      finishGame(room, winner, scores, 'pozo agotado — gana la menor puntuación');
-      return true;
-    }
-    return false;
+    if (room.pot.length > 0) return false;
+    const scores = computeScores(room);
+    const winner = room.players.reduce((a, b) =>
+      E.handPoints(b.hand) < E.handPoints(a.hand) ? b : a);
+    finishGame(room, winner, scores, 'pozo agotado — gana la menor puntuación');
+    return true;
   }
 
   function computeScores(room) {
@@ -266,6 +259,15 @@ function createRouter({ Ledger } = {}) {
     return a.map((t) => t.id).sort().join(',') === b.map((t) => t.id).sort().join(',');
   }
 
+  /* una jugada en curso solo puede redistribuir las fichas de la mesa y de la
+     mano del jugador: mismas fichas en total, sin duplicados, y la mano nueva
+     solo puede contener fichas que ya eran suyas (nada pasa de la mesa a la mano) */
+  function isRearrangement(room, player, board, hand) {
+    if (!sameIds([...board.flat(), ...hand], [...room.board.flat(), ...player.hand])) return false;
+    const own = new Set(player.hand.map((t) => t.id));
+    return hand.every((t) => own.has(t.id));
+  }
+
   /* ---------- acciones de juego ---------- */
 
   function doLiveBoard(room, player, body) {
@@ -274,6 +276,7 @@ function createRouter({ Ledger } = {}) {
     const resolvedBoard = resolveBoard(room, body.board);
     const resolvedHand = resolveHand(room, body.hand);
     if (!resolvedBoard || !resolvedHand) return err('Jugada malformada.');
+    if (!isRearrangement(room, player, resolvedBoard, resolvedHand)) return err('Jugada malformada.');
     room.pendingPlay = { board: resolvedBoard, hand: resolvedHand };
     relayLiveBoard(room, player, resolvedBoard);
     return ok();
@@ -300,7 +303,6 @@ function createRouter({ Ledger } = {}) {
     player.hand = newHand;
     room.tileMap = null;
     if (result.meldedNow) player.hasMelded = true;
-    room.passStreak = 0;
 
     if (player.hand.length === 0) {
       finishGame(room, player, computeScores(room), 'se quedó sin fichas');

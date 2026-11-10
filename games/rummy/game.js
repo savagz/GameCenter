@@ -449,7 +449,7 @@ function renderFooterButtons(st, myTurn) {
   $('btnUndo').disabled = !myTurn || S.placed.size === 0;
   $('btnDraw').disabled = !myTurn || !st || st.potCount === 0;
   $('btnEndTurn').disabled = !myTurn || S.placed.size === 0;
-  const value = S.rack.filter(Boolean).reduce((s, t) => s + (t.joker ? 30 : t.num), 0);
+  const value = S.rack.filter(Boolean).reduce((s, t) => s + (t.joker ? 10 : t.num), 0);
   $('handValue').textContent = value + ' pts';
 }
 

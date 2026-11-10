@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="game.css">
+<link rel="stylesheet" href="/shared/ui/turn-clock.css">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/ui/premium-home.css">
 </head>
@@ -212,9 +213,7 @@
         <span class="turn-label">Turno actual</span>
         <span class="turn-name" id="turnName">—</span>
       </div>
-      <span class="turn-die" aria-hidden="true">
-        <span class="die die-mini f5" id="turnDie"><i></i><i></i><i></i><i></i><i></i></span>
-      </span>
+      <span class="turn-clock is-hidden" id="turnClock" title="Tiempo del turno" aria-live="off"></span>
     </div>
 
     <div class="board-owner">
@@ -352,6 +351,7 @@
       <li>Cada partida define cuántos <b>lances consecutivos</b> tiene un turno como máximo.</li>
       <li>Al tapar tus 10 números entras en la <b>fase final</b>: un único lanzamiento, sin importar los lances.</li>
       <li>Si ese lanzamiento final suma <b>7</b>, ¡ganas! Si no, pierdes la oportunidad y sigue el siguiente jugador.</li>
+      <li>Con apuesta, la <b>jugada de castigo</b> se paga al pozo cada vez que sacas 7 antes de completar tu tablero y cada vez que fallas el tiro final. El ganador se lleva el pozo.</li>
     </ul>
     <button class="btn-main" type="button" id="btnCloseRules">Entendido</button>
   </div>
@@ -363,6 +363,7 @@
 <script>window.GC_BASE = new URL('.', location.href).pathname;</script>
 <script src="/shared/ui/turn-banner.js"></script>
 <script src="/shared/ui/victory-banner.js"></script>
+<script src="/shared/ui/turn-clock.js"></script>
 <script src="board.js"></script>
 <script src="game.js"></script>
 </body>

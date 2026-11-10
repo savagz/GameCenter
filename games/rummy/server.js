@@ -78,6 +78,7 @@ function createRouter({ Ledger } = {}) {
       hand: [],
       hasMelded: false,
       online: false,
+      offlineAt: Date.now(),
       streams: new Set()
     };
     room.players.push(player);
@@ -139,12 +140,9 @@ function createRouter({ Ledger } = {}) {
 
   function nextTurn(room) {
     if (room.status !== 'playing') return;
-    const n = room.players.length;
-    let idx = (room.turnIndex + 1) % n;
-    for (let i = 1; i <= n; i++) {
-      const cand = (room.turnIndex + i) % n;
-      if (room.players[cand].online) { idx = cand; break; }
-    }
+    /* siempre el siguiente que sigue en la partida; a un desconectado se le
+       salta el turno tras 25 s (scheduleSkipDisconnected) */
+    const idx = RK.nextActiveIndex(room);
     room.turnIndex = idx;
     startTurn(room);
   }
@@ -193,7 +191,7 @@ function createRouter({ Ledger } = {}) {
   function checkPotExhausted(room) {
     if (room.pot.length > 0) return false;
     const scores = computeScores(room);
-    const winner = room.players.reduce((a, b) =>
+    const winner = RK.activePlayers(room).reduce((a, b) =>
       E.handPoints(b.hand) < E.handPoints(a.hand) ? b : a);
     finishGame(room, winner, scores, 'pozo agotado — gana la menor puntuación');
     return true;
@@ -213,6 +211,21 @@ function createRouter({ Ledger } = {}) {
     }
     pushEvent(room, 'win', `${winner.name} gana (${reason}).`);
     room.lastResult = { seq: room.eventSeq, winnerId: winner.id, winnerName: winner.name, scores, reason, prize };
+  }
+
+  /* salir durante la partida o al terminarla: el jugador queda fuera de los
+     turnos, cobros y revanchas. Si solo queda un jugador en la partida, gana
+     por abandono de los demas */
+  function leaveGame(room, player) {
+    const wasCurrent = room.status === 'playing' && currentPlayer(room) === player;
+    RK.markLeft(room, player);
+    if (room.status !== 'playing') return;
+    const active = RK.activePlayers(room);
+    if (active.length < 2) {
+      if (active.length === 1) finishGame(room, active[0], computeScores(room), 'abandono de los demás jugadores');
+      return;
+    }
+    if (wasCurrent) nextTurn(room);
   }
 
   /* ---------- mesa: resolver ids -> fichas ---------- */
@@ -396,6 +409,7 @@ function createRouter({ Ledger } = {}) {
     res.write('retry: 2000\n\n');
 
     player.streams.add(res);
+    RK.cancelLobbyRemoval(player);
     const wasOffline = !player.online;
     player.online = true;
     clearEmptyTimer(room);
@@ -410,10 +424,15 @@ function createRouter({ Ledger } = {}) {
       player.streams.delete(res);
       if (player.streams.size > 0) return;
       player.online = false;
+      player.offlineAt = Date.now();
 
       if (room.status === 'lobby') {
-        const deleted = removePlayer(room, player);
-        if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        /* margen de gracia: una recarga o un corte breve no expulsan de la sala */
+        RK.scheduleLobbyRemoval(room, player, () => {
+          const deleted = removePlayer(room, player);
+          if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        });
+        broadcast(room);
         return;
       }
 
@@ -442,6 +461,9 @@ function createRouter({ Ledger } = {}) {
   }
 
   RK.scheduleRoomCleanup(rooms, { gameSlug: 'rummy', Ledger, onDispose: clearTurnTimer });
+  /* desconectado mas de 25 s en su turno: se salta (roba como al agotar el tiempo) */
+  RK.scheduleSkipDisconnected(rooms, { nextTurn: (room) => autoPass(room), broadcast });
+  RK.scheduleHostCheck(rooms, { broadcast });
 
   /* ---------- acciones ---------- */
 
@@ -462,6 +484,11 @@ function createRouter({ Ledger } = {}) {
       if (nameResult.error) return err(nameResult.error);
       const player = addPlayer(room, nameResult.name);
       pushEvent(room, 'info', `${player.name} se unió a la sala.`);
+      /* quien se une y nunca abre la conexion no ocupa el asiento para siempre */
+      RK.scheduleLobbyRemoval(room, player, () => {
+        const deleted = removePlayer(room, player);
+        if (!deleted) { pushEvent(room, 'info', `${player.name} no llegó a conectarse y salió de la sala.`); broadcast(room); }
+      }, RK.GHOST_MS);
       broadcast(room);
       return ok({ roomId: room.id, playerId: player.id, token: player.token, state: stateFor(room, player) });
     }
@@ -477,6 +504,10 @@ function createRouter({ Ledger } = {}) {
       case 'start':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede iniciar.'); break; }
         if (room.status === 'playing') { result = err('La partida ya está en curso.'); break; }
+        if (room.status === 'finished') {
+          const restartError = RK.prepareRestart(room);
+          if (restartError) { result = err(restartError); break; }
+        }
         if (room.players.length < 2) { result = err('Se necesitan al menos 2 jugadores.'); break; }
         beginGame(room);
         result = ok();
@@ -489,6 +520,7 @@ function createRouter({ Ledger } = {}) {
       case 'restart':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede reiniciar.'); break; }
         if (room.status !== 'finished') { result = err('La partida sigue en curso.'); break; }
+        { const restartError = RK.prepareRestart(room); if (restartError) { result = err(restartError); break; } }
         pushEvent(room, 'info', 'Nueva partida con los mismos jugadores.');
         beginGame(room);
         result = ok();
@@ -498,6 +530,8 @@ function createRouter({ Ledger } = {}) {
         if (room.status === 'lobby') {
           if (removePlayer(room, player)) return ok();
           pushEvent(room, 'info', `${player.name} salió de la sala.`);
+        } else {
+          leaveGame(room, player);
         }
         result = ok();
         break;

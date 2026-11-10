@@ -35,7 +35,7 @@ function createRouter({ Ledger } = {}) {
     const bettingEnabled = !!(cfg && cfg.bettingEnabled);
     const config = {
       maxPlayers: clampInt(cfg && cfg.maxPlayers, 2, 8, 6),
-      startMarbles: clampInt(cfg && cfg.startMarbles, 3, 30, 10),
+      startMarbles: clampInt(cfg && cfg.startMarbles, 10, 20, 10),
       bettingEnabled,
       apuesta: bettingEnabled ? clampInt(cfg && cfg.apuesta, 0, 1e7, 500) : 0
     };
@@ -99,13 +99,16 @@ function createRouter({ Ledger } = {}) {
       }
     }
 
-    room.turnIndex = 0;
+    room.lastRoll = null;
+    room.turnIndex = Math.floor(Math.random() * room.players.length);   /* sorteo de quien empieza */
+    pushEvent(room, 'info', `Sorteo: empieza ${room.players[room.turnIndex].name}.`);
     pushEvent(room, 'start',
       `Comienza la partida. Cada jugador tiene ${room.config.startMarbles} canicas.`);
     beginTurn(room);
   }
 
   function beginTurn(room) {
+    RK.touchTurn(room);
     clearEndTimer(room);
     room.turn = null;
     room.rollLock = false;
@@ -133,17 +136,14 @@ function createRouter({ Ledger } = {}) {
 
   function nextTurn(room) {
     if (room.status !== 'playing') return;
-    const n = room.players.length;
-    let idx = (room.turnIndex + 1) % n;   /* por defecto, el siguiente */
-    for (let i = 1; i <= n; i++) {        /* si hay alguien conectado, ese */
-      const cand = (room.turnIndex + i) % n;
-      if (room.players[cand].online) { idx = cand; break; }
-    }
+    /* siempre el siguiente que sigue en la partida; a un desconectado se le
+       salta el turno tras 25 s (scheduleSkipDisconnected) */
+    const idx = RK.nextActiveIndex(room);
     room.turnIndex = idx;
     beginTurn(room);
   }
 
-  function finishGame(room, winner, reason) {
+  function finishGame(room, winner, reason, text) {
     clearEndTimer(room);
     room.status = 'finished';
     room.winnerId = winner.id;
@@ -153,7 +153,22 @@ function createRouter({ Ledger } = {}) {
     if (Ledger && prize) {
       Ledger.recordWin({ gameSlug: 'porqueyo', roomCode: room.id, playerId: winner.id, playerName: winner.name, amount: prize, reason });
     }
-    pushEvent(room, 'win', `${winner.name} se queda sin canicas ${reason} y gana la partida.`);
+    pushEvent(room, 'win', text || `${winner.name} se queda sin canicas ${reason} y gana la partida.`);
+  }
+
+  /* salir durante la partida o al terminarla: el jugador queda fuera de los
+     turnos, cobros y revanchas. Si solo queda un jugador en la partida, gana
+     por abandono de los demas */
+  function leaveGame(room, player) {
+    const wasCurrent = room.status === 'playing' && currentPlayer(room) === player;
+    RK.markLeft(room, player);
+    if (room.status !== 'playing') return;
+    const active = RK.activePlayers(room);
+    if (active.length < 2) {
+      if (active.length === 1) finishGame(room, active[0], 'por abandono de los demás jugadores', `${active[0].name} gana por abandono de los demás jugadores.`);
+      return;
+    }
+    if (wasCurrent) { clearEndTimer(room); nextTurn(room); }
   }
 
   /* ---------- lanzar el dado (resuelve todo el turno de una vez) ---------- */
@@ -190,6 +205,7 @@ function createRouter({ Ledger } = {}) {
       face,
       resolution: res
     };
+    room.lastRoll = room.turn;   /* el dado y el panel la conservan entre turnos */
     pushEvent(room, 'roll', text);
 
     const decreased = res.type === 'black' || res.type === 'place';
@@ -219,6 +235,8 @@ function createRouter({ Ledger } = {}) {
       config: room.config,
       winnerId: room.winnerId,
       currentId: room.status === 'playing' && cur ? cur.id : null,
+      turnDeadline: RK.turnDeadline(room),
+      now: Date.now(),
       board: room.board,
       players: room.players.map((p) => ({
         id: p.id,
@@ -227,6 +245,7 @@ function createRouter({ Ledger } = {}) {
         online: p.online
       })),
       turn: room.turn,
+      lastRoll: room.lastRoll || null,
       events: room.events.slice(-10),
       prize: room.status === 'finished' ? (room.lastPrize || 0) : 0
     };
@@ -255,6 +274,7 @@ function createRouter({ Ledger } = {}) {
     res.write('retry: 2000\n\n');
 
     player.streams.add(res);
+    RK.cancelLobbyRemoval(player);
     player.online = true;
     player.hasConnected = true;
 
@@ -270,8 +290,12 @@ function createRouter({ Ledger } = {}) {
       player.offlineAt = Date.now();
 
       if (room.status === 'lobby') {
-        const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'porqueyo' });
-        if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        /* margen de gracia: una recarga o un corte breve no expulsan de la sala */
+        RK.scheduleLobbyRemoval(room, player, () => {
+          const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'porqueyo' });
+          if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        });
+        broadcast(room);
         return;
       }
 
@@ -286,7 +310,19 @@ function createRouter({ Ledger } = {}) {
   }
 
   RK.scheduleSkipDisconnected(rooms, { nextTurn, broadcast });
+  RK.scheduleIdleTurns(rooms, {
+    broadcast,
+    /* en este juego el turno es un unico lanzamiento: si se agota el tiempo
+       se lanza el dado automaticamente por el jugador (el turno pasa despues,
+       como en cualquier tirada) */
+    onIdle(room, cur) {
+      if (room.rollLock) return;
+      pushEvent(room, 'timeout', `${cur.name} no lanzó en 45 s: el dado se lanza automáticamente.`);
+      doRoll(room, cur);
+    }
+  });
   RK.scheduleRoomCleanup(rooms, { gameSlug: 'porqueyo', Ledger });
+  RK.scheduleHostCheck(rooms, { broadcast });
 
   /* ---------- acciones ---------- */
 
@@ -307,6 +343,11 @@ function createRouter({ Ledger } = {}) {
       if (nameResult.error) return err(nameResult.error);
       const player = addPlayer(room, nameResult.name);
       pushEvent(room, 'info', `${player.name} se unió a la sala.`);
+      /* quien se une y nunca abre la conexion no ocupa el asiento para siempre */
+      RK.scheduleLobbyRemoval(room, player, () => {
+        const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'porqueyo' });
+        if (!deleted) { pushEvent(room, 'info', `${player.name} no llegó a conectarse y salió de la sala.`); broadcast(room); }
+      }, RK.GHOST_MS);
       broadcast(room);
       return ok({ roomId: room.id, playerId: player.id, token: player.token, state: publicState(room) });
     }
@@ -316,12 +357,17 @@ function createRouter({ Ledger } = {}) {
     if (!room) return err('No existe esa sala.');
     const player = findPlayer(room, body.playerId, body.token);
     if (!player) return err('Jugador no reconocido.');
+    if (room.status === 'playing' && action !== 'state' && RK.currentPlayer(room) === player) RK.touchTurn(room);
 
     let result;
     switch (action) {
       case 'start':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede iniciar.'); break; }
         if (room.status === 'playing') { result = err('La partida ya está en curso.'); break; }
+        if (room.status === 'finished') {
+          const restartError = RK.prepareRestart(room);
+          if (restartError) { result = err(restartError); break; }
+        }
         if (room.players.length < 2) { result = err('Se necesitan al menos 2 jugadores.'); break; }
         startGame(room);
         result = ok();
@@ -332,6 +378,7 @@ function createRouter({ Ledger } = {}) {
       case 'restart':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede reiniciar.'); break; }
         if (room.status !== 'finished') { result = err('La partida sigue en curso.'); break; }
+        { const restartError = RK.prepareRestart(room); if (restartError) { result = err(restartError); break; } }
         pushEvent(room, 'info', 'Nueva partida con los mismos jugadores.');
         startGame(room);
         result = ok();
@@ -341,6 +388,8 @@ function createRouter({ Ledger } = {}) {
         if (room.status === 'lobby') {
           if (RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'porqueyo' })) return ok();
           pushEvent(room, 'info', `${player.name} salió de la sala.`);
+        } else {
+          leaveGame(room, player);
         }
         result = ok();
         break;

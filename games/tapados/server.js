@@ -79,12 +79,9 @@ function createRouter({ Ledger } = {}) {
 
   /* siguiente indice de turno: prioriza jugadores conectados */
   function computeNextIndex(room) {
-    const n = room.players.length;
-    let idx = (room.turnIndex + 1) % n;
-    for (let i = 1; i <= n; i++) {
-      const cand = (room.turnIndex + i) % n;
-      if (room.players[cand].online) { idx = cand; break; }
-    }
+    /* siempre el siguiente que sigue en la partida; a un desconectado se le
+       salta el turno tras 25 s (scheduleSkipDisconnected) */
+    const idx = RK.nextActiveIndex(room);
     return idx;
   }
 
@@ -95,6 +92,7 @@ function createRouter({ Ledger } = {}) {
   function startGame(room) {
     room.status = 'playing';
     room.winnerId = null;
+    room.lastDie = null;   /* ultima tirada de la partida: el dado la conserva entre turnos */
 
     for (const p of room.players) {
       p.board = E.newBoard();
@@ -103,12 +101,14 @@ function createRouter({ Ledger } = {}) {
       }
     }
 
-    room.turnIndex = 0;
+    room.turnIndex = Math.floor(Math.random() * room.players.length);   /* sorteo de quien empieza */
+    pushEvent(room, 'info', `Sorteo: empieza ${room.players[room.turnIndex].name}.`);
     pushEvent(room, 'start', 'Comienza la partida. ¡Buena suerte a todos!');
     beginTurn(room);
   }
 
   function beginTurn(room) {
+    RK.touchTurn(room);
     clearEndTimer(room);
     room.turn = {
       rolled: false,
@@ -148,13 +148,29 @@ function createRouter({ Ledger } = {}) {
     clearEndTimer(room);
     room.status = 'finished';
     room.winnerId = winner.id;
-    room.turn = null;
+    /* room.turn se conserva: el cliente anima la tirada ganadora (dado y
+       registro) antes de mostrar el modal; startGame lo reinicia */
     const prize = room.config.bettingEnabled ? room.config.apuesta * room.players.length : 0;
     room.lastPrize = prize;
     if (Ledger && prize) {
       Ledger.recordWin({ gameSlug: 'tapados', roomCode: room.id, playerId: winner.id, playerName: winner.name, amount: prize, reason });
     }
     pushEvent(room, 'win', `${winner.name} gana ${reason}.`);
+  }
+
+  /* salir durante la partida o al terminarla: el jugador queda fuera de los
+     turnos, cobros y revanchas. Si solo queda un jugador en la partida, gana
+     por abandono de los demas */
+  function leaveGame(room, player) {
+    const wasCurrent = room.status === 'playing' && currentPlayer(room) === player;
+    RK.markLeft(room, player);
+    if (room.status !== 'playing') return;
+    const active = RK.activePlayers(room);
+    if (active.length < 2) {
+      if (active.length === 1) finishGame(room, active[0], 'por abandono de los demás jugadores');
+      return;
+    }
+    if (wasCurrent) { clearEndTimer(room); nextTurn(room); }
   }
 
   /* ---------- lanzar ---------- */
@@ -172,6 +188,7 @@ function createRouter({ Ledger } = {}) {
 
     t.rolled = true;
     t.die = die;
+    room.lastDie = die;
     t.action = wasCovered ? 'uncovered' : 'covered';
     t.log.push({ n: 1, die, result: t.action });
 
@@ -208,6 +225,8 @@ function createRouter({ Ledger } = {}) {
       config: room.config,
       winnerId: room.winnerId,
       currentId: room.status === 'playing' && cur ? cur.id : null,
+      turnDeadline: RK.turnDeadline(room),
+      now: Date.now(),
       players: room.players.map((p) => ({
         id: p.id,
         name: p.name,
@@ -215,6 +234,7 @@ function createRouter({ Ledger } = {}) {
         filled: E.boardFilled(p.board),
         board: p.board
       })),
+      lastDie: room.lastDie || null,
       turn: t
         ? {
             rolled: t.rolled,
@@ -253,6 +273,7 @@ function createRouter({ Ledger } = {}) {
     res.write('retry: 2000\n\n');
 
     player.streams.add(res);
+    RK.cancelLobbyRemoval(player);
     player.online = true;
     player.hasConnected = true;
 
@@ -268,8 +289,12 @@ function createRouter({ Ledger } = {}) {
       player.offlineAt = Date.now();
 
       if (room.status === 'lobby') {
-        const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'tapados' });
-        if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        /* margen de gracia: una recarga o un corte breve no expulsan de la sala */
+        RK.scheduleLobbyRemoval(room, player, () => {
+          const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'tapados' });
+          if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        });
+        broadcast(room);
         return;
       }
 
@@ -284,7 +309,16 @@ function createRouter({ Ledger } = {}) {
   }
 
   RK.scheduleSkipDisconnected(rooms, { nextTurn, broadcast });
+  RK.scheduleIdleTurns(rooms, {
+    broadcast,
+    onIdle(room, cur) {
+      pushEvent(room, 'timeout', `${cur.name} no jugó en 45 s: pierde el turno.`);
+      clearEndTimer(room);
+      nextTurn(room);
+    }
+  });
   RK.scheduleRoomCleanup(rooms, { gameSlug: 'tapados', Ledger });
+  RK.scheduleHostCheck(rooms, { broadcast });
 
   /* ---------- acciones ---------- */
 
@@ -305,6 +339,11 @@ function createRouter({ Ledger } = {}) {
       if (nameResult.error) return err(nameResult.error);
       const player = addPlayer(room, nameResult.name);
       pushEvent(room, 'info', `${player.name} se unió a la sala.`);
+      /* quien se une y nunca abre la conexion no ocupa el asiento para siempre */
+      RK.scheduleLobbyRemoval(room, player, () => {
+        const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'tapados' });
+        if (!deleted) { pushEvent(room, 'info', `${player.name} no llegó a conectarse y salió de la sala.`); broadcast(room); }
+      }, RK.GHOST_MS);
       broadcast(room);
       return ok({ roomId: room.id, playerId: player.id, token: player.token, state: publicState(room) });
     }
@@ -314,12 +353,17 @@ function createRouter({ Ledger } = {}) {
     if (!room) return err('No existe esa sala.');
     const player = findPlayer(room, body.playerId, body.token);
     if (!player) return err('Jugador no reconocido.');
+    if (room.status === 'playing' && action !== 'state' && RK.currentPlayer(room) === player) RK.touchTurn(room);
 
     let result;
     switch (action) {
       case 'start':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede iniciar.'); break; }
         if (room.status === 'playing') { result = err('La partida ya está en curso.'); break; }
+        if (room.status === 'finished') {
+          const restartError = RK.prepareRestart(room);
+          if (restartError) { result = err(restartError); break; }
+        }
         if (room.players.length < 2) { result = err('Se necesitan al menos 2 jugadores.'); break; }
         startGame(room);
         result = ok();
@@ -330,6 +374,7 @@ function createRouter({ Ledger } = {}) {
       case 'restart':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede reiniciar.'); break; }
         if (room.status !== 'finished') { result = err('La partida sigue en curso.'); break; }
+        { const restartError = RK.prepareRestart(room); if (restartError) { result = err(restartError); break; } }
         pushEvent(room, 'info', 'Nueva partida con los mismos jugadores.');
         startGame(room);
         result = ok();
@@ -339,6 +384,8 @@ function createRouter({ Ledger } = {}) {
         if (room.status === 'lobby') {
           if (RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'tapados' })) return ok();
           pushEvent(room, 'info', `${player.name} salió de la sala.`);
+        } else {
+          leaveGame(room, player);
         }
         result = ok();
         break;

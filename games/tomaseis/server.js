@@ -17,6 +17,8 @@ const ROOT = __dirname;
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 10; /* 104 cartas = 10 jugadores x 10 cartas + 4 de las filas */
 const REVEAL_PAUSE_MS = 1100; /* pausa entre cada carta revelada al resolver la ronda */
+const CHOOSE_SECONDS = 45;    /* tiempo para elegir carta; al agotarse se juega la mas baja */
+const ROW_SECONDS = 20;       /* tiempo para elegir fila; al agotarse se toma la mas barata */
 
 function createRouter({ Ledger } = {}) {
   const router = express.Router();
@@ -58,6 +60,8 @@ function createRouter({ Ledger } = {}) {
       awaitingPlayerId: null,
       placements: [],
       resolveTimer: null,
+      phaseTimer: null,
+      deadline: null,
       emptyTimer: null,
       lastResult: null,
       events: [],
@@ -80,8 +84,10 @@ function createRouter({ Ledger } = {}) {
       name: cleanName(name, `Jugador ${room.players.length + 1}`),
       hand: [],
       stars: 0,
+      cardsTaken: 0,
       chosenCardId: null,
       online: false,
+      offlineAt: Date.now(),
       streams: new Set()
     };
     room.players.push(player);
@@ -103,7 +109,12 @@ function createRouter({ Ledger } = {}) {
     room.round = 0;
     room.status = 'playing';
     room.lastResult = null;
-    room.players.forEach((p, i) => { p.hand = hands[i]; p.stars = 0; p.chosenCardId = null; });
+    room.players.forEach((p, i) => { p.hand = hands[i]; p.stars = 0; p.cardsTaken = 0; p.chosenCardId = null; });
+    if (Ledger && room.config.bettingEnabled && room.config.apuesta) {
+      for (const p of room.players) {
+        Ledger.recordEntry({ gameSlug: 'tomaseis', roomCode: room.id, playerId: p.id, playerName: p.name, amount: room.config.apuesta });
+      }
+    }
 
     pushEvent(room, 'start', 'Comienza la partida. ¡Buena suerte a todos!');
     startRound(room);
@@ -123,8 +134,59 @@ function createRouter({ Ledger } = {}) {
     }
   }
 
-  function startRound(room) {
+  function clearPhaseTimer(room) {
+    if (room.phaseTimer) {
+      clearTimeout(room.phaseTimer);
+      room.phaseTimer = null;
+    }
+    room.deadline = null;
+  }
+
+  function clearAllTimers(room) {
     clearResolveTimer(room);
+    clearPhaseTimer(room);
+  }
+
+  /* reloj de la fase actual (elegir carta o elegir fila): al vencer ejecuta
+     la jugada automatica y transmite el nuevo estado */
+  function startPhaseTimer(room, seconds, onExpire) {
+    clearPhaseTimer(room);
+    room.deadline = Date.now() + seconds * 1000;
+    room.phaseTimer = setTimeout(() => {
+      room.phaseTimer = null;
+      room.deadline = null;
+      if (room.status !== 'playing') return;
+      onExpire();
+      broadcast(room);
+    }, seconds * 1000);
+  }
+
+  /* quien no eligio a tiempo juega su carta mas baja (la mano esta ordenada) */
+  function autoChooseCards(room) {
+    if (room.phase !== 'choosing') return;
+    for (const p of room.players) {
+      if (p.chosenCardId || p.hand.length === 0) continue;
+      p.chosenCardId = p.hand[0].id;
+      pushEvent(room, 'info', `${p.name} no eligió a tiempo: se juega automáticamente su carta más baja.`);
+    }
+    beginReveal(room);
+    resolveLoop(room);
+  }
+
+  /* fila mas barata: menos estrellas; si empatan, menos cartas; si siguen
+     empatadas, la de menor indice */
+  function cheapestRowIndex(rows) {
+    let best = 0;
+    rows.forEach((row, i) => {
+      const s = E.rowStars(row);
+      const bs = E.rowStars(rows[best]);
+      if (s < bs || (s === bs && row.length < rows[best].length)) best = i;
+    });
+    return best;
+  }
+
+  function startRound(room) {
+    clearAllTimers(room);
     room.round += 1;
     room.phase = 'choosing';
     room.resolveQueue = null;
@@ -137,13 +199,20 @@ function createRouter({ Ledger } = {}) {
     const isLastRound = active.length > 0 && active.every((p) => p.hand.length === 1);
     if (isLastRound) {
       active.forEach((p) => { p.chosenCardId = p.hand[0].id; });
-      pushEvent(room, 'lastRound', 'Última carta: se juega automáticamente para todos.');
+      pushEvent(room, 'lastRound', 'Última ronda: a cada jugador le queda una sola carta y se juega automáticamente.');
       beginReveal(room);
       resolveLoop(room);
       return;
     }
 
     pushEvent(room, 'turn', `Ronda ${room.round}: elige una carta.`);
+    for (const p of room.players) {
+      if (p.left && p.hand.length > 0) {
+        p.chosenCardId = p.hand[0].id;
+        pushEvent(room, 'info', `${p.name} abandonó: se juega automáticamente su carta más baja.`);
+      }
+    }
+    startPhaseTimer(room, CHOOSE_SECONDS, () => autoChooseCards(room));
   }
 
   function beginReveal(room) {
@@ -151,6 +220,7 @@ function createRouter({ Ledger } = {}) {
       .filter((p) => p.chosenCardId)
       .map((p) => ({ playerId: p.id, card: p.hand.find((c) => c.id === p.chosenCardId) }))
       .sort((a, b) => a.card.num - b.card.num);
+    clearPhaseTimer(room);
     room.resolveQueue = queue;
     room.resolveIndex = 0;
     room.placements = [];
@@ -184,6 +254,13 @@ function createRouter({ Ledger } = {}) {
       room.phase = 'awaitingRow';
       room.awaitingPlayerId = item.playerId;
       pushEvent(room, 'info', `${player.name} debe elegir una fila: su ${card.num} es menor que todas.`);
+      startPhaseTimer(room, ROW_SECONDS, () => {
+        if (room.phase !== 'awaitingRow' || room.awaitingPlayerId !== player.id) return;
+        const ri = cheapestRowIndex(room.rows);
+        pushEvent(room, 'info', `${player.name} no eligió fila a tiempo: se lleva automáticamente la fila ${ri + 1}, ` +
+          `la más barata (★ ${E.rowStars(room.rows[ri])}, ${room.rows[ri].length} carta${room.rows[ri].length === 1 ? '' : 's'}).`);
+        resolveAwaitingRow(room, ri);
+      });
       broadcast(room);
       return;
     }
@@ -206,6 +283,7 @@ function createRouter({ Ledger } = {}) {
     if (taken.length > 0) {
       const gained = E.rowStars(taken);
       player.stars += gained;
+      player.cardsTaken += taken.length;
       pushEvent(room, 'info', `${player.name} se lleva ${taken.length} cartas (+${gained} estrellas).`);
     }
     room.placements.push({ playerId: player.id, card, rowIndex: result.rowIndex, taken, mode: result.type });
@@ -216,9 +294,11 @@ function createRouter({ Ledger } = {}) {
     const item = room.resolveQueue[room.resolveIndex];
     const player = room.players.find((p) => p.id === item.playerId);
     const card = item.card;
+    clearPhaseTimer(room);
     const taken = room.rows[rowIndex];
     room.rows[rowIndex] = [card];
     player.stars += E.rowStars(taken);
+    player.cardsTaken += taken.length;
     pushEvent(room, 'info', `${player.name} elige la fila y se lleva ${taken.length} cartas (+${E.rowStars(taken)} estrellas).`);
     room.placements.push({ playerId: player.id, card, rowIndex, taken, mode: 'choice' });
     player.hand = player.hand.filter((c) => c.id !== card.id);
@@ -239,16 +319,72 @@ function createRouter({ Ledger } = {}) {
     startRound(room);
   }
 
+  /* gana quien tenga menos estrellas; si empatan, quien se haya llevado menos
+     cartas; si siguen empatados, la partida termina en empate y el bote se
+     reparte a partes iguales entre ellos */
   function endGame(room) {
+    clearAllTimers(room);
     room.status = 'finished';
-    const scores = room.players.map((p) => ({ id: p.id, name: p.name, points: p.stars }));
-    const winner = room.players.reduce((a, b) => (b.stars < a.stars ? b : a));
+    const scores = room.players.map((p) => ({ id: p.id, name: p.name, points: p.stars, cards: p.cardsTaken }));
+    const contenders = RK.activePlayers(room).length ? RK.activePlayers(room) : room.players;
+    const minStars = Math.min(...contenders.map((p) => p.stars));
+    const byStars = contenders.filter((p) => p.stars === minStars);
+    const minCards = Math.min(...byStars.map((p) => p.cardsTaken));
+    const winners = byStars.filter((p) => p.cardsTaken === minCards);
+    const tie = winners.length > 1;
+    const reason = tie
+      ? `empate con ${minStars} estrellas y ${minCards} cartas`
+      : byStars.length > 1
+        ? `menos cartas recogidas en el empate a ${minStars} estrellas`
+        : 'menor cantidad de estrellas';
+
     const prize = room.config.bettingEnabled ? room.config.apuesta * room.players.length : 0;
+    const share = winners.length ? Math.floor(prize / winners.length) : 0;
     if (Ledger && prize) {
-      Ledger.recordWin({ gameSlug: 'tomaseis', roomCode: room.id, playerId: winner.id, playerName: winner.name, amount: prize, reason: 'menor cantidad de estrellas' });
+      winners.forEach((w, i) => {
+        const amount = share + (i === 0 ? prize - share * winners.length : 0);
+        Ledger.recordWin({ gameSlug: 'tomaseis', roomCode: room.id, playerId: w.id, playerName: w.name, amount, reason });
+      });
     }
-    pushEvent(room, 'win', `${winner.name} gana con ${winner.stars} estrellas.`);
-    room.lastResult = { seq: room.eventSeq, winnerId: winner.id, winnerName: winner.name, scores, reason: 'menor cantidad de estrellas', prize };
+
+    const names = winners.map((w) => w.name);
+    pushEvent(room, 'win', tie
+      ? `Empate entre ${names.join(' y ')} con ${minStars} estrellas y ${minCards} cartas.`
+      : `${names[0]} gana con ${minStars} estrellas (${reason}).`);
+    room.lastResult = {
+      seq: room.eventSeq,
+      tie,
+      winnerIds: winners.map((w) => w.id),
+      winnerId: tie ? null : winners[0].id,
+      winnerName: tie ? null : winners[0].name,
+      winnerNames: names,
+      scores,
+      reason,
+      prize,
+      share: tie ? share : prize
+    };
+  }
+
+  /* salir durante la partida o al terminarla: el jugador queda fuera de los
+     turnos, cobros y revanchas. Si solo queda un jugador en la partida, gana
+     por abandono de los demas */
+  function leaveGame(room, player) {
+    RK.markLeft(room, player);
+    if (room.status !== 'playing') return;
+    if (RK.activePlayers(room).length < 2) { endGame(room); return; }
+    /* no se espera al reloj: su carta o su fila se resuelven ya */
+    if (room.phase === 'choosing' && !player.chosenCardId && player.hand.length > 0) {
+      player.chosenCardId = player.hand[0].id;
+      pushEvent(room, 'info', `${player.name} abandonó: se juega automáticamente su carta más baja.`);
+      if (room.players.every((p) => p.chosenCardId || p.hand.length === 0)) {
+        beginReveal(room);
+        resolveLoop(room);
+      }
+    } else if (room.phase === 'awaitingRow' && room.awaitingPlayerId === player.id) {
+      const ri = cheapestRowIndex(room.rows);
+      pushEvent(room, 'info', `${player.name} abandonó: se lleva automáticamente la fila ${ri + 1}, la más barata.`);
+      resolveAwaitingRow(room, ri);
+    }
   }
 
   /* ---------- acciones de juego ---------- */
@@ -311,6 +447,8 @@ function createRouter({ Ledger } = {}) {
       resolveIndex: room.resolveIndex,
       placements: room.placements,
       awaitingPlayerId: room.awaitingPlayerId,
+      deadline: room.status === 'playing' ? room.deadline : null,
+      now: Date.now(),
       result: room.status === 'finished' ? room.lastResult : null,
       events: room.events.slice(-10)
     };
@@ -339,6 +477,7 @@ function createRouter({ Ledger } = {}) {
     res.write('retry: 2000\n\n');
 
     player.streams.add(res);
+    RK.cancelLobbyRemoval(player);
     const wasOffline = !player.online;
     player.online = true;
     clearEmptyTimer(room);
@@ -353,10 +492,15 @@ function createRouter({ Ledger } = {}) {
       player.streams.delete(res);
       if (player.streams.size > 0) return;
       player.online = false;
+      player.offlineAt = Date.now();
 
       if (room.status === 'lobby') {
-        const deleted = removePlayer(room, player);
-        if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        /* margen de gracia: una recarga o un corte breve no expulsan de la sala */
+        RK.scheduleLobbyRemoval(room, player, () => {
+          const deleted = removePlayer(room, player);
+          if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        });
+        broadcast(room);
         return;
       }
 
@@ -366,7 +510,7 @@ function createRouter({ Ledger } = {}) {
         room.emptyTimer = setTimeout(() => {
           room.emptyTimer = null;
           if (room.players.every((p) => !p.online)) {
-            clearResolveTimer(room);
+            clearAllTimers(room);
             rooms.delete(room.id);
             if (Ledger) Ledger.disposeRoom('tomaseis', room.id);
           }
@@ -381,7 +525,8 @@ function createRouter({ Ledger } = {}) {
     broadcast(room);
   }
 
-  RK.scheduleRoomCleanup(rooms, { gameSlug: 'tomaseis', Ledger, onDispose: clearResolveTimer });
+  RK.scheduleRoomCleanup(rooms, { gameSlug: 'tomaseis', Ledger, onDispose: clearAllTimers });
+  RK.scheduleHostCheck(rooms, { broadcast });
 
   /* ---------- acciones ---------- */
 
@@ -402,6 +547,11 @@ function createRouter({ Ledger } = {}) {
       if (nameResult.error) return err(nameResult.error);
       const player = addPlayer(room, nameResult.name);
       pushEvent(room, 'info', `${player.name} se unió a la sala.`);
+      /* quien se une y nunca abre la conexion no ocupa el asiento para siempre */
+      RK.scheduleLobbyRemoval(room, player, () => {
+        const deleted = removePlayer(room, player);
+        if (!deleted) { pushEvent(room, 'info', `${player.name} no llegó a conectarse y salió de la sala.`); broadcast(room); }
+      }, RK.GHOST_MS);
       broadcast(room);
       return ok({ roomId: room.id, playerId: player.id, token: player.token, state: stateFor(room, player) });
     }
@@ -417,6 +567,10 @@ function createRouter({ Ledger } = {}) {
       case 'start':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede iniciar.'); break; }
         if (room.status === 'playing') { result = err('La partida ya está en curso.'); break; }
+        if (room.status === 'finished') {
+          const restartError = RK.prepareRestart(room);
+          if (restartError) { result = err(restartError); break; }
+        }
         if (room.players.length < MIN_PLAYERS) { result = err('Se necesitan al menos 2 jugadores.'); break; }
         beginGame(room);
         result = ok();
@@ -428,6 +582,7 @@ function createRouter({ Ledger } = {}) {
       case 'restart':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede reiniciar.'); break; }
         if (room.status !== 'finished') { result = err('La partida sigue en curso.'); break; }
+        { const restartError = RK.prepareRestart(room); if (restartError) { result = err(restartError); break; } }
         pushEvent(room, 'info', 'Nueva partida con los mismos jugadores.');
         beginGame(room);
         result = ok();
@@ -437,6 +592,8 @@ function createRouter({ Ledger } = {}) {
         if (room.status === 'lobby') {
           if (removePlayer(room, player)) return ok();
           pushEvent(room, 'info', `${player.name} salió de la sala.`);
+        } else {
+          leaveGame(room, player);
         }
         result = ok();
         break;

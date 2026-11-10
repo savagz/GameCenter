@@ -121,6 +121,8 @@ const S = {
   animQueue: [],
   animBusy: false,
   reminderTimer: null,
+  clockOffset: 0,
+  clockTimer: null,
   confirmPending: false,
   confirmedCardId: null
 };
@@ -155,6 +157,17 @@ function connect() {
   });
 
   src.onerror = () => {
+    /* 403/404: el servidor ya no reconoce al jugador o la sala no existe; el
+       navegador no vuelve a intentarlo, asi que se comprueba y se vuelve al inicio */
+    if (src.readyState === EventSource.CLOSED) {
+      if (S.source !== src) return;
+      api('state')
+        .then(() => setTimeout(() => { if (S.source === src) connect(); }, 1500))
+        .catch((e) => leaveToHome(/reconocido/.test(e.message)
+          ? 'Ya no formas parte de esa sala.'
+          : 'La sala ya no existe.'));
+      return;
+    }
     S.errors += 1;
     if (S.errors === 3) toast('Conexión interrumpida, reintentando…', 'info');
     if (S.errors > 12) { src.close(); leaveToHome('No se pudo restablecer la conexión.'); }
@@ -179,6 +192,7 @@ function leaveToHome(message) {
   S.lastBannerKey = null;
   S.displayRows = null; S.animQueue = []; S.animBusy = false; S.confirmPending = false; S.confirmedCardId = null;
   if (S.reminderTimer) { clearInterval(S.reminderTimer); S.reminderTimer = null; }
+  if (S.clockTimer) { clearInterval(S.clockTimer); S.clockTimer = null; }
   $('modalGameOver').classList.add('is-hidden');
   $('modalExit').classList.add('is-hidden');
   $('modalChooseRow').classList.add('is-hidden');
@@ -242,6 +256,25 @@ function buildCard(num, stars, opts) {
 /* ============================================================
    Render
    ============================================================ */
+
+/* cuenta atras de la fase (elegir carta / elegir fila), con el reloj del
+   servidor corregido por la diferencia con el reloj local */
+function renderPhaseTimer() {
+  const st = S.state;
+  const box = $('phaseTimer');
+  const active = st && st.status === 'playing' && st.deadline &&
+    (st.phase === 'choosing' || st.phase === 'awaitingRow');
+  if (!active) {
+    box.classList.add('is-hidden');
+    if (S.clockTimer) { clearInterval(S.clockTimer); S.clockTimer = null; }
+    return;
+  }
+  const left = Math.max(0, Math.ceil((st.deadline - (Date.now() + S.clockOffset)) / 1000));
+  box.textContent = `${left}s`;
+  box.classList.toggle('is-urgent', left <= 10);
+  box.classList.remove('is-hidden');
+  if (!S.clockTimer) S.clockTimer = setInterval(renderPhaseTimer, 250);
+}
 
 function renderTopbar(st) {
   const row = $('playersRow');
@@ -417,11 +450,13 @@ function renderBoardHint(st) {
   if (st.status === 'playing') {
     if (st.phase === 'choosing') {
       hint = S.selectedCardId || (playerById(st, st.youId) || {}).hasChosen
-        ? 'Esperando a que el resto elija su carta…'
-        : 'Elige una carta de tu mano y confirma.';
+        ? 'Esperando a que el resto elija su carta. Quien no elija a tiempo jugará su carta más baja.'
+        : 'Elige una carta de tu mano y confirma. Si se acaba el tiempo, se jugará tu carta más baja.';
     } else if (st.phase === 'awaitingRow') {
       const p = playerById(st, st.awaitingPlayerId);
-      hint = awaitingMe ? 'Tu carta es menor que todas: elige qué fila te llevas.' : `${p ? p.name : '…'} está eligiendo una fila.`;
+      hint = awaitingMe
+        ? 'Tu carta es menor que todas: elige qué fila te llevas. Si se acaba el tiempo, te llevarás la fila más barata.'
+        : `${p ? p.name : '…'} está eligiendo una fila. Si se le acaba el tiempo, se llevará la más barata.`;
     } else if (st.phase === 'resolving') {
       hint = 'Resolviendo la ronda…';
     }
@@ -486,7 +521,11 @@ function renderRowPicker(st) {
       $('modalChooseRow').classList.add('is-hidden');
       S.rowModalShown = false;
       Sound.take();
-      api('chooseRow', { rowIndex: ri }).catch((e) => { toast(e.message, 'error'); Sound.invalid(); });
+      api('chooseRow', { rowIndex: ri }).catch((e) => {
+        toast(e.message, 'error');
+        Sound.invalid();
+        if (S.state) renderRowPicker(S.state);
+      });
     });
     picker.appendChild(opt);
   });
@@ -544,17 +583,23 @@ function renderLobby(st) {
    ============================================================ */
 
 function handleDeltas(st) {
-  if (!S.displayRows) {
-    S.displayRows = st.rows.map((r) => r.slice());
-    renderBoardRows(st);
-  }
-
   if (st.round !== S.lastRound) {
+    /* la ronda bajo: el anfitrion reinicio la partida, el tablero viejo no sirve */
+    if (st.round < S.lastRound) { S.displayRows = null; S.animQueue = []; }
     S.lastRound = st.round;
     S.selectedCardId = null;
     S.confirmPending = false;
     S.confirmedCardId = null;
     S.lastPlacementsLen = 0;
+  }
+
+  /* en la fase de eleccion no hay colocaciones pendientes: si no queda ninguna
+     animacion en curso, el tablero mostrado debe ser exactamente el del
+     servidor (corrige reconexiones que se saltaron colocaciones) */
+  const idle = !S.animBusy && S.animQueue.length === 0;
+  if (!S.displayRows || (idle && st.phase === 'choosing' && !sameRows(S.displayRows, st.rows))) {
+    S.displayRows = st.rows.map((r) => r.slice());
+    renderBoardRows(st);
   }
 
   const placements = st.placements || [];
@@ -564,6 +609,11 @@ function handleDeltas(st) {
     S.lastPlacementsLen = placements.length;
     processAnimQueue();
   }
+}
+
+function sameRows(a, b) {
+  const key = (rows) => rows.map((r) => r.map((c) => c.id).join(',')).join('|');
+  return key(a) === key(b);
 }
 
 /* ============================================================
@@ -623,6 +673,7 @@ function manageChoosingReminder(st) {
 
 function applyState(st) {
   S.state = st;
+  if (typeof st.now === 'number') S.clockOffset = st.now - Date.now();
 
   if (st.status === 'lobby') { renderLobby(st); showScreen('lobby'); return; }
   if ($('screenGame').classList.contains('is-hidden')) {
@@ -637,6 +688,7 @@ function applyState(st) {
   handleDeltas(st);
 
   renderTopbar(st);
+  renderPhaseTimer();
   renderBoardHint(st);
   renderHand(st);
   renderRowPicker(st);
@@ -671,12 +723,24 @@ function checkFinish(st) {
   if (S.finishShownFor === st.result.seq) return;
   S.finishShownFor = st.result.seq;
 
-  const mine = st.result.winnerId === S.me.playerId;
+  const winnerIds = st.result.winnerIds || [st.result.winnerId];
+  const mine = winnerIds.includes(S.me.playerId);
   if (mine) Sound.win(); else Sound.lose();
 
-  const banner = window.GCVictoryBanner
-    ? GCVictoryBanner.text({ winnerName: st.result.winnerName, amountWon: st.result.prize || 0, mine, fallback: st.result.reason })
-    : { title: mine ? '¡GANASTE!' : `${st.result.winnerName} ganó`, body: st.result.reason };
+  let banner;
+  if (st.result.tie) {
+    const names = (st.result.winnerNames || []).join(' y ');
+    banner = {
+      title: '¡EMPATE!',
+      body: st.result.share > 0
+        ? `${names} empatan. Cada uno recibe $${Number(st.result.share).toLocaleString('en-US')}.`
+        : `${names} empatan con las mismas estrellas y cartas.`
+    };
+  } else {
+    banner = window.GCVictoryBanner
+      ? GCVictoryBanner.text({ winnerName: st.result.winnerName, amountWon: st.result.prize || 0, mine, fallback: st.result.reason })
+      : { title: mine ? '¡GANASTE!' : `${st.result.winnerName} ganó`, body: st.result.reason };
+  }
 
   $('goTitle').textContent = banner.title;
   $('goBody').textContent = banner.body;
@@ -685,10 +749,11 @@ function checkFinish(st) {
 
   const tbody = $('goScores');
   tbody.textContent = '';
-  [...st.result.scores].sort((a, b) => a.points - b.points).forEach((s) => {
+  [...st.result.scores].sort((a, b) => a.points - b.points || (a.cards || 0) - (b.cards || 0)).forEach((s) => {
     const tr = document.createElement('tr');
-    if (s.id === st.result.winnerId) tr.classList.add('winner');
-    tr.innerHTML = `<td>${escapeHtml(s.name)}${s.id === S.me.playerId ? ' (tú)' : ''}</td><td>★ ${s.points}</td>`;
+    if (winnerIds.includes(s.id)) tr.classList.add('winner');
+    const cards = typeof s.cards === 'number' ? ` · ${s.cards} carta${s.cards === 1 ? '' : 's'}` : '';
+    tr.innerHTML = `<td>${escapeHtml(s.name)}${s.id === S.me.playerId ? ' (tú)' : ''}</td><td>★ ${s.points}${cards}</td>`;
     tbody.appendChild(tr);
   });
 

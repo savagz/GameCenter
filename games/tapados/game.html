@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="game.css">
+<link rel="stylesheet" href="/shared/ui/turn-clock.css">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/ui/premium-home.css">
 </head>
@@ -203,9 +204,10 @@
         <span class="turn-label">Turno actual</span>
         <span class="turn-name" id="turnName">—</span>
       </div>
-      <span class="turn-die" aria-hidden="true">
+      <span class="turn-die is-hidden" id="turnDieWrap" title="Última tirada del turno">
         <span class="die die-mini f1" id="turnDie"><i></i></span>
       </span>
+      <span class="turn-clock is-hidden" id="turnClock" title="Tiempo del turno" aria-live="off"></span>
     </div>
 
     <div class="board-owner">
@@ -346,6 +348,7 @@
 <script>window.GC_BASE = new URL('.', location.href).pathname;</script>
 <script src="/shared/ui/turn-banner.js"></script>
 <script src="/shared/ui/victory-banner.js"></script>
+<script src="/shared/ui/turn-clock.js"></script>
 <script src="board.js"></script>
 <script src="game.js"></script>
 </body>

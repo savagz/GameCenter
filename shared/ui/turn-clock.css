@@ -1,0 +1,35 @@
+/* ============================================================
+   shared/ui/turn-clock.css — cuenta atrás del turno (turn-clock.js)
+   ============================================================ */
+
+.turn-clock {
+  flex: 0 0 auto;
+  min-width: 48px;
+  margin-left: auto;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #f3eee4;
+  font: 700 0.86rem/1.2 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.turn-clock.is-urgent {
+  color: #ff8a7a;
+  border-color: rgba(255, 138, 122, 0.6);
+  background: rgba(120, 20, 10, 0.35);
+  animation: turn-clock-pulse 1s ease-in-out infinite;
+}
+
+.turn-clock.is-hidden { display: none; }
+
+@keyframes turn-clock-pulse {
+  50% { box-shadow: 0 0 0 4px rgba(255, 138, 122, 0.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turn-clock.is-urgent { animation: none; }
+}

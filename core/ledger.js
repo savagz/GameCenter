@@ -29,7 +29,8 @@ function configureRoom(gameSlug, roomCode, { bettingEnabled = false, apuesta = 0
     winnerId: null,
     prizeAmount: 0,
     events: [],
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    lastActivity: Date.now()
   });
 }
 
@@ -49,6 +50,7 @@ function ensurePlayer(room, playerId, playerName) {
 }
 
 function pushEvent(room, type, data) {
+  room.lastActivity = Date.now();
   room.events.push({ type, ts: Date.now(), ...data });
   if (room.events.length > 40) room.events.shift();
 }
@@ -97,10 +99,13 @@ function disposeRoom(gameSlug, roomCode) {
 }
 
 /* limpieza de salas abandonadas (2 h) */
+/* red de seguridad: cada juego borra su sala con disposeRoom; aqui solo se
+   purgan salas sin ningun movimiento en 12 h (una sala activa con revanchas
+   nunca se pierde por haber sido creada hace mucho) */
 setInterval(() => {
   const now = Date.now();
   for (const [key, room] of rooms) {
-    if (now - room.createdAt > 2 * 3600 * 1000) rooms.delete(key);
+    if (now - (room.lastActivity || room.createdAt) > 12 * 3600 * 1000) rooms.delete(key);
   }
 }, 600000);
 

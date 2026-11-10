@@ -5,25 +5,26 @@ Juego de dados para 2 a 6 jugadores basado en `RULES.md`, con el tablero descrit
 
 ## Ejecutar
 
-```bash
-node server.js
-```
-
-Luego abrir <http://localhost:3000>.
-
-Un solo proceso sirve el frontend y gestiona el tiempo real. No hay dependencias
-externas ni `npm install`. Requiere Node 18 o superior.
-
-Variable opcional: `PORT` (por defecto 3000).
+El juego forma parte de GameCenter. Desde la raíz del proyecto:
 
 ```bash
-PORT=8080 node server.js
+npm install
+npm start
+# Lobby:  http://localhost:3000/
+# Juego:  http://localhost:3000/games/cucaracha/
 ```
+
+Variable opcional: `PORT` (por defecto 3000). Requiere Node 18 o superior.
+
+También existe un modo independiente (`node games/cucaracha/server.js`), pero no
+sirve los recursos compartidos de `/shared` (estilos de las pantallas de inicio
+y sala, banner de turno), así que se recomienda arrancarlo desde GameCenter.
 
 ## Jugar
 
-1. Quien crea la sala define la **configuración inicial**: jugadores máximos,
-   capital inicial, apuesta y multa.
+1. Quien crea la sala define la **configuración inicial**: jugadores máximos y,
+   si activa **Jugar con apuesta y multa**, el importe de la apuesta y de la multa.
+   Sin apuestas se juega igual, pero no hay pozo ni pagos.
 2. Se genera un **código de 4 letras**. Los demás jugadores entran con ese código
    desde otro dispositivo o pestaña de la misma red.
 3. El anfitrión pulsa **Iniciar partida** (mínimo 2 jugadores).
@@ -53,12 +54,36 @@ anfitrión, por ejemplo `http://192.168.1.20:3000`.
 | Punto | Decisión |
 |---|---|
 | Cinco dados iguales | Solo cuenta en un lanzamiento de 5 dados (el primero del turno). Cinco 1 repartidos entre dos lanzamientos aplican el pago del caso 2, no la victoria. |
+| Cinco 1 en el primer lanzamiento | Cumple las dos reglas: los demás le pagan la multa y después gana la partida. |
+| Los cinco dados apartados | Si se apartan los cinco dados (todos en 1), no se vuelven a lanzar: el jugador coloca sus aciertos y el turno termina. |
 | Cuatro iguales | Se evalúa en lanzamientos de 4 o más dados. Con 4 dados y ninguno igual a 1, se aplica el caso "todos pagan al pozo". |
-| Aciertos sin gastar | Se acumulan durante el turno (puedes guardar un 1 para formar un 2), pero se pierden al terminarlo. |
+| Aciertos sin gastar | Se acumulan durante el turno (puedes guardar un 1 para formar un 2), pero se pierden al terminarlo. Si un lanzamiento no da ningún 1 y aún puedes colocar fichas, el turno espera a que las coloques o pulses **Terminar turno**. |
 | Apuesta inicial | Cada jugador la aporta al pozo al empezar la partida. |
 | Pozo | Se lo lleva íntegro el ganador. |
-| Créditos insuficientes | Se paga lo que haya; los créditos nunca bajan de 0. |
-| Desconexión | El jugador se marca como desconectado; si le toca el turno y lleva 25 s sin conexión, se salta. |
+| Saldo | No hay capital inicial. El saldo de cada jugador es un contador de ganancias y pérdidas de la partida: empieza en 0 y puede ser negativo, porque los pagos se cobran completos. |
+| Sin apuestas | La apuesta y la multa valen 0: no hay pozo, los eventos no muestran importes y no hay avisos de multa. |
+| Desconexión y abandono | Ver [Salas y conexión](#salas-y-conexión). |
+
+## Salas y conexión
+
+Reglas comunes de GameCenter (`core/room-kit.js`):
+
+- **Identidad:** toda acción exige el token secreto que recibe cada jugador al
+  crear o unirse a la sala; el identificador público no basta.
+- **Sala de espera:** quien se desconecta (recarga, corte de red) conserva su
+  asiento 15 s. Quien se une y no llega a conectarse sale a los 20 s.
+- **Primer turno:** se sortea al empezar cada partida.
+- **Turno inactivo:** si el jugador de turno está conectado y pasa 45 s sin hacer
+  nada, pierde el turno ("X no jugó en 45 s").
+- **Desconexión en partida:** el turno pasa siempre al jugador de al lado. Si le
+  toca a alguien desconectado, se espera 25 s y luego se salta su turno.
+- **Salir de la partida:** quien pulsa Salir queda fuera de los turnos, de los
+  cobros y de las revanchas, y ya no puede volver a esa partida.
+  Si solo queda un jugador, gana por abandono y se lleva el bote.
+- **Anfitrión:** si abandona, o lleva 10 s desconectado durante la partida, el
+  rol pasa al primer jugador conectado.
+- **Revancha:** solo con los jugadores conectados (mínimo 2); quien abandonó o
+  está desconectado sale de la sala y no paga la nueva entrada.
 
 ## Archivos
 
@@ -75,7 +100,7 @@ anfitrión, por ejemplo `http://192.168.1.20:3000`.
 ## Notas técnicas
 
 - Transporte: `EventSource` (SSE) del servidor al cliente y `POST /api/*` del
-  cliente al servidor. Sin WebSockets ni dependencias.
+  cliente al servidor. Sin WebSockets; el router usa Express.
 - Los dados se generan en el servidor con `crypto.randomInt`; el cliente solo
   anima el resultado.
 - Todos los sonidos se sintetizan en el navegador con WebAudio: no hay archivos

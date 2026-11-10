@@ -196,6 +196,21 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
 }
 .choose-count.all-in { color: var(--accent); border-color: rgba(244, 196, 48, 0.5); }
 
+.phase-timer {
+  min-width: 52px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ivory-1);
+  transition: color 0.2s, border-color 0.2s;
+}
+.phase-timer.is-urgent { color: #ff8a7a; border-color: rgba(255, 138, 122, 0.55); }
+
 .btn-mute {
   cursor: pointer; width: 36px; height: 36px; min-height: 36px; padding: 0;
   border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1);

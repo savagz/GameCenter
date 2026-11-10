@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="game.css">
+<link rel="stylesheet" href="/shared/ui/turn-clock.css">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/ui/premium-home.css">
 </head>
@@ -71,7 +72,7 @@
           </label>
           <label class="gch-field">
             <span>Canicas iniciales</span>
-            <input class="gch-input" type="number" id="cfgMarbles" value="10" min="3" max="30" step="1">
+            <input class="gch-input" type="number" id="cfgMarbles" value="10" min="10" max="20" step="1">
           </label>
           <label class="gch-field is-hidden" id="cfgApuestaWrap">
             <span>Apuesta / CASE</span>
@@ -183,6 +184,7 @@
       <span class="turn-player">
         <span class="avatar avatar-sm" id="turnAvatarTop">?</span>
         <strong id="turnNameTop">—</strong>
+        <span class="turn-clock is-hidden" id="turnClock" title="Tiempo para lanzar" aria-live="off"></span>
       </span>
     </div>
 
@@ -393,6 +395,7 @@
 <script>window.GC_BASE = new URL('.', location.href).pathname;</script>
 <script src="/shared/ui/turn-banner.js"></script>
 <script src="/shared/ui/victory-banner.js"></script>
+<script src="/shared/ui/turn-clock.js"></script>
 <script src="zones.js"></script>
 <script src="game.js"></script>
 </body>

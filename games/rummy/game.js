@@ -171,6 +171,17 @@ function connect() {
   });
 
   src.onerror = () => {
+    /* 403/404: el servidor ya no reconoce al jugador o la sala no existe; el
+       navegador no vuelve a intentarlo, asi que se comprueba y se vuelve al inicio */
+    if (src.readyState === EventSource.CLOSED) {
+      if (S.source !== src) return;
+      api('state')
+        .then(() => setTimeout(() => { if (S.source === src) connect(); }, 1500))
+        .catch((e) => leaveToHome(/reconocido/.test(e.message)
+          ? 'Ya no formas parte de esa sala.'
+          : 'La sala ya no existe.'));
+      return;
+    }
     S.errors += 1;
     if (S.errors === 3) toast('Conexión interrumpida, reintentando…', 'info');
     if (S.errors > 12) { src.close(); leaveToHome('No se pudo restablecer la conexión.'); }

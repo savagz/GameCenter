@@ -297,3 +297,6 @@
 @media (prefers-reduced-motion: reduce) {
   .throw-disc.is-rolling, .die-svg.is-rolling, .crown, .toast, .turn-flash span { animation: none !important; }
 }
+
+/* cuenta atras del turno dentro de la capsula, junto al nombre */
+.turn-player .turn-clock { margin-left: 4px; min-width: 40px; padding: 3px 8px; font-size: 0.78rem; letter-spacing: 0; }

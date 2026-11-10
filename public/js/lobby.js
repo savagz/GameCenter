@@ -99,7 +99,7 @@
     s.benditosiete.maxPlayers = clampInt($('bs-maxplayers').value, 2, 8, s.benditosiete.maxPlayers);
     s.benditosiete.lances = clampInt($('bs-lances').value, 1, 10, s.benditosiete.lances);
     s.porqueyo.maxPlayers = clampInt($('pq-maxplayers').value, 2, 8, s.porqueyo.maxPlayers);
-    s.porqueyo.startMarbles = clampInt($('pq-marbles').value, 3, 30, s.porqueyo.startMarbles);
+    s.porqueyo.startMarbles = clampInt($('pq-marbles').value, 10, 20, s.porqueyo.startMarbles);
     s.tapados.maxPlayers = clampInt($('tp-maxplayers').value, 2, 6, s.tapados.maxPlayers);
     s.tomaseis.maxPlayers = clampInt($('t6-maxplayers').value, 2, 10, s.tomaseis.maxPlayers);
     const selectedLevel = $('rummyLevelPicker').querySelector('.level-opt.selected');
@@ -316,6 +316,16 @@
     src.addEventListener('state', (e) => {
       try { renderRoom(slug, me, JSON.parse(e.data)); } catch (err) { console.error(err); }
     });
+    /* el servidor cerro la conexion (sala borrada o jugador fuera): el
+       navegador no reintenta, se cierra la ventana de sala con un aviso */
+    src.onerror = () => {
+      if (src.readyState !== EventSource.CLOSED || Room.source !== src) return;
+      closeRoomConnection();
+      $('roomModal').classList.remove('is-open');
+      if (Room.slug) sessionStorage.removeItem(SESSION_KEYS[Room.slug]);
+      Room.slug = null; Room.roomId = null; Room.playerId = null; Room.token = null;
+      toast('Ya no estás en la sala.');
+    };
   }
 
   function openRoom(slug, me) {

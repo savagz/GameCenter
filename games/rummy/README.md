@@ -28,7 +28,7 @@ Para probar en solitario, abre varias pestañas: cada pestaña es un jugador dis
 ## Cómo se juega
 
 1. Un jugador crea la sala desde el lobby de GameCenter o desde la pantalla de inicio del juego, elige el nivel (Relajado 120 s, Normal 90 s, Experto 45 s por turno) y comparte el código de 4 letras.
-2. Se unen hasta 4 jugadores y el anfitrión inicia la partida (mínimo 2). El primer turno se sortea.
+2. Se unen hasta 4 jugadores y el anfitrión inicia la partida (mínimo 2).
 3. Cada jugador recibe 14 fichas. En tu turno:
    - Arrastra fichas del atril a la mesa para formar **grupos** (mismo número, colores distintos, 3 o 4 fichas) o **escaleras** (números consecutivos del mismo color, 3 o más).
    - **Primera bajada:** mínimo 30 puntos usando solo fichas de tu mano. El comodín vale lo que representa.
@@ -57,6 +57,27 @@ Todas las acciones son `POST /games/rummy/api/<acción>` con JSON. Las de partid
 | `state` / `leave` | Estado actual / salir de la sala. |
 
 `GET /games/rummy/events?room=&pid=&token=` abre el stream SSE con el estado de la sala (cada jugador recibe solo su propia mano).
+
+## Salas y conexión
+
+Reglas comunes de GameCenter (`core/room-kit.js`):
+
+- **Identidad:** toda acción exige el token secreto que recibe cada jugador al
+  crear o unirse a la sala; el identificador público no basta.
+- **Sala de espera:** quien se desconecta (recarga, corte de red) conserva su
+  asiento 15 s. Quien se une y no llega a conectarse sale a los 20 s.
+- **Primer turno:** se sortea al empezar cada partida.
+- **Tiempo de turno:** el del nivel elegido (120, 90 o 45 s). Al agotarse se acepta
+  la jugada en curso si es válida o se roba automáticamente.
+- **Desconexión en partida:** el turno pasa siempre al jugador de al lado. Si le
+  toca a alguien desconectado, se espera 25 s y luego se roba por él y pasa el turno.
+- **Salir de la partida:** quien pulsa Salir queda fuera de los turnos, de los
+  cobros y de las revanchas, y ya no puede volver a esa partida.
+  Si solo queda un jugador, gana por abandono y se lleva el bote.
+- **Anfitrión:** si abandona, o lleva 10 s desconectado durante la partida, el
+  rol pasa al primer jugador conectado.
+- **Revancha:** solo con los jugadores conectados (mínimo 2); quien abandonó o
+  está desconectado sale de la sala y no paga la nueva entrada.
 
 ## Estructura
 

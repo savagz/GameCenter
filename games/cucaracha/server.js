@@ -84,6 +84,8 @@ function createRouter({ Ledger } = {}) {
      Dinero
      ============================================================ */
 
+  const fmt = (n) => '$' + Number(n || 0).toLocaleString('en-US');
+
   /* sin capital inicial: no hay techo de saldo, credits es un contador
      informativo de ganancias/pérdidas de la partida (ver DESIGN.md sección 10) */
   function charge(player, amount) {
@@ -95,7 +97,7 @@ function createRouter({ Ledger } = {}) {
   function othersPayPlayer(room, to) {
     let total = 0;
     for (const p of room.players) {
-      if (p === to) continue;
+      if (p === to || p.left) continue;
       const paid = charge(p, room.config.castigo);
       total += paid;
       if (Ledger && room.config.bettingEnabled && paid) {
@@ -114,6 +116,7 @@ function createRouter({ Ledger } = {}) {
   function allPayPot(room) {
     let total = 0;
     for (const p of room.players) {
+      if (p.left) continue;
       const paid = charge(p, room.config.castigo);
       total += paid;
       if (Ledger && room.config.bettingEnabled && paid) {
@@ -145,13 +148,16 @@ function createRouter({ Ledger } = {}) {
       }
     }
 
-    room.turnIndex = 0;
-    pushEvent(room, 'start',
-      `Comienza la partida. Cada jugador aportó $${room.config.apuesta.toLocaleString('en-US')} al pozo.`);
+    room.turnIndex = Math.floor(Math.random() * room.players.length);   /* sorteo de quien empieza */
+    pushEvent(room, 'info', `Sorteo: empieza ${room.players[room.turnIndex].name}.`);
+    pushEvent(room, 'start', room.config.bettingEnabled
+      ? `Comienza la partida. Cada jugador aportó ${fmt(room.config.apuesta)} al pozo.`
+      : 'Comienza la partida. ¡Buena suerte a todos!');
     beginTurn(room);
   }
 
   function beginTurn(room) {
+    RK.touchTurn(room);
     clearEndTimer(room);
     room.turn = {
       rollNo: 0,
@@ -185,12 +191,9 @@ function createRouter({ Ledger } = {}) {
 
   function nextTurn(room) {
     if (room.status !== 'playing') return;
-    const n = room.players.length;
-    let idx = (room.turnIndex + 1) % n;          /* por defecto, el siguiente */
-    for (let i = 1; i <= n; i++) {               /* si hay alguien conectado, ese */
-      const cand = (room.turnIndex + i) % n;
-      if (room.players[cand].online) { idx = cand; break; }
-    }
+    /* siempre el siguiente que sigue en la partida; a un desconectado se le
+       salta el turno tras 25 s (scheduleSkipDisconnected) */
+    const idx = RK.nextActiveIndex(room);
     room.turnIndex = idx;
     beginTurn(room);
   }
@@ -207,8 +210,24 @@ function createRouter({ Ledger } = {}) {
     if (Ledger && room.config.bettingEnabled && prize) {
       Ledger.recordWin({ gameSlug: 'cucaracha', roomCode: room.id, playerId: winner.id, playerName: winner.name, amount: prize, reason });
     }
-    pushEvent(room, 'win',
-      `${winner.name} gana ${reason} y se lleva $${prize.toLocaleString('en-US')} del pozo.`);
+    pushEvent(room, 'win', room.config.bettingEnabled
+      ? `${winner.name} gana ${reason} y se lleva ${fmt(prize)} del pozo.`
+      : `${winner.name} gana ${reason}.`);
+  }
+
+  /* salir durante la partida o al terminarla: el jugador queda fuera de los
+     turnos, cobros y revanchas. Si solo queda un jugador en la partida, gana
+     por abandono de los demas */
+  function leaveGame(room, player) {
+    const wasCurrent = room.status === 'playing' && currentPlayer(room) === player;
+    RK.markLeft(room, player);
+    if (room.status !== 'playing') return;
+    const active = RK.activePlayers(room);
+    if (active.length < 2) {
+      if (active.length === 1) finishGame(room, active[0], 'por abandono de los demás jugadores');
+      return;
+    }
+    if (wasCurrent) { clearEndTimer(room); nextTurn(room); }
   }
 
   /* ---------- lanzar ---------- */
@@ -232,6 +251,15 @@ function createRouter({ Ledger } = {}) {
 
     /* victoria inmediata: los cinco dados iguales en un mismo lanzamiento */
     if (a.fiveKind) {
+      /* cinco 1 de un solo lanzamiento: cumple a la vez el pago de los cinco 1
+         y la victoria de los cinco iguales. Primero cobra a los demas y despues
+         gana la partida */
+      if (a.fiveKind.value === 1) {
+        const got = othersPayPlayer(room, player);
+        if (room.config.bettingEnabled) {
+          pushEvent(room, 'reward', `¡${player.name} sacó cinco 1! Los demás le pagan ${fmt(got)}.`);
+        }
+      }
       pushEvent(room, 'jackpot', `¡${player.name} sacó cinco ${a.fiveKind.value}! Final anticipado.`);
       finishGame(room, player, `con cinco dados de valor ${a.fiveKind.value}`);
       return ok();
@@ -242,14 +270,17 @@ function createRouter({ Ledger } = {}) {
 
     /* cuatro dados iguales distintos de 1 */
     if (a.fourKind) {
+      const betting = room.config.bettingEnabled;
       if (a.fourKind.withOne) {
         const got = othersPayPlayer(room, player);
-        pushEvent(room, 'reward',
-          `${player.name} sacó cuatro ${a.fourKind.value} y un 1: los demás le pagan $${got.toLocaleString('en-US')}.`);
+        pushEvent(room, betting ? 'reward' : 'info', betting
+          ? `${player.name} sacó cuatro ${a.fourKind.value} y un 1: los demás le pagan ${fmt(got)}.`
+          : `${player.name} sacó cuatro ${a.fourKind.value} y un 1.`);
       } else {
         const put = allPayPot(room);
-        pushEvent(room, 'penalty',
-          `Cuatro ${a.fourKind.value} sin ningún 1: todos pagan al pozo ($${put.toLocaleString('en-US')}).`);
+        pushEvent(room, betting ? 'penalty' : 'info', betting
+          ? `Cuatro ${a.fourKind.value} sin ningún 1: todos pagan al pozo (${fmt(put)}).`
+          : `Cuatro ${a.fourKind.value} sin ningún 1.`);
       }
     }
 
@@ -264,21 +295,25 @@ function createRouter({ Ledger } = {}) {
           playerId: player.id, playerName: player.name, amount: paid, reason: 'sin-unos'
         });
       }
-      pushEvent(room, 'penalty',
-        `${player.name} no sacó ningún 1 y pagó $${paid.toLocaleString('en-US')} de multa al pozo.`);
+      if (room.config.bettingEnabled) {
+        pushEvent(room, 'penalty', `${player.name} no sacó ningún 1 y pagó ${fmt(paid)} de multa al pozo.`);
+      }
     }
 
     /* los cinco dados en 1 durante los dos primeros lanzamientos */
     if (t.rollNo === 2 && t.kept.length === E.DICE_COUNT) {
       const got = othersPayPlayer(room, player);
-      pushEvent(room, 'reward',
-        `¡${player.name} completó cinco 1 en dos lanzamientos! Los demás le pagan $${got.toLocaleString('en-US')}.`);
+      pushEvent(room, 'reward', room.config.bettingEnabled
+        ? `¡${player.name} completó cinco 1 en dos lanzamientos! Los demás le pagan ${fmt(got)}.`
+        : `¡${player.name} completó cinco 1 en dos lanzamientos!`);
     }
 
     /* transicion de fase */
     if (a.ones === 0) {
       t.phase = 'ending';
-      scheduleEnd(room, 3400);
+      /* con aciertos guardados y casillas disponibles, el turno espera a que el
+         jugador los coloque o pulse "Terminar turno"; si no, se cierra solo */
+      if (!E.canPlaceAnything(player.board, t.pending)) scheduleEnd(room, 3400);
     } else {
       t.phase = 'active';
       if (t.kept.length >= E.DICE_COUNT) {
@@ -315,8 +350,8 @@ function createRouter({ Ledger } = {}) {
       return ok();
     }
 
-    /* sin dados por lanzar y sin jugadas posibles: cerrar el turno */
-    if (t.mustEnd && !E.canPlaceAnything(player.board, t.pending)) scheduleEnd(room, 1600);
+    /* turno sin mas lanzamientos (sin dados o sin ningun 1) y sin jugadas posibles: cerrar */
+    if ((t.mustEnd || t.phase === 'ending') && !E.canPlaceAnything(player.board, t.pending)) scheduleEnd(room, 1600);
 
     return ok();
   }
@@ -352,6 +387,8 @@ function createRouter({ Ledger } = {}) {
       pot: room.pot,
       winnerId: room.winnerId,
       currentId: room.status === 'playing' && cur ? cur.id : null,
+      turnDeadline: RK.turnDeadline(room),
+      now: Date.now(),
       players: room.players.map((p) => ({
         id: p.id,
         name: p.name,
@@ -402,6 +439,7 @@ function createRouter({ Ledger } = {}) {
     res.write('retry: 2000\n\n');
 
     player.streams.add(res);
+    RK.cancelLobbyRemoval(player);
     player.online = true;
     player.hasConnected = true;
 
@@ -417,8 +455,12 @@ function createRouter({ Ledger } = {}) {
       player.offlineAt = Date.now();
 
       if (room.status === 'lobby') {
-        const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'cucaracha' });
-        if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        /* margen de gracia: una recarga o un corte breve no expulsan de la sala */
+        RK.scheduleLobbyRemoval(room, player, () => {
+          const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'cucaracha' });
+          if (!deleted) { pushEvent(room, 'info', `${player.name} salió de la sala.`); broadcast(room); }
+        });
+        broadcast(room);
         return;
       }
 
@@ -433,7 +475,16 @@ function createRouter({ Ledger } = {}) {
   }
 
   RK.scheduleSkipDisconnected(rooms, { nextTurn, broadcast });
+  RK.scheduleIdleTurns(rooms, {
+    broadcast,
+    onIdle(room, cur) {
+      pushEvent(room, 'timeout', `${cur.name} no jugó en 45 s: pierde el turno.`);
+      clearEndTimer(room);
+      nextTurn(room);
+    }
+  });
   RK.scheduleRoomCleanup(rooms, { gameSlug: 'cucaracha', Ledger });
+  RK.scheduleHostCheck(rooms, { broadcast });
 
   /* ---------- acciones ---------- */
 
@@ -454,6 +505,11 @@ function createRouter({ Ledger } = {}) {
       if (nameResult.error) return err(nameResult.error);
       const player = addPlayer(room, nameResult.name);
       pushEvent(room, 'info', `${player.name} se unió a la sala.`);
+      /* quien se une y nunca abre la conexion no ocupa el asiento para siempre */
+      RK.scheduleLobbyRemoval(room, player, () => {
+        const deleted = RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'cucaracha' });
+        if (!deleted) { pushEvent(room, 'info', `${player.name} no llegó a conectarse y salió de la sala.`); broadcast(room); }
+      }, RK.GHOST_MS);
       broadcast(room);
       return ok({ roomId: room.id, playerId: player.id, token: player.token, state: publicState(room) });
     }
@@ -463,12 +519,17 @@ function createRouter({ Ledger } = {}) {
     if (!room) return err('No existe esa sala.');
     const player = findPlayer(room, body.playerId, body.token);
     if (!player) return err('Jugador no reconocido.');
+    if (room.status === 'playing' && action !== 'state' && RK.currentPlayer(room) === player) RK.touchTurn(room);
 
     let result;
     switch (action) {
       case 'start':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede iniciar.'); break; }
         if (room.status === 'playing') { result = err('La partida ya está en curso.'); break; }
+        if (room.status === 'finished') {
+          const restartError = RK.prepareRestart(room);
+          if (restartError) { result = err(restartError); break; }
+        }
         if (room.players.length < 2) { result = err('Se necesitan al menos 2 jugadores.'); break; }
         startGame(room);
         result = ok();
@@ -481,6 +542,7 @@ function createRouter({ Ledger } = {}) {
       case 'restart':
         if (player.id !== room.hostId) { result = err('Solo el anfitrión puede reiniciar.'); break; }
         if (room.status !== 'finished') { result = err('La partida sigue en curso.'); break; }
+        { const restartError = RK.prepareRestart(room); if (restartError) { result = err(restartError); break; } }
         pushEvent(room, 'info', 'Nueva partida con los mismos jugadores.');
         startGame(room);
         result = ok();
@@ -490,6 +552,8 @@ function createRouter({ Ledger } = {}) {
         if (room.status === 'lobby') {
           if (RK.removePlayerFromLobby(rooms, room, player, { Ledger, gameSlug: 'cucaracha' })) return ok();
           pushEvent(room, 'info', `${player.name} salió de la sala.`);
+        } else {
+          leaveGame(room, player);
         }
         result = ok();
         break;

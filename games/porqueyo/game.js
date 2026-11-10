@@ -198,6 +198,17 @@ function connect() {
   });
 
   src.onerror = () => {
+    /* 403/404: el servidor ya no reconoce al jugador o la sala no existe; el
+       navegador no vuelve a intentarlo, asi que se comprueba y se vuelve al inicio */
+    if (src.readyState === EventSource.CLOSED) {
+      if (S.source !== src) return;
+      api('state')
+        .then(() => setTimeout(() => { if (S.source === src) connect(); }, 1500))
+        .catch((e) => leaveToHome(/reconocido/.test(e.message)
+          ? 'Ya no formas parte de esa sala.'
+          : 'La sala ya no existe.'));
+      return;
+    }
     S.errors += 1;
     if (S.errors === 3) toast('Conexión interrumpida, reintentando…', 'info');
     if (S.errors > 12) { src.close(); leaveToHome('No se pudo restablecer la conexión.'); }
@@ -527,7 +538,20 @@ function renderPlayers(st, marblesOverride) {
   });
 }
 
+/* cuenta atras del turno con pitido desde 10 s (solo en mi turno) */
+function renderTurnClock(st) {
+  if (!window.GCTurnClock) return;
+  GCTurnClock.update({
+    element: $('turnClock'),
+    deadline: st.turnDeadline,
+    now: st.now,
+    mine: st.status === 'playing' && st.currentId === S.me.playerId,
+    sound: Sound.enabled
+  });
+}
+
 function renderTurnPill(st) {
+  renderTurnClock(st);
   const cur = playerById(st, st.currentId);
   if (!cur) {
     $('turnLabelTop').textContent = st.status === 'finished' ? 'PARTIDA' : 'TURNO DE';
@@ -544,7 +568,13 @@ function renderTurnPill(st) {
 
 const RESULT_LABEL = { white: 'BLANCO', yellow: 'AMARILLO', blue: 'AZUL', green: 'VERDE', red: 'ROJO', black: 'NEGRO' };
 
-function renderResult(turn, fresh) {
+/* resultado visible: la tirada del turno actual o, si aun no se lanzo, la
+   ultima jugada de la partida. El dado se coloca en esa misma jugada */
+function lastPlay(st) {
+  return st.turn || st.lastRoll || null;
+}
+
+function renderResult(turn, fresh, isPrevious) {
   const panel = $('resultRow').closest('.result-panel');
   if (!turn) {
     $('resultDot').className = 'result-dot';
@@ -558,13 +588,15 @@ function renderResult(turn, fresh) {
   $('resultName').textContent = RESULT_LABEL[color];
   $('resultName').className = 'result-name c-' + (color === 'black' ? 'red' : color);
 
+  let sub;
   if (turn.resolution.type === 'black') {
-    $('resultSub').textContent = 'ZONA NEGRA — canica eliminada';
+    sub = 'ZONA NEGRA — canica eliminada';
   } else if (turn.resolution.type === 'steal') {
-    $('resultSub').textContent = `ZONA ${RESULT_LABEL[color]} LLENA — ${turn.playerName} se lleva ${turn.resolution.stolen}`;
+    sub = `ZONA ${RESULT_LABEL[color]} LLENA — ${turn.playerName} se lleva ${turn.resolution.stolen}`;
   } else {
-    $('resultSub').textContent = `ZONA ${RESULT_LABEL[color]} (${turn.resolution.filledAfter}/${turn.resolution.cap})`;
+    sub = `ZONA ${RESULT_LABEL[color]} (${turn.resolution.filledAfter}/${turn.resolution.cap})`;
   }
+  $('resultSub').textContent = isPrevious ? `ÚLTIMA JUGADA DE ${turn.playerName.toUpperCase()} · ${sub}` : sub;
 
   if (fresh) {
     panel.classList.remove('is-fresh');
@@ -587,6 +619,12 @@ function renderRollButton(st) {
     btn.disabled = true;
     const cur = playerById(st, st.currentId);
     label.textContent = cur ? `TURNO DE ${cur.name.toUpperCase()}` : 'ESPERANDO…';
+    return;
+  }
+  /* ya lance en este turno: el servidor pasa el turno tras la animacion */
+  if (st.turn && st.turn.playerId === st.currentId) {
+    btn.disabled = true;
+    label.textContent = 'ESPERANDO…';
     return;
   }
   btn.disabled = false;
@@ -640,7 +678,8 @@ function toast(text, type) {
   }, 4200);
 }
 
-const turnFlash = window.GCTurnBanner.show;
+/* en modo independiente (node server.js) no se sirve /shared: sin banner */
+const turnFlash = (window.GCTurnBanner && window.GCTurnBanner.show) || (() => {});
 
 /* ============================================================
    Aplicacion del estado recibido
@@ -666,8 +705,9 @@ function applyState(st) {
     S.lastTurnSeq = st.turn ? st.turn.seq : 0;
     S.lastCurrentId = st.currentId;
     paintAll(st);
-    renderResult(st.turn, false);
+    renderResult(lastPlay(st), false, !st.turn);
     snapshotPrev(st);
+    checkFinish(st);   /* recarga con la partida ya terminada: modal y "Nueva partida" */
     return;
   }
 
@@ -682,7 +722,7 @@ function applyState(st) {
   if (S.animating) return; /* el estado nuevo se recoge al terminar la animacion */
 
   paintAll(st);
-  renderResult(st.turn, false);
+  renderResult(lastPlay(st), false, !st.turn);
   flushEvents(st);
   checkTurnChange(st);
   checkFinish(st);
@@ -695,6 +735,7 @@ function snapshotPrev(st) {
 }
 
 function paintAll(st, boardOverride, marblesOverride) {
+  if (!S.animating && lastPlay(st)) showDieFace(lastPlay(st).face);
   renderTopMeta(st);
   renderPlayers(st, marblesOverride);
   renderTurnPill(st);
@@ -721,6 +762,24 @@ function setDieFaceColor(face, colorName) {
   $(`die-face-${face}-s0`).setAttribute('stop-color', c0);
   $(`die-face-${face}-s1`).setAttribute('stop-color', c1);
   $(`die-face-${face}-s2`).setAttribute('stop-color', c2);
+}
+
+/* caras laterales fijas para cada color de arriba: el dado queda siempre en
+   la misma posicion para una jugada, aunque se repinte o se recargue */
+const DIE_SIDES = {
+  white:  ['red', 'blue'],
+  yellow: ['green', 'white'],
+  blue:   ['yellow', 'red'],
+  green:  ['black', 'yellow'],
+  red:    ['green', 'white'],
+  black:  ['blue', 'green']
+};
+
+function showDieFace(top) {
+  const [left, right] = DIE_SIDES[top] || DIE_SIDES.red;
+  setDieFaceColor('top', top);
+  setDieFaceColor('left', left);
+  setDieFaceColor('right', right);
 }
 
 function randomColorExcept(exclude) {
@@ -751,11 +810,7 @@ function startDieSpin() {
 function stopDieSpin(resultColor) {
   if (dieSpinTimer) { clearInterval(dieSpinTimer); dieSpinTimer = null; }
   $('die-svg').classList.remove('is-rolling');
-  const left = randomColorExcept([resultColor]);
-  const right = randomColorExcept([resultColor, left]);
-  setDieFaceColor('top', resultColor);
-  setDieFaceColor('left', left);
-  setDieFaceColor('right', right);
+  showDieFace(resultColor);
 }
 
 function animateRoll(st) {
@@ -795,6 +850,9 @@ function animateRoll(st) {
     flushEvents(st);
     checkTurnChange(st);
     checkFinish(st);
+
+    /* durante la animacion pudieron llegar estados nuevos: aplicar el ultimo */
+    if (S.state !== st) applyState(S.state);
   }, 900);
 }
 

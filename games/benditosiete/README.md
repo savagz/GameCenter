@@ -5,20 +5,20 @@ inspirado en `BOARD.png`. Arquitectura calcada de `CUCARACHA_II`.
 
 ## Ejecutar
 
-```bash
-node server.js
-```
-
-Luego abrir <http://localhost:3000>.
-
-Un solo proceso sirve el frontend y gestiona el tiempo real. No hay dependencias
-externas ni `npm install`. Requiere Node 18 o superior.
-
-Variable opcional: `PORT` (por defecto 3000).
+El juego forma parte de GameCenter. Desde la raíz del proyecto:
 
 ```bash
-PORT=8080 node server.js
+npm install
+npm start
+# Lobby:  http://localhost:3000/
+# Juego:  http://localhost:3000/games/benditosiete/
 ```
+
+Variable opcional: `PORT` (por defecto 3000). Requiere Node 18 o superior.
+
+También existe un modo independiente (`node games/benditosiete/server.js`), pero no
+sirve los recursos compartidos de `/shared` (estilos de las pantallas de inicio
+y sala, banner de turno), así que se recomienda arrancarlo desde GameCenter.
 
 ## Jugar
 
@@ -52,7 +52,30 @@ distinto (la sesión se guarda en `sessionStorage`).
 | Número pasado ya tapado también en el receptor | Si el jugador siguiente también lo tiene tapado (o ya completó su tablero), simplemente no se tapa nada y el turno pasa igual. |
 | Jugadores máximo | Las reglas no fijan un tope; se limita a 8 por diseño de la sala (código de 4 letras, paleta de avatares). |
 | Lances consecutivos | Se configura al crear la sala (mínimo 1, máximo 10), igual que la apuesta/multa en Cucaracha. |
-| Desconexión | El jugador se marca como desconectado; si le toca el turno y lleva 25 s sin conexión, se salta. |
+| Desconexión y abandono | Ver [Salas y conexión](#salas-y-conexión). |
+| Salir en tu turno | El turno pasa al siguiente jugador en el acto. |
+| Jugada de castigo (multa) | Solo con apuesta. Se paga al pozo cada vez que sacas 7 antes de completar el tablero y cada vez que fallas el tiro final. El ganador se lleva el pozo (entradas más multas). Sin apuesta, el 7 solo termina el turno y no se muestra como multa. |
+
+## Salas y conexión
+
+Reglas comunes de GameCenter (`core/room-kit.js`):
+
+- **Identidad:** toda acción exige el token secreto que recibe cada jugador al
+  crear o unirse a la sala; el identificador público no basta.
+- **Sala de espera:** quien se desconecta (recarga, corte de red) conserva su
+  asiento 15 s. Quien se une y no llega a conectarse sale a los 20 s.
+- **Primer turno:** se sortea al empezar cada partida.
+- **Turno inactivo:** si el jugador de turno está conectado y pasa 45 s sin hacer
+  nada, pierde el turno ("X no jugó en 45 s").
+- **Desconexión en partida:** el turno pasa siempre al jugador de al lado. Si le
+  toca a alguien desconectado, se espera 25 s y luego se salta su turno.
+- **Salir de la partida:** quien pulsa Salir queda fuera de los turnos, de los
+  cobros y de las revanchas, y ya no puede volver a esa partida.
+  Si solo queda un jugador, gana por abandono y se lleva el bote.
+- **Anfitrión:** si abandona, o lleva 10 s desconectado durante la partida, el
+  rol pasa al primer jugador conectado.
+- **Revancha:** solo con los jugadores conectados (mínimo 2); quien abandonó o
+  está desconectado sale de la sala y no paga la nueva entrada.
 
 ## Archivos
 
@@ -70,7 +93,7 @@ distinto (la sesión se guarda en `sessionStorage`).
 ## Notas técnicas
 
 - Transporte: `EventSource` (SSE) del servidor al cliente y `POST /api/*` del
-  cliente al servidor. Sin WebSockets ni dependencias.
+  cliente al servidor. Sin WebSockets; el router usa Express.
 - Los dados se generan en el servidor con `crypto.randomInt`; el cliente solo
   anima el resultado.
 - Todos los sonidos se sintetizan en el navegador con WebAudio: no hay archivos

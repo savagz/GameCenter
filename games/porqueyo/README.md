@@ -5,20 +5,20 @@ tablero descrito en `DESIGN.png` y `BOARD.png`.
 
 ## Ejecutar
 
-```bash
-node server.js
-```
-
-Luego abrir <http://localhost:3000>.
-
-Un solo proceso sirve el frontend y gestiona el tiempo real. No hay dependencias
-externas ni `npm install`. Requiere Node 18 o superior.
-
-Variable opcional: `PORT` (por defecto 3000).
+El juego forma parte de GameCenter. Desde la raíz del proyecto:
 
 ```bash
-PORT=8080 node server.js
+npm install
+npm start
+# Lobby:  http://localhost:3000/
+# Juego:  http://localhost:3000/games/porqueyo/
 ```
+
+Variable opcional: `PORT` (por defecto 3000). Requiere Node 18 o superior.
+
+También existe un modo independiente (`node games/porqueyo/server.js`), pero no
+sirve los recursos compartidos de `/shared` (estilos de las pantallas de inicio
+y sala, banner de turno), así que se recomienda arrancarlo desde GameCenter.
 
 ## Jugar
 
@@ -54,10 +54,31 @@ anfitrión, por ejemplo `http://192.168.1.20:3000`.
 | Punto | Decisión |
 |---|---|
 | Jugadores máximos | RULES.md solo indica "2 o más". Se limita a 2–8 por practicidad de sala/UI. |
-| Canicas iniciales | RULES.md las fija en 10. Se dejó configurable por el anfitrión (3–30), con 10 como valor por defecto para no alterar la partida si no se cambia. |
+| Canicas iniciales | RULES.md las fija en 10. Configurable por el anfitrión entre 10 y 20, con 10 como valor por defecto. |
 | Elección del jugador | Ninguna regla depende de una decisión del jugador (el color obtenido determina la acción de forma automática), así que un turno equivale a un único lanzamiento sin pasos intermedios. |
-| Desconexión | El jugador se marca como desconectado; si le toca el turno y lleva 25 s sin conexión, se salta. |
-| Reinicio | "Nueva partida" (solo el anfitrión, con la partida terminada) vacía el tablero y devuelve a todos sus canicas iniciales, con los mismos jugadores. |
+| Desconexión y abandono | Ver [Salas y conexión](#salas-y-conexión). |
+| Reinicio | "Nueva partida" (solo el anfitrión, con la partida terminada) vacía el tablero y devuelve a todos sus canicas iniciales, con los jugadores que sigan conectados. |
+
+## Salas y conexión
+
+Reglas comunes de GameCenter (`core/room-kit.js`):
+
+- **Identidad:** toda acción exige el token secreto que recibe cada jugador al
+  crear o unirse a la sala; el identificador público no basta.
+- **Sala de espera:** quien se desconecta (recarga, corte de red) conserva su
+  asiento 15 s. Quien se une y no llega a conectarse sale a los 20 s.
+- **Primer turno:** se sortea al empezar cada partida.
+- **Turno inactivo:** si el jugador de turno está conectado y pasa 45 s sin lanzar,
+  el dado se lanza automáticamente por él y la jugada se resuelve como cualquier otra.
+- **Desconexión en partida:** el turno pasa siempre al jugador de al lado. Si le
+  toca a alguien desconectado, se espera 25 s y luego se salta su turno.
+- **Salir de la partida:** quien pulsa Salir queda fuera de los turnos, de los
+  cobros y de las revanchas, y ya no puede volver a esa partida.
+  Si solo queda un jugador, gana por abandono y se lleva el bote.
+- **Anfitrión:** si abandona, o lleva 10 s desconectado durante la partida, el
+  rol pasa al primer jugador conectado.
+- **Revancha:** solo con los jugadores conectados (mínimo 2); quien abandonó o
+  está desconectado sale de la sala y no paga la nueva entrada.
 
 ## Archivos
 
@@ -74,7 +95,7 @@ anfitrión, por ejemplo `http://192.168.1.20:3000`.
 ## Notas técnicas
 
 - Transporte: `EventSource` (SSE) del servidor al cliente y `POST /api/*` del
-  cliente al servidor. Sin WebSockets ni dependencias.
+  cliente al servidor. Sin WebSockets; el router usa Express.
 - El dado se genera en el servidor con `crypto.randomInt`; el cliente solo
   anima el resultado.
 - Todos los sonidos se sintetizan en el navegador con WebAudio: no hay archivos

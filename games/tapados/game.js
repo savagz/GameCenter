@@ -195,6 +195,17 @@ function connect() {
   });
 
   src.onerror = () => {
+    /* 403/404: el servidor ya no reconoce al jugador o la sala no existe; el
+       navegador no vuelve a intentarlo, asi que se comprueba y se vuelve al inicio */
+    if (src.readyState === EventSource.CLOSED) {
+      if (S.source !== src) return;
+      api('state')
+        .then(() => setTimeout(() => { if (S.source === src) connect(); }, 1500))
+        .catch((e) => leaveToHome(/reconocido/.test(e.message)
+          ? 'Ya no formas parte de esa sala.'
+          : 'La sala ya no existe.'));
+      return;
+    }
     S.errors += 1;
     if (S.errors === 3) toast('Conexión interrumpida, reintentando…', 'info');
     if (S.errors > 12) { src.close(); leaveToHome('No se pudo restablecer la conexión.'); }
@@ -325,7 +336,20 @@ function renderPlayers(st) {
   });
 }
 
+/* cuenta atras del turno con pitido desde 10 s (solo en mi turno) */
+function renderTurnClock(st) {
+  if (!window.GCTurnClock) return;
+  GCTurnClock.update({
+    element: $('turnClock'),
+    deadline: st.turnDeadline,
+    now: st.now,
+    mine: st.status === 'playing' && st.currentId === S.me.playerId,
+    sound: Sound.enabled
+  });
+}
+
 function renderTurnBar(st) {
+  renderTurnClock(st);
   const cur = playerById(st, st.currentId);
   $('turnAvatar').textContent = cur ? initial(cur.name) : '?';
   $('turnAvatar').className = 'avatar avatar-lg';
@@ -337,6 +361,18 @@ function renderTurnBar(st) {
   }
   const mine = cur.id === S.me.playerId;
   $('turnName').innerHTML = `${escapeHtml(cur.name)} <em>${mine ? '(tú)' : ''}</em>`;
+  renderTurnDie(st);
+}
+
+/* dado de la barra de turno: la tirada del turno actual (oculto antes de lanzar) */
+function renderTurnDie(st) {
+  const t = st.turn;
+  const wrap = $('turnDieWrap');
+  if (!t || !t.rolled) { wrap.classList.add('is-hidden'); return; }
+  const die = $('turnDie');
+  die.className = `die die-mini f${t.die}`;
+  die.innerHTML = '<i></i>'.repeat(t.die);
+  wrap.classList.remove('is-hidden');
 }
 
 function renderBoard(st) {
@@ -387,7 +423,9 @@ function renderDice(st, face) {
   tray.textContent = '';
 
   if (!t || !t.rolled) {
-    tray.appendChild(dieEl(3));
+    /* turno nuevo sin lanzar: se conserva la ultima tirada de la partida
+       (al empezar la partida, sin tiradas, se muestra el 1) */
+    tray.appendChild(dieEl(st.lastDie || 1));
     return;
   }
 
@@ -513,7 +551,8 @@ function toast(text, type) {
   }, 4200);
 }
 
-const turnFlash = window.GCTurnBanner.show;
+/* en modo independiente (node server.js) no se sirve /shared: sin banner */
+const turnFlash = (window.GCTurnBanner && window.GCTurnBanner.show) || (() => {});
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) =>
@@ -777,7 +816,11 @@ function wire() {
   /* juego */
   $('btnRoll').addEventListener('click', () => {
     $('btnRoll').disabled = true;
-    api('roll').catch((e) => { toast(e.message, 'penalty'); Sound.error(); });
+    api('roll').catch((e) => {
+      toast(e.message, 'penalty');
+      Sound.error();
+      if (S.state) renderRollPanel(S.state);   /* el boton no se queda desactivado */
+    });
   });
 
   $('btnPrevBoard').addEventListener('click', () => stepBoard(-1));

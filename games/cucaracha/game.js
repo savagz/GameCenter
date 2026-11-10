@@ -215,6 +215,17 @@ function connect() {
   });
 
   src.onerror = () => {
+    /* 403/404: el servidor ya no reconoce al jugador o la sala no existe; el
+       navegador no vuelve a intentarlo, asi que se comprueba y se vuelve al inicio */
+    if (src.readyState === EventSource.CLOSED) {
+      if (S.source !== src) return;
+      api('state')
+        .then(() => setTimeout(() => { if (S.source === src) connect(); }, 1500))
+        .catch((e) => leaveToHome(/reconocido/.test(e.message)
+          ? 'Ya no formas parte de esa sala.'
+          : 'La sala ya no existe.'));
+      return;
+    }
     S.errors += 1;
     if (S.errors === 3) toast('Conexión interrumpida, reintentando…', 'info');
     if (S.errors > 12) { src.close(); leaveToHome('No se pudo restablecer la conexión.'); }
@@ -384,7 +395,20 @@ function renderPlayers(st) {
   });
 }
 
+/* cuenta atras del turno con pitido desde 10 s (solo en mi turno) */
+function renderTurnClock(st) {
+  if (!window.GCTurnClock) return;
+  GCTurnClock.update({
+    element: $('turnClock'),
+    deadline: st.turnDeadline,
+    now: st.now,
+    mine: st.status === 'playing' && st.currentId === S.me.playerId,
+    sound: Sound.enabled
+  });
+}
+
 function renderTurnBar(st) {
+  renderTurnClock(st);
   const cur = playerById(st, st.currentId);
   $('turnAvatar').textContent = cur ? initial(cur.name) : '?';
   $('turnAvatar').className = 'avatar avatar-lg';
@@ -545,8 +569,9 @@ function renderRollPanel(st) {
 
   if (t.phase === 'ending') {
     btn.disabled = true;
-    sub.textContent = 'Ningún 1: tu turno terminó';
-    end.textContent = 'Continuar';
+    const canPlace = t.pending > 0 && t.placeable && t.placeable.length > 0;
+    sub.textContent = canPlace ? 'Ningún 1: coloca tus fichas y termina el turno' : 'Ningún 1: tu turno terminó';
+    end.textContent = canPlace ? 'Terminar turno (perderás fichas)' : 'Continuar';
     end.classList.remove('is-hidden');
     return;
   }
@@ -612,7 +637,8 @@ function toast(text, type) {
   }, 4200);
 }
 
-const turnFlash = window.GCTurnBanner.show;
+/* en modo independiente (node server.js) no se sirve /shared: sin banner */
+const turnFlash = (window.GCTurnBanner && window.GCTurnBanner.show) || (() => {});
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) =>
@@ -807,12 +833,21 @@ function renderLobby(st) {
 function wire() {
   /* datos que llegan de GameCenter: nombre y apuesta pre-cargados */
   if (GC.name) { $('createName').value = GC.name; $('joinName').value = GC.name; }
+  const syncBetting = () => {
+    const on = $('cfgBetting').checked;
+    $('cfgApuestaWrap').classList.toggle('is-hidden', !on);
+    $('cfgCastigoWrap').classList.toggle('is-hidden', !on);
+  };
   if (GC.betting) {
+    $('cfgBetting').checked = true;
+    $('cfgBetting').disabled = true;
     $('cfgApuesta').value = GC.bet;
     $('cfgApuesta').readOnly = true;
     $('cfgCastigo').value = GC.penalty;
     $('cfgCastigo').readOnly = true;
   }
+  $('cfgBetting').addEventListener('change', syncBetting);
+  syncBetting();
 
   /* pestañas de inicio */
   document.querySelectorAll('.tab').forEach((tab) => {
@@ -836,7 +871,7 @@ function wire() {
           maxPlayers: Number($('cfgMax').value),
           apuesta: GC.betting ? GC.bet : Number($('cfgApuesta').value),
           castigo: GC.betting ? GC.penalty : Number($('cfgCastigo').value),
-          bettingEnabled: GC.betting
+          bettingEnabled: GC.betting || $('cfgBetting').checked
         }
       });
       S.me = { roomId: res.roomId, playerId: res.playerId, token: res.token };
